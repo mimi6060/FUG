@@ -1,0 +1,54 @@
+# CODEOWNERS for FUG Project
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+* @bmad-code-org/fug-team
+
+# Mobile App (Flutter)
+/app/ @mobile-team
+/app/lib/ @mobile-team
+/app/test/ @mobile-team
+/app/android/ @mobile-team @devops-team
+/app/ios/ @mobile-team @devops-team
+/app/pubspec.yaml @mobile-team
+/app/pubspec.lock @mobile-team
+
+# Backend Functions
+/functions/ @backend-team
+/functions/follow-user/ @backend-team
+/functions/join-event/ @backend-team
+/functions/create-event/ @backend-team
+/functions/gamification/ @backend-team
+
+# Infrastructure & DevOps
+/infrastructure/ @devops-team
+/.github/ @devops-team
+/.github/workflows/ @devops-team
+/.github/CODEOWNERS @devops-team @bmad-code-org/fug-team
+/docker-compose*.yml @devops-team
+/Dockerfile* @devops-team
+/*.dockerfile @devops-team
+
+# Configuration files
+/.env* @devops-team @backend-team
+/appwrite.json @backend-team @devops-team
+*.config.js @backend-team
+*.config.ts @backend-team
+
+# Documentation
+/docs/ @bmad-code-org/fug-team
+*.md @bmad-code-org/fug-team
+LICENSE @bmad-code-org/fug-team
+
+# Security-sensitive files (require multiple approvals)
+/functions/**/secrets* @devops-team @backend-team
+/.github/workflows/deploy-production.yml @devops-team @bmad-code-org/fug-team
+/infrastructure/secrets/ @devops-team
+
+# Dependency files (auto-updated by dependabot, reviewed by relevant team)
+/app/pubspec.yaml @mobile-team
+/app/pubspec.lock @mobile-team
+/functions/**/package.json @backend-team
+/functions/**/package-lock.json @backend-team
+/functions/**/pubspec.yaml @backend-team
+/functions/**/pubspec.lock @backend-team

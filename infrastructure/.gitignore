@@ -1,0 +1,47 @@
+# =============================================================================
+# FUG Infrastructure - .gitignore
+# =============================================================================
+
+# Fichiers d'environnement (contiennent des secrets)
+.env
+.env.local
+.env.*.local
+
+# Backups (peuvent etre volumineux)
+backups/
+*.sql
+*.tar.gz
+
+# Logs
+logs/
+*.log
+
+# Certificats SSL/TLS
+certs/
+*.pem
+*.key
+*.crt
+*.csr
+
+# Donnees Docker locales (si montees)
+data/
+
+# Fichiers temporaires
+tmp/
+*.tmp
+*.bak
+*.swp
+*~
+
+# Fichiers systeme
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Node modules (pour les scripts)
+scripts/node_modules/

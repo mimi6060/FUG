@@ -1,0 +1,280 @@
+name: Functions CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['functions/**']
+  pull_request:
+    branches: [main]
+    paths: ['functions/**']
+
+env:
+  NODE_VERSION: '18'
+  DART_VERSION: '3.4.0'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Functions
+    runs-on: ubuntu-latest
+    outputs:
+      functions: ${{ steps.filter.outputs.changes }}
+      has_changes: ${{ steps.filter.outputs.has_changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changed functions
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            follow-user:
+              - 'functions/follow-user/**'
+            join-event:
+              - 'functions/join-event/**'
+            create-event:
+              - 'functions/create-event/**'
+            gamification:
+              - 'functions/gamification/**'
+
+      - name: Set has_changes output
+        id: has_changes
+        run: |
+          if [ "${{ steps.filter.outputs.changes }}" != "[]" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+  lint-node-functions:
+    name: Lint Node.js Functions
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: contains(needs.detect-changes.outputs.functions, 'follow-user') || contains(needs.detect-changes.outputs.functions, 'join-event') || contains(needs.detect-changes.outputs.functions, 'create-event')
+    strategy:
+      fail-fast: false
+      matrix:
+        function: [follow-user, join-event, create-event]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: functions/${{ matrix.function }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: functions/${{ matrix.function }}
+
+      - name: Run linter
+        run: npm run lint --if-present
+        working-directory: functions/${{ matrix.function }}
+
+  test-node-functions:
+    name: Test Node.js Functions
+    runs-on: ubuntu-latest
+    needs: lint-node-functions
+    strategy:
+      fail-fast: false
+      matrix:
+        function: [follow-user, join-event, create-event]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: functions/${{ matrix.function }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: functions/${{ matrix.function }}
+
+      - name: Run tests
+        run: npm test --if-present
+        working-directory: functions/${{ matrix.function }}
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: functions-${{ matrix.function }}
+          fail_ci_if_error: false
+
+  build-node-functions:
+    name: Build Node.js Functions
+    runs-on: ubuntu-latest
+    needs: test-node-functions
+    strategy:
+      fail-fast: false
+      matrix:
+        function: [follow-user, join-event, create-event]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: functions/${{ matrix.function }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: functions/${{ matrix.function }}
+
+      - name: Build function
+        run: npm run build --if-present
+        working-directory: functions/${{ matrix.function }}
+
+      - name: Package function
+        run: |
+          mkdir -p artifacts
+          tar -czf artifacts/${{ matrix.function }}.tar.gz -C functions/${{ matrix.function }} .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-${{ matrix.function }}
+          path: artifacts/${{ matrix.function }}.tar.gz
+          retention-days: 7
+
+  lint-dart-functions:
+    name: Lint Dart Functions
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: contains(needs.detect-changes.outputs.functions, 'gamification')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+
+      - name: Cache Dart packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-${{ hashFiles('functions/gamification/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-
+
+      - name: Get dependencies
+        run: dart pub get
+        working-directory: functions/gamification
+
+      - name: Analyze code
+        run: dart analyze --fatal-infos
+        working-directory: functions/gamification
+
+  test-dart-functions:
+    name: Test Dart Functions
+    runs-on: ubuntu-latest
+    needs: lint-dart-functions
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+
+      - name: Cache Dart packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-${{ hashFiles('functions/gamification/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-
+
+      - name: Get dependencies
+        run: dart pub get
+        working-directory: functions/gamification
+
+      - name: Run tests with coverage
+        run: dart test --coverage=coverage
+        working-directory: functions/gamification
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: functions-gamification
+          fail_ci_if_error: false
+
+  build-dart-functions:
+    name: Build Dart Functions
+    runs-on: ubuntu-latest
+    needs: test-dart-functions
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+
+      - name: Cache Dart packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-${{ hashFiles('functions/gamification/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-
+
+      - name: Get dependencies
+        run: dart pub get
+        working-directory: functions/gamification
+
+      - name: Compile to executable
+        run: dart compile exe lib/main.dart -o gamification
+        working-directory: functions/gamification
+
+      - name: Package function
+        run: |
+          mkdir -p artifacts
+          tar -czf artifacts/gamification.tar.gz -C functions/gamification .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-gamification
+          path: artifacts/gamification.tar.gz
+          retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'functions/'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

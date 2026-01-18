@@ -1,0 +1,53 @@
+# =============================================================================
+# FUG App - Dockerfile Developpement (Hot Reload)
+# =============================================================================
+# Build: docker build -f Dockerfile.dev -t fug-app:dev .
+# Run:   docker run -p 8080:8080 -v $(pwd):/app fug-app:dev
+# =============================================================================
+
+FROM ghcr.io/cirruslabs/flutter:3.24.0
+
+# Labels
+LABEL maintainer="FUG Team"
+LABEL description="FUG - Find Urban Gatherings - Flutter Dev Environment"
+LABEL version="1.0.0-dev"
+
+# Variables d'environnement
+ENV FLUTTER_WEB_PORT=8080
+ENV APPWRITE_ENDPOINT=http://localhost/v1
+ENV APPWRITE_PROJECT_ID=fug
+
+WORKDIR /app
+
+# Installer les outils de dev utiles
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pre-telecharger les dependances Flutter web
+RUN flutter precache --web
+
+# Copier les fichiers de dependances (pour le cache initial)
+COPY pubspec.yaml pubspec.lock* ./
+
+# Installer les dependances
+RUN flutter pub get
+
+# Le reste du code sera monte en volume pour le hot reload
+
+# Port expose pour le serveur de dev Flutter
+EXPOSE 8080
+
+# Script d'entree personnalise
+COPY docker-entrypoint.dev.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.dev.sh
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${FLUTTER_WEB_PORT}/ || exit 1
+
+# Commande par defaut: lancer le serveur de dev Flutter
+ENTRYPOINT ["docker-entrypoint.dev.sh"]
+CMD ["flutter", "run", "-d", "web-server", "--web-port=8080", "--web-hostname=0.0.0.0", "--web-renderer=canvaskit"]

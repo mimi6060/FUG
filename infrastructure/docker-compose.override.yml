@@ -1,0 +1,251 @@
+# =============================================================================
+# FUG Project - Docker Compose Override (Development)
+# =============================================================================
+# Ce fichier est automatiquement charge avec docker-compose.yml
+# Il contient les configurations specifiques au developpement local
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # FUG APP DEV - Configuration Override pour le developpement
+  # ===========================================================================
+  fug-app-dev:
+    environment:
+      APPWRITE_ENDPOINT: http://localhost:9000/v1
+      APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID:-fug}
+      FLUTTER_WEB_PORT: 8080
+    volumes:
+      # Mount du code source pour hot reload
+      - ../app:/app:cached
+      # Cache des packages Flutter
+      - flutter-pub-cache:/root/.pub-cache
+      # Exclure les dossiers de build
+      - /app/build
+      - /app/.dart_tool
+    ports:
+      - "8080:8080"
+      - "45678:45678"  # Port pour le debugging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fug-app-dev.rule=Host(`dev.localhost`)"
+      - "traefik.http.routers.fug-app-dev.entrypoints=web"
+      - "traefik.http.routers.fug-app-dev.service=fug-app-dev"
+      - "traefik.http.services.fug-app-dev.loadbalancer.server.port=8080"
+
+  # ===========================================================================
+  # FUG FUNCTIONS DEV - Configuration Override
+  # ===========================================================================
+  fug-functions-dev:
+    environment:
+      NODE_ENV: development
+      APPWRITE_FUNCTION_API_ENDPOINT: http://appwrite/v1
+      APPWRITE_FUNCTION_PROJECT_ID: ${APPWRITE_PROJECT_ID:-fug}
+      DEBUG: "*"
+    volumes:
+      - ../functions:/functions:cached
+      # Node modules separe pour chaque fonction
+      - functions-node-modules:/functions/node_modules
+      - follow-user-modules:/functions/follow-user/node_modules
+      - join-event-modules:/functions/join-event/node_modules
+      - create-event-modules:/functions/create-event/node_modules
+      - gamification-modules:/functions/gamification/node_modules
+    ports:
+      - "9229:9229"  # Port pour le debugging Node.js
+
+  # ===========================================================================
+  # TRAEFIK - Configuration Developpement
+  # ===========================================================================
+  traefik:
+    command:
+      # API & Dashboard - Accessible en dev
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --api.debug=true
+      # Providers
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --providers.docker.network=fug-network
+      # Entrypoints
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      # Logs detailles pour le debug
+      - --log.level=DEBUG
+      - --accesslog=true
+      - --accesslog.format=json
+    ports:
+      - "80:80"      # HTTP
+      - "443:443"    # HTTPS
+      - "8080:8080"  # Traefik Dashboard
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=web"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+
+  # ===========================================================================
+  # MARIADB - Configuration Developpement
+  # ===========================================================================
+  mariadb:
+    # Exposer le port pour les outils de dev (DBeaver, etc.)
+    ports:
+      - "3306:3306"
+    # Logs verbeux
+    command:
+      - --innodb-buffer-pool-size=128M
+      - --transaction-isolation=READ-COMMITTED
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-allowed-packet=128M
+      - --innodb-log-file-size=64M
+      - --innodb-flush-log-at-trx-commit=2
+      - --general-log=1
+      - --general-log-file=/var/lib/mysql/mysql.log
+
+  # ===========================================================================
+  # REDIS - Configuration Developpement
+  # ===========================================================================
+  redis:
+    # Exposer le port pour Redis CLI/GUI
+    ports:
+      - "6379:6379"
+    # Mode verbeux
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru --loglevel verbose
+
+  # ===========================================================================
+  # APPWRITE - Configuration Developpement
+  # ===========================================================================
+  appwrite:
+    environment:
+      _APP_ENV: development
+      _APP_OPTIONS_FORCE_HTTPS: disabled
+      _APP_OPTIONS_ABUSE: disabled
+      # Activer le mode debug
+      _APP_SYSTEM_SECURITY_EMAIL_ADDRESS: security@localhost
+    # Exposer directement le port Appwrite (en plus de Traefik)
+    ports:
+      - "9000:80"
+    # Monter les fonctions locales pour le dev hot-reload
+    volumes:
+      - appwrite-uploads:/storage/uploads
+      - appwrite-cache:/storage/cache
+      - appwrite-config:/storage/config
+      - appwrite-certificates:/storage/certificates
+      - appwrite-functions:/storage/functions
+      - appwrite-builds:/storage/builds
+      # Monter les fonctions locales du projet FUG
+      - ../functions:/app/functions:ro
+
+  # ===========================================================================
+  # APPWRITE EXECUTOR - Configuration Developpement
+  # ===========================================================================
+  appwrite-executor:
+    environment:
+      _APP_ENV: development
+      # Logs detailles pour debug des fonctions
+      _APP_LOGGING_PROVIDER: ""
+    # Monter les fonctions locales
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - appwrite-builds:/storage/builds
+      - appwrite-functions:/storage/functions
+      - /tmp:/tmp:rw
+      # Monter les fonctions locales du projet FUG
+      - ../functions:/app/functions:ro
+
+  # ===========================================================================
+  # MAILHOG - Serveur SMTP de Test (Dev uniquement)
+  # ===========================================================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: fug-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - fug-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "1"
+
+  # Surcharge des workers pour utiliser Mailhog
+  appwrite-worker-mails:
+    environment:
+      _APP_ENV: development
+      _APP_SMTP_HOST: mailhog
+      _APP_SMTP_PORT: 1025
+      _APP_SMTP_SECURE: ""
+      _APP_SMTP_USERNAME: ""
+      _APP_SMTP_PASSWORD: ""
+
+  # ===========================================================================
+  # ADMINER - Interface Admin DB (Dev uniquement)
+  # ===========================================================================
+  adminer:
+    image: adminer:latest
+    container_name: fug-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mariadb
+      ADMINER_DESIGN: dracula
+    networks:
+      - fug-network
+    depends_on:
+      - mariadb
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "1"
+
+  # ===========================================================================
+  # REDIS COMMANDER - Interface Redis (Dev uniquement)
+  # ===========================================================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: fug-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    networks:
+      - fug-network
+    depends_on:
+      - redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "1"
+
+# =============================================================================
+# Volumes additionnels pour le dev
+# =============================================================================
+volumes:
+  appwrite-uploads:
+  appwrite-cache:
+  appwrite-config:
+  appwrite-certificates:
+  appwrite-functions:
+  appwrite-builds:
+
+  # Flutter App Dev
+  flutter-pub-cache:
+    name: fug-flutter-pub-cache-dev
+
+  # Functions Dev - Node modules
+  functions-node-modules:
+    name: fug-functions-node-modules-dev
+  follow-user-modules:
+    name: fug-follow-user-modules-dev
+  join-event-modules:
+    name: fug-join-event-modules-dev
+  create-event-modules:
+    name: fug-create-event-modules-dev
+  gamification-modules:
+    name: fug-gamification-modules-dev

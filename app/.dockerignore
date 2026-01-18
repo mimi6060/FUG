@@ -1,0 +1,56 @@
+# =============================================================================
+# FUG App - Docker Ignore
+# =============================================================================
+
+# Build outputs
+build/
+.dart_tool/
+.packages
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Test coverage
+coverage/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment files (handled via Docker)
+.env
+.env.*
+!.env.example
+
+# Flutter specific
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# Test files (not needed in production image)
+test/
+
+# Android/iOS (not needed for web build)
+android/
+ios/
+macos/
+windows/
+linux/
+
+# Misc
+*.swp
+*.swo
+*~

@@ -1,0 +1,18 @@
+{
+  "name": "@fug/test-utils",
+  "version": "1.0.0",
+  "description": "Shared test utilities for FUG Appwrite Functions",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "keywords": [
+    "fug",
+    "test",
+    "utils",
+    "appwrite"
+  ],
+  "author": "FUG Team",
+  "license": "MIT"
+}

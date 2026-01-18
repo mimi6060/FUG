@@ -1,0 +1,178 @@
+# =================================
+# FUG Project - Root .gitignore
+# =================================
+
+# =================================
+# Environment & Secrets
+# =================================
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# =================================
+# Dependencies
+# =================================
+node_modules/
+.npm/
+.pnpm-store/
+
+# =================================
+# Build outputs
+# =================================
+build/
+dist/
+out/
+*.js.map
+
+# =================================
+# Flutter/Dart
+# =================================
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.mocks.dart
+
+# Flutter build
+app/build/
+app/.dart_tool/
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/Flutter.framework
+app/ios/Flutter/Flutter.podspec
+app/ios/Runner.xcworkspace/
+app/macos/Pods/
+app/macos/Flutter/Flutter.framework
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+
+# =================================
+# IDE & Editors
+# =================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# VS Code (keep some configs)
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# =================================
+# Logs
+# =================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# =================================
+# Testing & Coverage
+# =================================
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+
+# =================================
+# OS Generated
+# =================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =================================
+# Docker
+# =================================
+# Persistent data volumes (keep structure, ignore data)
+infrastructure/appwrite-data/
+infrastructure/mariadb-data/
+infrastructure/redis-data/
+infrastructure/influxdb-data/
+infrastructure/grafana-data/
+
+# Docker overrides (keep example)
+docker-compose.override.local.yml
+
+# =================================
+# Appwrite
+# =================================
+appwrite/
+.appwrite/
+
+# =================================
+# Temporary files
+# =================================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# =================================
+# Certificates & Keys
+# =================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+!*.example.pem
+
+# =================================
+# Archives
+# =================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# =================================
+# Project specific
+# =================================
+# Local scripts
+scripts/local/
+*.local.sh
+
+# Secrets directory
+secrets/
+
+# Backup files
+backups/
+*.sql
+*.dump
+
+# Performance profiling
+*.trace
+*.timeline

@@ -1,0 +1,191 @@
+version: 2
+
+registries:
+  npm-registry:
+    type: npm-registry
+    url: https://registry.npmjs.org
+    replaces-base: true
+
+updates:
+  # Flutter/Dart dependencies
+  - package-ecosystem: "pub"
+    directory: "/app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "mobile-team"
+    labels:
+      - "dependencies"
+      - "flutter"
+      - "automated"
+    commit-message:
+      prefix: "deps(flutter)"
+    groups:
+      flutter-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      flutter-major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+
+  # Node.js dependencies for follow-user function
+  - package-ecosystem: "npm"
+    directory: "/functions/follow-user"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "backend-team"
+    labels:
+      - "dependencies"
+      - "functions"
+      - "follow-user"
+      - "automated"
+    commit-message:
+      prefix: "deps(follow-user)"
+    registries:
+      - npm-registry
+    groups:
+      npm-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # Node.js dependencies for join-event function
+  - package-ecosystem: "npm"
+    directory: "/functions/join-event"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "backend-team"
+    labels:
+      - "dependencies"
+      - "functions"
+      - "join-event"
+      - "automated"
+    commit-message:
+      prefix: "deps(join-event)"
+    registries:
+      - npm-registry
+    groups:
+      npm-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Node.js dependencies for create-event function
+  - package-ecosystem: "npm"
+    directory: "/functions/create-event"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "backend-team"
+    labels:
+      - "dependencies"
+      - "functions"
+      - "create-event"
+      - "automated"
+    commit-message:
+      prefix: "deps(create-event)"
+    registries:
+      - npm-registry
+    groups:
+      npm-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Dart dependencies for gamification function
+  - package-ecosystem: "pub"
+    directory: "/functions/gamification"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "backend-team"
+    labels:
+      - "dependencies"
+      - "functions"
+      - "gamification"
+      - "automated"
+    commit-message:
+      prefix: "deps(gamification)"
+    groups:
+      dart-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci(actions)"
+    groups:
+      actions-all:
+        patterns:
+          - "*"
+
+  # Docker dependencies (if Dockerfiles exist)
+  - package-ecosystem: "docker"
+    directory: "/infrastructure"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    commit-message:
+      prefix: "deps(docker)"

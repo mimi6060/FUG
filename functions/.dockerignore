@@ -1,0 +1,44 @@
+# =============================================================================
+# FUG Functions - Docker Ignore
+# =============================================================================
+
+# Node modules (will be installed in container)
+node_modules/
+*/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+*/coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in container)
+*.md
+
+# Test files (optional - comment if you want tests in container)
+# test/
+# */test/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Misc
+*.swp
+*.swo
+*~

@@ -1,0 +1,284 @@
+# ==============================================================================
+# BMad Method Module Configuration for FUG Project
+# ==============================================================================
+# Configuration du module BMM (BMad Method) pour le projet FUG
+# Documentation: https://docs.bmad-method.org
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Core Configuration
+# ------------------------------------------------------------------------------
+core:
+  user_name: "The Develobeers"
+  communication_language: "French"
+  document_output_language: "French"
+  output_folder: "_bmad-output"
+
+# ------------------------------------------------------------------------------
+# BMM Module Configuration
+# ------------------------------------------------------------------------------
+bmm:
+  project_name: "FUG - Fous-toi Une Guinze"
+  user_skill_level: "intermediate"
+
+  # Dossiers pour les artefacts
+  planning_artifacts: "_bmad-output/planning-artifacts"
+  implementation_artifacts: "_bmad-output/implementation-artifacts"
+  project_knowledge: "docs"
+
+  # Options MCP (non utilisees pour ce projet Flutter)
+  tea_use_mcp_enhancements: false
+  tea_use_playwright_utils: false
+
+# ------------------------------------------------------------------------------
+# Project Information
+# ------------------------------------------------------------------------------
+project:
+  name: "FUG"
+  full_name: "Fous-toi Une Guinze"
+  description: >
+    Application mobile de reseau social geolocalisee permettant aux utilisateurs
+    de trouver des compagnons de boisson et d'organiser des evenements sociaux.
+  version: "1.0.0"
+  status: "brownfield"  # Projet existant avec code
+  team: "The Develobeers"
+
+  # Membres de l'equipe
+  team_members:
+    - name: "Bruno Boi"
+      role: "Flutter Lead"
+    - name: "Christophe Paquet"
+      role: "Backend Lead"
+    - name: "Michel Lammens"
+      role: "Tech Lead"
+
+# ------------------------------------------------------------------------------
+# Technology Stack
+# ------------------------------------------------------------------------------
+tech_stack:
+  frontend:
+    framework: "Flutter"
+    version: ">=3.2.0"
+    language: "Dart"
+    state_management: "Riverpod 2.x"
+    navigation: "GoRouter"
+
+  backend:
+    platform: "Appwrite"
+    version: ">=1.4.0"
+    database: "MariaDB (via Appwrite)"
+    functions_runtime:
+      - "Dart"
+      - "Node.js"
+    services:
+      - "Auth (OAuth2 + Email)"
+      - "Database (Spatial support)"
+      - "Storage"
+      - "Functions"
+      - "Realtime"
+      - "Messaging (Push)"
+
+  architecture:
+    pattern: "Clean Architecture"
+    layers:
+      - "presentation"
+      - "domain"
+      - "data"
+
+  testing:
+    framework: "flutter_test"
+    coverage_target: "80%"
+
+# ------------------------------------------------------------------------------
+# Agent Configuration
+# ------------------------------------------------------------------------------
+agents:
+  priority:
+    - "quick-flow-solo-dev"    # Features rapides, corrections de bugs
+    - "architect"              # Decisions d'architecture
+    - "dev"                    # Implementation
+    - "tech-writer"            # Documentation
+
+  config:
+    quick-flow-solo-dev:
+      max_task_duration: "4h"
+      auto_test: true
+
+    architect:
+      patterns:
+        - "clean-architecture"
+        - "repository-pattern"
+        - "riverpod"
+      focus_areas:
+        - "appwrite-integration"
+        - "geospatial-queries"
+        - "realtime-subscriptions"
+
+    dev:
+      code_style: "flutter_lints"
+      test_coverage_target: 80
+      conventions:
+        files: "snake_case"
+        classes: "PascalCase"
+
+    tech-writer:
+      language: "fr"
+      formats:
+        - "markdown"
+        - "dart-doc"
+
+# ------------------------------------------------------------------------------
+# Workflow Configuration
+# ------------------------------------------------------------------------------
+workflows:
+  priority:
+    - "bmad-quick-flow"
+    - "add-feature-to-existing"
+    - "document-project"
+
+  custom:
+    - name: "add-fug-feature"
+      path: "_bmad/workflows/add-feature.md"
+      description: "Workflow adapte pour ajouter une feature FUG"
+
+# ------------------------------------------------------------------------------
+# Database Configuration (Appwrite)
+# ------------------------------------------------------------------------------
+database:
+  name: "fug_database"
+  collections:
+    - name: "users"
+      description: "Profils utilisateurs avec geolocalisation"
+      spatial: true
+
+    - name: "events"
+      description: "Evenements/FUG avec localisation"
+      spatial: true
+
+    - name: "followers"
+      description: "Relations de follow entre utilisateurs"
+
+    - name: "event_participants"
+      description: "Participations aux evenements"
+
+    - name: "achievements"
+      description: "Badges et trophees disponibles"
+
+    - name: "user_achievements"
+      description: "Badges debloques par utilisateur"
+
+    - name: "notifications"
+      description: "Notifications in-app"
+
+    - name: "user_devices"
+      description: "Tokens push des appareils"
+
+# ------------------------------------------------------------------------------
+# Appwrite Functions
+# ------------------------------------------------------------------------------
+functions:
+  - name: "follow-user"
+    runtime: "Dart"
+    trigger: "HTTP POST"
+    description: "Gestion des follows/unfollows"
+
+  - name: "join-event"
+    runtime: "Dart"
+    trigger: "HTTP POST"
+    description: "Inscription/desinscription aux evenements"
+
+  - name: "nearby-events"
+    runtime: "Dart"
+    trigger: "HTTP GET"
+    description: "Recherche geospatiale d'evenements"
+
+  - name: "gamification"
+    runtime: "Dart"
+    trigger: "Event"
+    description: "Attribution des points et badges"
+
+  - name: "send-notification"
+    runtime: "Node.js"
+    trigger: "Event"
+    description: "Envoi des push notifications"
+
+  - name: "cleanup-events"
+    runtime: "Dart"
+    trigger: "Schedule"
+    schedule: "0 * * * *"
+    description: "Archive des evenements expires"
+
+# ------------------------------------------------------------------------------
+# Environments
+# ------------------------------------------------------------------------------
+environments:
+  - name: "development"
+    description: "Environnement de developpement local"
+    appwrite_project: "fug-dev"
+    appwrite_endpoint: "http://localhost:8080/v1"
+
+  - name: "staging"
+    description: "Environnement de pre-production"
+    appwrite_project: "fug-staging"
+    appwrite_endpoint: "https://cloud.appwrite.io/v1"
+
+  - name: "production"
+    description: "Environnement de production"
+    appwrite_project: "fug-production"
+    appwrite_endpoint: "https://cloud.appwrite.io/v1"
+
+# ------------------------------------------------------------------------------
+# Conventions
+# ------------------------------------------------------------------------------
+conventions:
+  files:
+    dart: "snake_case"
+    test: "*_test.dart"
+
+  classes:
+    models: "*Model"
+    repositories: "*Repository"
+    providers: "*Provider"
+    screens: "*Screen"
+    widgets: "*Widget"
+
+  branches:
+    feature: "feature/*"
+    bugfix: "bugfix/*"
+    hotfix: "hotfix/*"
+
+  commits:
+    format: "type(scope): description"
+    types:
+      - "feat"
+      - "fix"
+      - "docs"
+      - "style"
+      - "refactor"
+      - "test"
+      - "chore"
+
+# ------------------------------------------------------------------------------
+# Key Documents (for agent reference)
+# ------------------------------------------------------------------------------
+key_documents:
+  - path: "docs/index.md"
+    purpose: "Vue d'ensemble du projet pour les agents"
+
+  - path: "docs/architecture.md"
+    purpose: "Architecture technique detaillee"
+
+  - path: "docs/business-rules.md"
+    purpose: "Regles metier FUG"
+
+  - path: "1. Document de vision.md"
+    purpose: "Vision produit originale"
+
+  - path: "2. Analyse fonctionnelle.md"
+    purpose: "Specifications fonctionnelles"
+
+  - path: "3. Architecture technique.md"
+    purpose: "Architecture complete Flutter + Appwrite"
+
+  - path: "4. Backlog produit.md"
+    purpose: "User stories et priorites"

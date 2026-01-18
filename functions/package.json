@@ -1,0 +1,37 @@
+{
+  "name": "fug-functions",
+  "version": "1.0.0",
+  "description": "FUG - Appwrite Functions Collection",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:all",
+    "test:all": "npm run test:follow-user && npm run test:join-event && npm run test:create-event && npm run test:gamification",
+    "test:follow-user": "cd follow-user && npm test",
+    "test:join-event": "cd join-event && npm test",
+    "test:create-event": "cd create-event && npm test",
+    "test:gamification": "cd gamification && npm test",
+    "install:all": "npm run install:follow-user && npm run install:join-event && npm run install:create-event && npm run install:gamification",
+    "install:follow-user": "cd follow-user && npm install",
+    "install:join-event": "cd join-event && npm install",
+    "install:create-event": "cd create-event && npm install",
+    "install:gamification": "cd gamification && npm install",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0"
+  },
+  "keywords": [
+    "appwrite",
+    "functions",
+    "fug",
+    "serverless"
+  ],
+  "author": "FUG Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

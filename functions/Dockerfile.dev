@@ -1,0 +1,44 @@
+# =============================================================================
+# FUG Functions - Dockerfile Developpement
+# =============================================================================
+# Pour le developpement local avec hot reload et tests
+# =============================================================================
+
+FROM node:20-alpine
+
+# Labels
+LABEL maintainer="FUG Team"
+LABEL description="FUG - Appwrite Functions Dev Environment"
+LABEL version="1.0.0-dev"
+
+# Installer les outils de dev
+RUN apk add --no-cache \
+    curl \
+    git \
+    bash \
+    make \
+    python3
+
+# Installer nodemon globalement pour le hot reload
+RUN npm install -g nodemon
+
+WORKDIR /functions
+
+# Variables d'environnement
+ENV NODE_ENV=development
+ENV APPWRITE_FUNCTION_API_ENDPOINT=http://appwrite/v1
+ENV APPWRITE_FUNCTION_PROJECT_ID=fug
+
+# Copier les fichiers de config
+COPY package*.json ./
+
+# Installer les dependances (dev incluses)
+RUN npm install 2>/dev/null || echo "No root package.json"
+
+# Le code sera monte en volume
+
+# Expose le port pour les tests
+EXPOSE 3000
+
+# Commande par defaut: shell interactif
+CMD ["sh"]

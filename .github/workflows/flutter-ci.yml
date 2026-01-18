@@ -1,0 +1,149 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['app/**']
+  pull_request:
+    branches: [main]
+    paths: ['app/**']
+
+env:
+  FLUTTER_VERSION: '3.24.0'
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
+          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: app
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        working-directory: app
+
+      - name: Analyze code
+        run: flutter analyze --fatal-infos
+        working-directory: app
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
+          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: app
+
+      - name: Run unit tests with coverage
+        run: flutter test --coverage --reporter=github
+        working-directory: app
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: app/coverage/lcov.info
+          flags: flutter
+          fail_ci_if_error: false
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: app/coverage/
+          retention-days: 7
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
+          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: app
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+        working-directory: app
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 14
+
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
+          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: app
+
+      - name: Build iOS (no codesign)
+        run: flutter build ios --debug --no-codesign
+        working-directory: app
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-ios-debug
+          path: app/build/ios/iphoneos/
+          retention-days: 14
