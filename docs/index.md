@@ -12,11 +12,11 @@
 
 ### Equipe
 
-**The Develobeers** - Une equipe passionnee de developpeurs:
+**The Develobeers**
+- Michel Lammens
+- Christophe Paquet
 
-- **Michel Lammens** - Tech Lead
-- **Bruno Boi** - Flutter Lead
-- **Christophe Paquet** - Backend Lead
+*Projet original (2014): Bruno Boi, Christophe Paquet, Michel Lammens*
 
 ---
 

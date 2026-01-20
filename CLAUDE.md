@@ -220,6 +220,7 @@ appwrite functions createDeployment
 ## Contact Équipe
 
 **The Develobeers**
-- Bruno Boi (BOB)
-- Christophe Paquet (PAC)
 - Michel Lammens (LAM)
+- Christophe Paquet (PAC)
+
+*Projet original (2014): Bruno Boi, Christophe Paquet, Michel Lammens*

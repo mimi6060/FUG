@@ -41,11 +41,11 @@ FUG permet aux utilisateurs de:
 
 ## Equipe
 
-| Membre | Role | Responsabilites |
-|--------|------|-----------------|
-| **Michel Lammens** | Tech Lead | Architecture, decisions techniques |
-| **Bruno Boi** | Flutter Lead | Application mobile, UI/UX |
-| **Christophe Paquet** | Backend Lead | Appwrite, Functions, Infrastructure |
+**The Develobeers**
+- Michel Lammens
+- Christophe Paquet
+
+*Projet original (2014): Bruno Boi, Christophe Paquet, Michel Lammens*
 
 ---
 

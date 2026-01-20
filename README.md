@@ -19,7 +19,7 @@
 - Suivre d'autres utilisateurs et voir leurs activites
 - Gagner des points de "murgilarity" et debloquer des badges
 
-**Equipe**: The Develobeers - Bruno Boi, Christophe Paquet, Michel Lammens
+**Equipe**: The Develobeers - Michel Lammens, Christophe Paquet
 
 ---
 
@@ -405,10 +405,11 @@ Proprietary - The Develobeers (c) 2014-2026
 
 ## Contact
 
-- **Equipe**: The Develobeers
-- **Tech Lead**: Michel Lammens
-- **Flutter Lead**: Bruno Boi
-- **Backend Lead**: Christophe Paquet
+**The Develobeers**
+- Michel Lammens
+- Christophe Paquet
+
+*Projet original (2014): Bruno Boi, Christophe Paquet, Michel Lammens*
 
 ---
 
