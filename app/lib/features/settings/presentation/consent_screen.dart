@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../data/consent_provider.dart';
-import '../domain/consent_model.dart';
+import '../data/consent_repository.dart';
 
 /// Ecran de consentement RGPD
 ///
@@ -37,11 +37,11 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   }
 
   Future<void> _loadExistingConsent() async {
-    final consent = await ref.read(currentConsentProvider.future);
-    if (consent != null && mounted) {
+    final prefs = await ref.read(currentConsentPreferencesProvider.future);
+    if (prefs != null && mounted) {
       setState(() {
-        _analyticsConsent = consent.analyticsConsent;
-        _marketingConsent = consent.marketingConsent;
+        _analyticsConsent = prefs.analytics;
+        _marketingConsent = prefs.marketing;
       });
     }
   }

@@ -14,10 +14,18 @@ final hasLocalConsentProvider = FutureProvider<bool>((ref) async {
   return repository.hasLocalConsent();
 });
 
-/// Provider pour recuperer le consentement actuel
-final currentConsentProvider = FutureProvider<ConsentModel?>((ref) async {
+/// Provider pour recuperer les preferences de consentement actuelles
+final currentConsentPreferencesProvider =
+    FutureProvider<ConsentPreferences?>((ref) async {
   final repository = ref.watch(consentRepositoryProvider);
   return repository.getLocalConsent();
+});
+
+/// Provider pour recuperer le ConsentModel actuel (necessite un userId)
+final currentConsentProvider =
+    FutureProvider.family<ConsentModel?, String>((ref, userId) async {
+  final repository = ref.watch(consentRepositoryProvider);
+  return repository.getLocalConsentModel(userId);
 });
 
 /// Provider pour le consentement analytics
@@ -42,11 +50,9 @@ class ConsentNotifier extends StateNotifier<bool> {
   }
 
   Future<void> _loadInitialState() async {
-    final consent = await _ref.read(currentConsentProvider.future);
-    if (consent != null) {
-      state = _type == ConsentType.analytics
-          ? consent.analyticsConsent
-          : consent.marketingConsent;
+    final prefs = await _ref.read(currentConsentPreferencesProvider.future);
+    if (prefs != null) {
+      state = _type == ConsentType.analytics ? prefs.analytics : prefs.marketing;
     }
   }
 
@@ -69,7 +75,12 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
 
   @override
   Future<ConsentModel?> build() async {
-    return _repository.getLocalConsent();
+    // Retourne null car on a besoin d'un userId pour creer un ConsentModel
+    // Le ConsentModel sera charge via currentConsentProvider.family
+    final prefs = await _repository.getLocalConsent();
+    if (prefs == null) return null;
+    // On utilise un userId generique pour le build initial
+    return _repository.preferencesToModel(prefs, 'unknown');
   }
 
   /// Sauvegarde le consentement initial (premier lancement)
@@ -89,8 +100,9 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
 
       if (consent != null) {
         state = AsyncValue.data(consent);
-        // Invalider le provider hasLocalConsent pour forcer refresh
+        // Invalider les providers pour forcer refresh
         ref.invalidate(hasLocalConsentProvider);
+        ref.invalidate(currentConsentPreferencesProvider);
         return true;
       }
 
@@ -119,6 +131,7 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
 
       if (consent != null) {
         state = AsyncValue.data(consent);
+        ref.invalidate(currentConsentPreferencesProvider);
         return true;
       }
 
@@ -139,6 +152,7 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
       if (cleared) {
         state = const AsyncValue.data(null);
         ref.invalidate(hasLocalConsentProvider);
+        ref.invalidate(currentConsentPreferencesProvider);
       }
       return cleared;
     } catch (e, st) {
