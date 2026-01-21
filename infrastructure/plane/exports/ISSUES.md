@@ -1,6 +1,6 @@
 # Plane Issues Summary
 
-> Auto-generated export - 71 issues
+> Auto-generated export - 72 issues
 > Run `./sync-plane.sh export` to update
 
 ## [x] [URGENT] US-001: Inscription par email
@@ -195,15 +195,18 @@
 ## [ ] [LOW] MOD-009: Monétisation Éthique
 **State:** Backlog
 
-## [ ] [URGENT] INFRA-001: Appwrite Infrastructure as Code
-**State:** Todo
+## [x] [URGENT] INFRA-001: Appwrite Infrastructure as Code
+**State:** Done
 
-## [ ] [URGENT] INFRA-001: Appwrite Infrastructure as Code
-**State:** Todo
+## [x] [URGENT] INFRA-001: Appwrite Infrastructure as Code
+**State:** Done
 
-- [ ] INFRA-001-A: Bootstrap Script (Todo)
-- [ ] INFRA-001-B: Migration System Enhancement (Todo)
-- [ ] INFRA-001-C: Bootstrap Migrations (Todo)
-- [ ] INFRA-001-D: Documentation (Todo)
-- [ ] INFRA-001-E: Update CLAUDE.md - Appwrite via migrations only (Todo)
+- [x] INFRA-001-A: Bootstrap Script (Done)
+- [x] INFRA-001-B: Migration System Enhancement (Done)
+- [x] INFRA-001-C: Bootstrap Migrations (Done)
+- [x] INFRA-001-D: Documentation (Done)
+- [x] INFRA-001-E: Update CLAUDE.md - Appwrite via migrations only (Done)
+
+## [ ] [HIGH] INFRA-002: Storage Buckets Configuration
+**State:** In Progress
 

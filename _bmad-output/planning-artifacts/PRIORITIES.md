@@ -23,7 +23,8 @@ Raison: Sans conformité RGPD/DSA/App Store, l'application risque:
 
 | Priorité | Story | Description | Sprint |
 |----------|-------|-------------|--------|
-| **P0** | INFRA-001 | Appwrite Infrastructure as Code | Sprint 9 |
+| **P0** | INFRA-001 | Appwrite Infrastructure as Code | Sprint 9 ✅ |
+| **P1** | INFRA-002 | Storage Buckets Configuration | Sprint 9 |
 
 > **INFRA-001 est CRITIQUE:** Sans automatisation complète, impossible de déployer en staging/prod de manière fiable.
 
@@ -95,11 +96,12 @@ Raison: Sans conformité RGPD/DSA/App Store, l'application risque:
 
 ### Stories Sprint 9
 
-1. [ ] **INFRA-001**: Appwrite Infrastructure as Code (EN COURS)
-   - [ ] INFRA-001-A: Bootstrap Script
-   - [ ] INFRA-001-B: Migration System Enhancement
-   - [ ] INFRA-001-C: Bootstrap Migrations
-   - [ ] INFRA-001-D: Documentation
+1. [x] **INFRA-001**: Appwrite Infrastructure as Code ✅
+   - [x] INFRA-001-A: Bootstrap Script
+   - [x] INFRA-001-B: Migration System Enhancement
+   - [x] INFRA-001-C: Bootstrap Migrations
+   - [x] INFRA-001-D: Documentation
+   - [x] INFRA-001-E: Update CLAUDE.md
 
 2. [x] **MOD-001**: Conformité RGPD Complète ✅
    - [x] MOD-001-A: Écran de consentement
@@ -117,7 +119,7 @@ Raison: Sans conformité RGPD/DSA/App Store, l'application risque:
 - [x] Suppression de compte fonctionnelle (avec délai 30j)
 - [ ] Export données disponible
 - [x] Google Sign-In configuré
-- [ ] Infrastructure automatisée (INFRA-001)
+- [x] Infrastructure automatisée (INFRA-001) ✅
 - [ ] Tests manuels validés
 
 ---
@@ -159,7 +161,7 @@ QA-* ──────> Après implémentation features concernées
 
 | Métrique | Valeur Actuelle | Cible |
 |----------|-----------------|-------|
-| Stories P0 complétées | 0/3 | 3/3 |
+| Stories P0 complétées | 3/4 | 4/4 |
 | Stories P1 complétées | 0/7 | 7/7 |
 | Conformité RGPD | 60% | 100% |
 | Conformité DSA | 0% | 100% |
