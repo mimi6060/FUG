@@ -7,10 +7,10 @@ class AppwriteConfig {
   AppwriteConfig._();
 
   /// Endpoint Appwrite - À modifier selon l'environnement
-  static const String endpoint = 'https://cloud.appwrite.io/v1';
+  static const String endpoint = 'http://localhost:9000/v1';
 
   /// ID du projet Appwrite
-  static const String projectId = 'YOUR_PROJECT_ID';
+  static const String projectId = '697015400010787139b8';
 
   /// Clé API (optionnelle, pour les opérations serveur)
   static const String? apiKey = null;
@@ -20,7 +20,7 @@ class AppwriteConfig {
   // ============================================
 
   /// Database principale
-  static const String databaseId = 'fug_database';
+  static const String databaseId = 'fug-db';
 
   // ============================================
   // IDs des Collections

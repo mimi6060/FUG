@@ -26,7 +26,7 @@ void main() async {
 
   // Configurer la barre de statut
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
       statusBarBrightness: Brightness.light,

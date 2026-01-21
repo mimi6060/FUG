@@ -268,11 +268,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 radius: 60,
                                 backgroundColor: theme.colorScheme.primary,
                                 backgroundImage: state.newAvatarFile != null
-                                    ? FileImage(state.newAvatarFile!)
+                                    ? FileImage(state.newAvatarFile!) as ImageProvider<Object>
                                     : state.profile?.avatarUrl != null
                                         ? CachedNetworkImageProvider(
                                             state.profile!.avatarUrl!,
-                                          )
+                                          ) as ImageProvider<Object>
                                         : null,
                                 child: state.newAvatarFile == null &&
                                         state.profile?.avatarUrl == null
