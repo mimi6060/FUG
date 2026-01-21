@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
@@ -573,24 +574,42 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                       borderRadius: BorderRadius.circular(12),
                       child: SizedBox(
                         height: 150,
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: state.selectedLocation!,
-                            zoom: 15,
-                          ),
-                          markers: {
-                            Marker(
-                              markerId: const MarkerId('selected'),
-                              position: state.selectedLocation!,
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: state.selectedLocation!,
+                            initialZoom: 15,
+                            interactionOptions: const InteractionOptions(
+                              flags: InteractiveFlag.none,
                             ),
-                          },
-                          zoomControlsEnabled: false,
-                          scrollGesturesEnabled: false,
-                          rotateGesturesEnabled: false,
-                          tiltGesturesEnabled: false,
-                          zoomGesturesEnabled: false,
-                          myLocationButtonEnabled: false,
-                          liteModeEnabled: true,
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              subdomains: const ['a', 'b', 'c'],
+                              userAgentPackageName: 'com.fug.app',
+                            ),
+                            MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: state.selectedLocation!,
+                                  width: 40,
+                                  height: 40,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.deepPurple,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: const Icon(
+                                      Icons.location_on,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -739,7 +758,7 @@ class _LocationPickerSheet extends StatefulWidget {
 
 class _LocationPickerSheetState extends State<_LocationPickerSheet> {
   late LatLng _selectedPosition;
-  GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   final _addressController = TextEditingController();
 
   @override
@@ -750,7 +769,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
 
   @override
   void dispose() {
-    _mapController?.dispose();
+    _mapController.dispose();
     _addressController.dispose();
     super.dispose();
   }
@@ -822,36 +841,53 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
 
               // Carte
               Expanded(
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _selectedPosition,
-                    zoom: 15,
+                child: FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: _selectedPosition,
+                    initialZoom: 15,
+                    onTap: (tapPosition, point) {
+                      setState(() {
+                        _selectedPosition = point;
+                      });
+                      // TODO: Reverse geocoder la position
+                    },
                   ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                  markers: {
-                    Marker(
-                      markerId: const MarkerId('selected'),
-                      position: _selectedPosition,
-                      draggable: true,
-                      onDragEnd: (position) {
-                        setState(() {
-                          _selectedPosition = position;
-                        });
-                        // TODO: Reverse geocoder la position
-                      },
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      subdomains: const ['a', 'b', 'c'],
+                      userAgentPackageName: 'com.fug.app',
                     ),
-                  },
-                  onTap: (position) {
-                    setState(() {
-                      _selectedPosition = position;
-                    });
-                    // TODO: Reverse geocoder la position
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                  zoomControlsEnabled: true,
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: _selectedPosition,
+                          width: 50,
+                          height: 50,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
 

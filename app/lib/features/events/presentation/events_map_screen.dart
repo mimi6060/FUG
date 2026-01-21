@@ -2,14 +2,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/providers/location_provider.dart';
 import '../../../core/providers/events_provider.dart';
 import '../domain/event_model.dart';
 
-/// Ecran principal avec la carte Google Maps affichant les evenements
+/// Ecran principal avec la carte OpenStreetMap affichant les evenements
 class EventsMapScreen extends ConsumerStatefulWidget {
   const EventsMapScreen({super.key});
 
@@ -18,8 +18,8 @@ class EventsMapScreen extends ConsumerStatefulWidget {
 }
 
 class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
-  GoogleMapController? _mapController;
-  final Set<Marker> _markers = {};
+  final MapController _mapController = MapController();
+  List<Marker> _markers = [];
   bool _isLoading = true;
   String? _error;
 
@@ -32,6 +32,9 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
 
   // Evenement selectionne pour la bottom sheet
   EventModel? _selectedEvent;
+
+  // Liste des evenements pour reference
+  List<EventModel> _events = [];
 
   @override
   void initState() {
@@ -71,6 +74,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
         ),
       ).future);
 
+      _events = events;
       _updateMarkers(events);
       setState(() {
         _isLoading = false;
@@ -84,36 +88,50 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
   }
 
   void _updateMarkers(List<EventModel> events) {
-    final newMarkers = <Marker>{};
+    final newMarkers = <Marker>[];
 
     for (final event in events) {
       newMarkers.add(
         Marker(
-          markerId: MarkerId(event.id),
-          position: LatLng(event.latitude, event.longitude),
-          infoWindow: InfoWindow(
-            title: event.title,
-            snippet: event.formattedPrice,
+          point: LatLng(event.latitude, event.longitude),
+          width: 40,
+          height: 40,
+          child: GestureDetector(
+            onTap: () => _onMarkerTapped(event),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _getMarkerColor(event),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.local_bar,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            _getMarkerHue(event),
-          ),
-          onTap: () => _onMarkerTapped(event),
         ),
       );
     }
 
     setState(() {
-      _markers.clear();
-      _markers.addAll(newMarkers);
+      _markers = newMarkers;
     });
   }
 
-  double _getMarkerHue(EventModel event) {
-    if (event.isFeatured) return BitmapDescriptor.hueYellow;
-    if (event.isFree) return BitmapDescriptor.hueGreen;
-    if (event.isFull) return BitmapDescriptor.hueRed;
-    return BitmapDescriptor.hueViolet;
+  Color _getMarkerColor(EventModel event) {
+    if (event.isFeatured) return Colors.amber;
+    if (event.isFree) return Colors.green;
+    if (event.isFull) return Colors.red;
+    return Colors.deepPurple;
   }
 
   void _onMarkerTapped(EventModel event) {
@@ -138,36 +156,13 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
     );
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-    _setMapStyle();
-  }
-
-  Future<void> _setMapStyle() async {
-    final brightness = MediaQuery.of(context).platformBrightness;
-    if (brightness == Brightness.dark) {
-      // Style sombre pour le mode nuit
-      await _mapController?.setMapStyle('''
-        [
-          {"elementType": "geometry", "stylers": [{"color": "#242f3e"}]},
-          {"elementType": "labels.text.fill", "stylers": [{"color": "#746855"}]},
-          {"elementType": "labels.text.stroke", "stylers": [{"color": "#242f3e"}]}
-        ]
-      ''');
-    }
-  }
-
   Future<void> _centerOnUser() async {
     final position = await ref.read(currentPositionProvider.future);
-    if (position != null && _mapController != null) {
-      _mapController!.animateCamera(
-        CameraUpdate.newLatLngZoom(
-          LatLng(position.latitude, position.longitude),
-          14,
-        ),
-      );
+    if (position != null) {
+      final newPosition = LatLng(position.latitude, position.longitude);
+      _mapController.move(newPosition, 14);
       setState(() {
-        _currentPosition = LatLng(position.latitude, position.longitude);
+        _currentPosition = newPosition;
       });
       await _loadNearbyEvents();
     }
@@ -176,6 +171,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -195,33 +191,38 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
       ),
       body: Stack(
         children: [
-          // Carte Google Maps
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _currentPosition,
-              zoom: 13,
-            ),
-            onMapCreated: _onMapCreated,
-            markers: _markers,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: false,
-            mapToolbarEnabled: false,
-            onCameraIdle: () {
-              // Recharger les evenements quand la camera arrete de bouger
-              _mapController?.getVisibleRegion().then((bounds) {
-                final center = LatLng(
-                  (bounds.northeast.latitude + bounds.southwest.latitude) / 2,
-                  (bounds.northeast.longitude + bounds.southwest.longitude) / 2,
-                );
-                if (_currentPosition != center) {
+          // Carte OpenStreetMap
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _currentPosition,
+              initialZoom: 13,
+              onPositionChanged: (position, hasGesture) {
+                if (hasGesture && position.center != null) {
                   setState(() {
-                    _currentPosition = center;
+                    _currentPosition = position.center!;
                   });
+                }
+              },
+              onMapEvent: (event) {
+                // Recharger les evenements quand l'utilisateur arrete de bouger la carte
+                if (event is MapEventMoveEnd) {
                   _loadNearbyEvents();
                 }
-              });
-            },
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: isDarkMode
+                    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: isDarkMode ? const ['a', 'b', 'c', 'd'] : const ['a', 'b', 'c'],
+                userAgentPackageName: 'com.fug.app',
+              ),
+              MarkerLayer(
+                markers: _markers,
+              ),
+            ],
           ),
 
           // Indicateur de chargement
@@ -444,7 +445,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
 
   @override
   void dispose() {
-    _mapController?.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 }
