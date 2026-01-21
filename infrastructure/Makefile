@@ -448,3 +448,24 @@ functions-install:
 	@echo "$(YELLOW)>>> Installation des dependances Functions...$(NC)"
 	@cd ../functions && npm run install:all
 	@echo "$(GREEN)>>> Dependances installees!$(NC)"
+
+# =============================================================================
+# PLANE (Project Management)
+# =============================================================================
+
+## plane-export: Export Plane issues to git
+plane-export:
+	@echo "$(CYAN)Exporting Plane issues...$(NC)"
+	@cd plane && ./sync-plane.sh export
+
+## plane-import: Import issues from git to Plane
+plane-import:
+	@echo "$(CYAN)Importing issues to Plane...$(NC)"
+	@cd plane && ./sync-plane.sh import
+
+## plane-sync: Full sync (export + commit suggestion)
+plane-sync: plane-export
+	@echo ""
+	@echo "$(GREEN)Plane data exported. To commit:$(NC)"
+	@echo "  git add infrastructure/plane/exports/"
+	@echo "  git commit -m 'chore(plane): sync issues'"

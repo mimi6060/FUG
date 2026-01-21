@@ -1,0 +1,28 @@
+#!/bin/bash
+# Git pre-commit hook
+# Auto-exports Plane data when BMAD files are modified
+
+# Check if BMAD files are being committed
+BMAD_FILES=$(git diff --cached --name-only | grep -E "_bmad-output/|infrastructure/plane/" || true)
+
+if [ -n "$BMAD_FILES" ]; then
+    echo "BMAD files detected in commit, syncing Plane..."
+
+    # Check if Plane is running
+    if curl -s "http://localhost:8088/api/v1/" > /dev/null 2>&1; then
+        # Export Plane data
+        if [ -x "infrastructure/plane/sync-plane.sh" ]; then
+            infrastructure/plane/sync-plane.sh export > /dev/null 2>&1
+
+            # Stage the exports
+            git add infrastructure/plane/exports/ 2>/dev/null || true
+
+            echo "Plane data synced and staged."
+        fi
+    else
+        echo "Warning: Plane not running, skipping sync."
+        echo "Run './infrastructure/plane/sync-plane.sh export' manually when Plane is available."
+    fi
+fi
+
+exit 0
