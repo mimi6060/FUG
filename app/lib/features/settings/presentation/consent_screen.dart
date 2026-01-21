@@ -7,12 +7,12 @@ import '../../../core/providers/auth_provider.dart';
 import '../data/consent_provider.dart';
 import '../data/consent_repository.dart';
 
-/// Ecran de consentement RGPD
+/// GDPR consent screen
 ///
-/// Affiche lors du premier lancement ou accessible depuis les parametres.
-/// Permet a l'utilisateur de gerer ses preferences de consentement.
+/// Displayed on first launch or accessible from settings.
+/// Allows user to manage consent preferences.
 class ConsentScreen extends ConsumerStatefulWidget {
-  /// Indique si c'est le premier lancement (inscription)
+  /// Indicates if this is first launch (registration)
   final bool isFirstLaunch;
 
   const ConsentScreen({
@@ -25,7 +25,7 @@ class ConsentScreen extends ConsumerStatefulWidget {
 }
 
 class _ConsentScreenState extends ConsumerState<ConsentScreen> {
-  bool _essentialConsent = true; // Toujours vrai, obligatoire
+  bool _essentialConsent = true; // Always true, required
   bool _analyticsConsent = false;
   bool _marketingConsent = false;
   bool _isLoading = false;
@@ -49,7 +49,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   Future<void> _saveConsent() async {
     final user = ref.read(authStateProvider).valueOrNull;
     if (user == null) {
-      _showError('Utilisateur non connecte');
+      _showError('User not connected');
       return;
     }
 
@@ -77,23 +77,23 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
       if (success && mounted) {
         if (widget.isFirstLaunch) {
-          // Rediriger vers la page d'accueil
+          // Redirect to home page
           context.go('/home');
         } else {
-          // Retourner aux parametres
+          // Return to settings
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Preferences enregistrees'),
+              content: Text('Preferences saved'),
               backgroundColor: Colors.green,
             ),
           );
           context.pop();
         }
       } else {
-        _showError('Erreur lors de la sauvegarde');
+        _showError('Error saving preferences');
       }
     } catch (e) {
-      _showError('Erreur: $e');
+      _showError('Error: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -121,10 +121,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        _showError('Impossible d\'ouvrir le lien');
+        _showError('Cannot open link');
       }
     } catch (e) {
-      _showError('Erreur: $e');
+      _showError('Error: $e');
     }
   }
 
@@ -151,7 +151,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       appBar: widget.isFirstLaunch
           ? null
           : AppBar(
-              title: const Text('Gestion du consentement'),
+              title: const Text('Consent Management'),
             ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -169,7 +169,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Vos donnees, votre controle',
+                  'Your data, your control',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -177,7 +177,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Nous respectons votre vie privee. Choisissez comment nous utilisons vos donnees.',
+                  'We respect your privacy. Choose how we use your data.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -186,7 +186,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 const SizedBox(height: 32),
               ],
 
-              // Section info RGPD
+              // GDPR info section
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -205,7 +205,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Conformement au RGPD, vous pouvez modifier vos choix a tout moment dans les parametres.',
+                        'In compliance with GDPR, you can change your choices at any time in settings.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onPrimaryContainer,
                         ),
@@ -216,17 +216,17 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Donnees essentielles (obligatoire)
+              // Essential data (required)
               _ConsentTile(
                 icon: Icons.security,
                 iconColor: colorScheme.secondary,
-                title: 'Donnees essentielles',
-                subtitle: 'Necessaire au fonctionnement de l\'application',
+                title: 'Essential data',
+                subtitle: 'Required for app functionality',
                 details:
-                    'Authentification, gestion de session, preferences de base.',
+                    'Authentication, session management, basic preferences.',
                 value: _essentialConsent,
                 required: true,
-                onChanged: null, // Obligatoire, non modifiable
+                onChanged: null, // Required, not modifiable
               ),
               const SizedBox(height: 16),
 
@@ -235,9 +235,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 icon: Icons.analytics_outlined,
                 iconColor: colorScheme.tertiary,
                 title: 'Analytics',
-                subtitle: 'Nous aider a ameliorer FUG',
+                subtitle: 'Help us improve FUG',
                 details:
-                    'Statistiques d\'utilisation anonymisees pour ameliorer l\'experience.',
+                    'Anonymous usage statistics to improve the experience.',
                 value: _analyticsConsent,
                 required: false,
                 onChanged: _isLoading
@@ -254,10 +254,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.campaign_outlined,
                 iconColor: colorScheme.error,
-                title: 'Communications marketing',
-                subtitle: 'Recevoir des offres et actualites',
+                title: 'Marketing communications',
+                subtitle: 'Receive offers and news',
                 details:
-                    'Emails promotionnels, notifications d\'evenements speciaux.',
+                    'Promotional emails, special event notifications.',
                 value: _marketingConsent,
                 required: false,
                 onChanged: _isLoading
@@ -270,21 +270,21 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Boutons rapides
+              // Quick buttons
               if (widget.isFirstLaunch) ...[
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _rejectOptional,
-                        child: const Text('Refuser optionnels'),
+                        child: const Text('Reject optional'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _acceptAll,
-                        child: const Text('Tout accepter'),
+                        child: const Text('Accept all'),
                       ),
                     ),
                   ],
@@ -292,15 +292,15 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 const SizedBox(height: 16),
               ],
 
-              // Lien politique de confidentialite
+              // Privacy policy link
               TextButton.icon(
                 onPressed: _openPrivacyPolicy,
                 icon: const Icon(Icons.description_outlined, size: 18),
-                label: const Text('Lire notre politique de confidentialite'),
+                label: const Text('Read our privacy policy'),
               ),
               const SizedBox(height: 24),
 
-              // Bouton de validation
+              // Validation button
               FilledButton(
                 onPressed: _isLoading ? null : _saveConsent,
                 style: FilledButton.styleFrom(
@@ -317,16 +317,16 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       )
                     : Text(
                         widget.isFirstLaunch
-                            ? 'Continuer'
-                            : 'Enregistrer mes preferences',
+                            ? 'Continue'
+                            : 'Save my preferences',
                         style: const TextStyle(fontSize: 16),
                       ),
               ),
               const SizedBox(height: 16),
 
-              // Note legale
+              // Legal note
               Text(
-                'En continuant, vous acceptez les donnees essentielles necessaires au fonctionnement de l\'application.',
+                'By continuing, you accept the essential data required for app functionality.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -340,7 +340,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   }
 }
 
-/// Widget pour afficher une option de consentement
+/// Widget to display a consent option
 class _ConsentTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -411,7 +411,7 @@ class _ConsentTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'Obligatoire',
+                      'Required',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colorScheme.secondary,
                         fontWeight: FontWeight.w600,

@@ -1,41 +1,41 @@
 import 'package:equatable/equatable.dart';
 
-/// Types de consentement RGPD
+/// GDPR consent types
 enum ConsentType {
-  /// Donnees essentielles au fonctionnement (obligatoire)
+  /// Essential data for app functionality (required)
   essential,
 
-  /// Analytics pour ameliorer l'application
+  /// Analytics to improve the application
   analytics,
 
-  /// Communications marketing
+  /// Marketing communications
   marketing,
 }
 
-/// Modele representant le consentement utilisateur RGPD
+/// Model representing user GDPR consent
 ///
-/// Stocke les preferences de consentement avec horodatage
-/// pour conformite RGPD Article 7.
+/// Stores consent preferences with timestamps
+/// for GDPR Article 7 compliance.
 class ConsentModel extends Equatable {
-  /// ID de l'utilisateur
+  /// User ID
   final String userId;
 
-  /// Consentement pour les donnees essentielles (toujours true)
+  /// Consent for essential data (always true)
   final bool essentialConsent;
 
-  /// Consentement pour les analytics
+  /// Consent for analytics
   final bool analyticsConsent;
 
-  /// Consentement pour le marketing
+  /// Consent for marketing
   final bool marketingConsent;
 
-  /// Date du premier consentement
+  /// Date of first consent
   final DateTime consentDate;
 
-  /// Date de la derniere modification
+  /// Date of last modification
   final DateTime lastUpdated;
 
-  /// Version de la politique de confidentialite acceptee
+  /// Version of accepted privacy policy
   final String policyVersion;
 
   const ConsentModel({
@@ -48,7 +48,7 @@ class ConsentModel extends Equatable {
     this.policyVersion = '1.0',
   });
 
-  /// Cree un ConsentModel par defaut pour un nouvel utilisateur
+  /// Creates a default ConsentModel for a new user
   factory ConsentModel.initial(String userId) {
     final now = DateTime.now();
     return ConsentModel(
@@ -62,7 +62,7 @@ class ConsentModel extends Equatable {
     );
   }
 
-  /// Cree un ConsentModel a partir d'un Map JSON
+  /// Creates a ConsentModel from a JSON Map
   factory ConsentModel.fromJson(Map<String, dynamic> json) {
     return ConsentModel(
       userId: json['userId'] as String,
@@ -75,7 +75,7 @@ class ConsentModel extends Equatable {
     );
   }
 
-  /// Convertit le ConsentModel en Map JSON
+  /// Converts the ConsentModel to a JSON Map
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
@@ -88,7 +88,7 @@ class ConsentModel extends Equatable {
     };
   }
 
-  /// Cree une copie avec des valeurs modifiees
+  /// Creates a copy with modified values
   ConsentModel copyWith({
     String? userId,
     bool? essentialConsent,
@@ -109,10 +109,10 @@ class ConsentModel extends Equatable {
     );
   }
 
-  /// Verifie si le consentement a ete donne
+  /// Checks if consent has been given
   bool get hasConsented => consentDate.isAfter(DateTime(2020));
 
-  /// Verifie si tous les consentements optionnels sont acceptes
+  /// Checks if all optional consents are accepted
   bool get hasAllConsents => analyticsConsent && marketingConsent;
 
   @override

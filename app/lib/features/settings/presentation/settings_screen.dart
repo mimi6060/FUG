@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../data/account_repository.dart';
 
-/// Ecran des parametres de l'application
+/// Application settings screen
 ///
-/// Permet a l'utilisateur de gerer:
-/// - Son compte (profil, mot de passe)
-/// - Les notifications
-/// - La confidentialite
-/// - La suppression de compte (RGPD)
+/// Allows users to manage:
+/// - Account (profile, password)
+/// - Notifications
+/// - Privacy
+/// - Account deletion (GDPR)
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -22,90 +22,90 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Parametres'),
+        title: const Text('Settings'),
       ),
       body: ListView(
         children: [
-          // Section Compte
-          _SectionHeader(title: 'Compte'),
+          // Account Section
+          _SectionHeader(title: 'Account'),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profil'),
-            subtitle: const Text('Modifier vos informations personnelles'),
+            title: const Text('Profile'),
+            subtitle: const Text('Edit your personal information'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/profile/edit'),
           ),
           ListTile(
             leading: const Icon(Icons.lock),
-            title: const Text('Mot de passe'),
-            subtitle: const Text('Modifier votre mot de passe'),
+            title: const Text('Password'),
+            subtitle: const Text('Change your password'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Ecran de changement de mot de passe
+              // TODO: Password change screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalite a venir')),
+                const SnackBar(content: Text('Feature coming soon')),
               );
             },
           ),
           ListTile(
             leading: const Icon(Icons.email),
             title: const Text('Email'),
-            subtitle: Text(user.valueOrNull?.email ?? 'Non connecte'),
+            subtitle: Text(user.valueOrNull?.email ?? 'Not connected'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Ecran de modification d'email
+              // TODO: Email modification screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalite a venir')),
+                const SnackBar(content: Text('Feature coming soon')),
               );
             },
           ),
 
           const Divider(),
 
-          // Section Notifications
+          // Notifications Section
           _SectionHeader(title: 'Notifications'),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Preferences de notifications'),
-            subtitle: const Text('Gerer vos alertes'),
+            title: const Text('Notification preferences'),
+            subtitle: const Text('Manage your alerts'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Ecran de parametres de notifications
+              // TODO: Notification settings screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalite a venir')),
+                const SnackBar(content: Text('Feature coming soon')),
               );
             },
           ),
 
           const Divider(),
 
-          // Section Confidentialite
-          _SectionHeader(title: 'Confidentialite et donnees'),
+          // Privacy Section
+          _SectionHeader(title: 'Privacy and data'),
           ListTile(
             leading: const Icon(Icons.privacy_tip),
-            title: const Text('Politique de confidentialite'),
+            title: const Text('Privacy policy'),
             trailing: const Icon(Icons.open_in_new),
             onTap: () {
-              // TODO: Ouvrir la politique de confidentialite
+              // TODO: Open privacy policy
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalite a venir')),
+                const SnackBar(content: Text('Feature coming soon')),
               );
             },
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text('Exporter mes donnees'),
-            subtitle: const Text('Telecharger une copie de vos donnees'),
+            title: const Text('Export my data'),
+            subtitle: const Text('Download a copy of your data'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Export des donnees (RGPD)
+              // TODO: Data export (GDPR)
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalite a venir')),
+                const SnackBar(content: Text('Feature coming soon')),
               );
             },
           ),
 
-          // Verifier s'il y a une demande de suppression en cours
+          // Check if there is a pending deletion request
           user.when(
             data: (currentUser) {
               if (currentUser == null) return const SizedBox.shrink();
@@ -124,8 +124,8 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         title: Text(
                           hasPendingRequest
-                              ? 'Suppression en cours...'
-                              : 'Supprimer mon compte',
+                              ? 'Deletion in progress...'
+                              : 'Delete my account',
                           style: TextStyle(
                             color:
                                 hasPendingRequest ? Colors.orange : Colors.red,
@@ -133,10 +133,10 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         subtitle: hasPendingRequest
                             ? Text(
-                                'Suppression dans ${request.daysUntilDeletion} jours',
+                                'Deletion in ${request.daysUntilDeletion} days',
                                 style: const TextStyle(color: Colors.orange),
                               )
-                            : const Text('Exercer votre droit a l\'oubli'),
+                            : const Text('Exercise your right to be forgotten'),
                         trailing: Icon(
                           Icons.chevron_right,
                           color:
@@ -148,7 +148,7 @@ class SettingsScreen extends ConsumerWidget {
                     loading: () => const ListTile(
                       leading: Icon(Icons.delete_forever, color: Colors.red),
                       title: Text(
-                        'Supprimer mon compte',
+                        'Delete my account',
                         style: TextStyle(color: Colors.red),
                       ),
                       trailing: SizedBox(
@@ -161,10 +161,10 @@ class SettingsScreen extends ConsumerWidget {
                       leading:
                           const Icon(Icons.delete_forever, color: Colors.red),
                       title: const Text(
-                        'Supprimer mon compte',
+                        'Delete my account',
                         style: TextStyle(color: Colors.red),
                       ),
-                      subtitle: const Text('Exercer votre droit a l\'oubli'),
+                      subtitle: const Text('Exercise your right to be forgotten'),
                       trailing:
                           const Icon(Icons.chevron_right, color: Colors.red),
                       onTap: () => context.push('/settings/delete-account'),
@@ -177,22 +177,22 @@ class SettingsScreen extends ConsumerWidget {
 
           const Divider(),
 
-          // Section A propos
-          _SectionHeader(title: 'A propos'),
+          // About Section
+          _SectionHeader(title: 'About'),
           ListTile(
             leading: const Icon(Icons.help),
-            title: const Text('Aide et support'),
+            title: const Text('Help and support'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Ecran d'aide
+              // TODO: Help screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fonctionnalite a venir')),
+                const SnackBar(content: Text('Feature coming soon')),
               );
             },
           ),
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('A propos de FUG'),
+            title: const Text('About FUG'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               showAboutDialog(
@@ -203,9 +203,8 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   const SizedBox(height: 16),
                   const Text(
-                    'FUG (Fous-toi Une Guinze) est une application '
-                    'de reseau social geolocalisee pour trouver '
-                    'des compagnons de boisson.',
+                    'FUG (Fous-toi Une Guinze) is a geolocation-based '
+                    'social networking app to find drinking companions.',
                   ),
                 ],
               );
@@ -214,29 +213,29 @@ class SettingsScreen extends ConsumerWidget {
 
           const Divider(),
 
-          // Deconnexion
+          // Logout
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text(
-              'Deconnexion',
+              'Sign out',
               style: TextStyle(color: Colors.red),
             ),
             onTap: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Deconnexion'),
+                  title: const Text('Sign out'),
                   content: const Text(
-                    'Etes-vous sur de vouloir vous deconnecter ?',
+                    'Are you sure you want to sign out?',
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Annuler'),
+                      child: const Text('Cancel'),
                     ),
                     FilledButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Deconnexion'),
+                      child: const Text('Sign out'),
                     ),
                   ],
                 ),
@@ -267,7 +266,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-/// En-tete de section
+/// Section header
 class _SectionHeader extends StatelessWidget {
   final String title;
 

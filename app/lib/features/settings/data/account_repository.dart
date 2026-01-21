@@ -7,27 +7,27 @@ import '../../../core/services/appwrite_service.dart';
 import '../../../core/config/appwrite_config.dart';
 import '../../../core/providers/auth_provider.dart';
 
-/// Modele representant une demande de suppression de compte
+/// Model representing an account deletion request
 ///
-/// Contient les informations sur la demande de suppression
-/// incluant la date de demande et la date prevue de suppression.
+/// Contains information about the deletion request
+/// including the request date and scheduled deletion date.
 class AccountDeletionRequest extends Equatable {
-  /// ID unique de la demande
+  /// Unique request ID
   final String id;
 
-  /// ID de l'utilisateur concerné
+  /// ID of the user concerned
   final String userId;
 
-  /// Date de la demande de suppression
+  /// Date of deletion request
   final DateTime requestedAt;
 
-  /// Date prevue de suppression effective (30 jours apres la demande)
+  /// Scheduled deletion date (30 days after request)
   final DateTime scheduledDeletionAt;
 
-  /// Statut de la demande: pending, cancelled, completed
+  /// Request status: pending, cancelled, completed
   final String status;
 
-  /// Motif d'annulation (si applicable)
+  /// Cancellation reason (if applicable)
   final String? cancellationReason;
 
   const AccountDeletionRequest({
@@ -39,7 +39,7 @@ class AccountDeletionRequest extends Equatable {
     this.cancellationReason,
   });
 
-  /// Cree une AccountDeletionRequest depuis un document JSON
+  /// Creates an AccountDeletionRequest from a JSON document
   factory AccountDeletionRequest.fromJson(Map<String, dynamic> json) {
     return AccountDeletionRequest(
       id: json['\$id'] as String,
@@ -51,7 +51,7 @@ class AccountDeletionRequest extends Equatable {
     );
   }
 
-  /// Convertit en Map JSON
+  /// Converts to JSON Map
   Map<String, dynamic> toJson() {
     return {
       'userId': userId,
@@ -62,11 +62,11 @@ class AccountDeletionRequest extends Equatable {
     };
   }
 
-  /// Verifie si la demande peut encore etre annulee
+  /// Checks if the request can still be cancelled
   bool get canBeCancelled =>
       status == 'pending' && DateTime.now().isBefore(scheduledDeletionAt);
 
-  /// Nombre de jours restants avant la suppression
+  /// Number of days remaining before deletion
   int get daysUntilDeletion {
     if (!canBeCancelled) return 0;
     return scheduledDeletionAt.difference(DateTime.now()).inDays;
@@ -83,7 +83,7 @@ class AccountDeletionRequest extends Equatable {
       ];
 }
 
-/// Exception personnalisee pour les operations de compte
+/// Custom exception for account operations
 class AccountException implements Exception {
   final String message;
   final int? code;
@@ -94,12 +94,12 @@ class AccountException implements Exception {
   String toString() => 'AccountException: $message';
 }
 
-/// Repository pour la gestion des operations de compte
+/// Repository for account operations management
 ///
-/// Gere les demandes de suppression de compte conformement au RGPD:
-/// - Demande de suppression avec delai de grace de 30 jours
-/// - Annulation de la demande pendant le delai de grace
-/// - Verification du mot de passe avant suppression
+/// Handles account deletion requests in compliance with GDPR:
+/// - Deletion request with 30-day grace period
+/// - Cancellation of request during grace period
+/// - Password verification before deletion
 class AccountRepository {
   final AppwriteService _appwrite;
 
@@ -109,41 +109,41 @@ class AccountRepository {
   Account get _account => _appwrite.account;
   Databases get _databases => _appwrite.databases;
 
-  /// Collection ID pour les demandes de suppression
+  /// Collection ID for deletion requests
   static const String _deletionRequestsCollection = 'account_deletion_requests';
 
   // ============================================
-  // Suppression de compte (RGPD)
+  // Account Deletion (GDPR)
   // ============================================
 
-  /// Demande la suppression du compte utilisateur
+  /// Requests user account deletion
   ///
-  /// Cree une demande de suppression avec un delai de grace de 30 jours.
-  /// L'utilisateur peut annuler pendant cette periode.
+  /// Creates a deletion request with a 30-day grace period.
+  /// User can cancel during this period.
   ///
-  /// [userId] - ID de l'utilisateur
-  /// [password] - Mot de passe pour verification
+  /// [userId] - User ID
+  /// [password] - Password for verification
   ///
-  /// Throws [AccountException] si le mot de passe est incorrect
-  /// ou si une demande est deja en cours.
+  /// Throws [AccountException] if password is incorrect
+  /// or if a request is already pending.
   Future<AccountDeletionRequest> requestAccountDeletion({
     required String userId,
     required String password,
   }) async {
     try {
-      // Verifier le mot de passe en tentant une operation authentifiee
+      // Verify password by attempting an authenticated operation
       await _verifyPassword(password);
 
-      // Verifier s'il y a deja une demande en cours
+      // Check if there's already a pending request
       final existingRequest = await getPendingDeletionRequest(userId);
       if (existingRequest != null && existingRequest.canBeCancelled) {
         throw AccountException(
-          'Une demande de suppression est deja en cours.',
+          'A deletion request is already pending.',
           code: 409,
         );
       }
 
-      // Creer la demande de suppression
+      // Create deletion request
       final now = DateTime.now();
       final scheduledDeletion = now.add(const Duration(days: 30));
 
@@ -174,12 +174,12 @@ class AccountRepository {
     }
   }
 
-  /// Annule une demande de suppression en cours
+  /// Cancels a pending deletion request
   ///
-  /// [requestId] - ID de la demande a annuler
-  /// [reason] - Motif d'annulation (optionnel)
+  /// [requestId] - ID of the request to cancel
+  /// [reason] - Cancellation reason (optional)
   ///
-  /// Throws [AccountException] si la demande ne peut plus etre annulee.
+  /// Throws [AccountException] if the request can no longer be cancelled.
   Future<void> cancelAccountDeletion({
     required String requestId,
     String? reason,
@@ -191,7 +191,7 @@ class AccountRepository {
         documentId: requestId,
         data: {
           'status': 'cancelled',
-          'cancellationReason': reason ?? 'Annule par l\'utilisateur',
+          'cancellationReason': reason ?? 'Cancelled by user',
         },
       );
     } on AppwriteException catch (e) {
@@ -202,9 +202,9 @@ class AccountRepository {
     }
   }
 
-  /// Recupere la demande de suppression en cours pour un utilisateur
+  /// Retrieves the pending deletion request for a user
   ///
-  /// Retourne null si aucune demande n'est en cours.
+  /// Returns null if no request is pending.
   Future<AccountDeletionRequest?> getPendingDeletionRequest(
     String userId,
   ) async {
@@ -233,31 +233,31 @@ class AccountRepository {
     }
   }
 
-  /// Liste des donnees qui seront supprimees
+  /// List of data that will be deleted
   ///
-  /// Retourne une description des categories de donnees
-  /// qui seront supprimees lors de la suppression du compte.
+  /// Returns a description of data categories
+  /// that will be deleted upon account deletion.
   List<String> getDataToBeDeleted() {
     return [
-      'Votre profil et informations personnelles (nom, email, bio)',
-      'Votre photo de profil',
-      'Vos evenements FUG crees',
-      'Votre historique de participations',
-      'Vos relations (followers et abonnements)',
-      'Vos badges et points de murgilarite',
-      'Vos notifications',
-      'Vos preferences et parametres',
+      'Your profile and personal information (name, email, bio)',
+      'Your profile picture',
+      'Your created FUG events',
+      'Your participation history',
+      'Your relationships (followers and following)',
+      'Your badges and murgilarity points',
+      'Your notifications',
+      'Your preferences and settings',
     ];
   }
 
-  /// Liste des donnees qui seront anonymisees (non supprimees)
+  /// List of data that will be anonymized (not deleted)
   ///
-  /// Certaines donnees sont conservees de maniere anonyme
-  /// pour des raisons statistiques ou legales.
+  /// Some data is kept anonymously
+  /// for statistical or legal reasons.
   List<String> getDataToBeAnonymized() {
     return [
-      'Les evenements auxquels vous avez participe (votre nom sera remplace par "Utilisateur supprime")',
-      'Les statistiques agregees de l\'application',
+      'Events you participated in (your name will be replaced with "Deleted user")',
+      'Aggregated application statistics',
     ];
   }
 
@@ -265,29 +265,29 @@ class AccountRepository {
   // Helpers
   // ============================================
 
-  /// Verifie le mot de passe de l'utilisateur
+  /// Verifies user password
   ///
-  /// Tente une operation authentifiee pour verifier
-  /// que le mot de passe est correct.
+  /// Attempts an authenticated operation to verify
+  /// that the password is correct.
   Future<void> _verifyPassword(String password) async {
     try {
-      // Recuperer l'email de l'utilisateur connecte
+      // Get currently logged in user's email
       final user = await _account.get();
 
-      // Tenter une re-authentification avec le mot de passe
-      // Cela verifie implicitement que le mot de passe est correct
+      // Attempt re-authentication with password
+      // This implicitly verifies the password is correct
       await _account.createEmailPasswordSession(
         email: user.email,
         password: password,
       );
 
-      // Supprimer la session creee (on garde la session originale)
-      // Note: Dans une vraie implementation, on utiliserait une API
-      // de verification de mot de passe dediee si disponible
+      // Delete the created session (keep the original session)
+      // Note: In a real implementation, a dedicated password
+      // verification API would be used if available
     } on AppwriteException catch (e) {
       if (e.code == 401) {
         throw AccountException(
-          'Mot de passe incorrect.',
+          'Incorrect password.',
           code: 401,
         );
       }
@@ -295,57 +295,57 @@ class AccountRepository {
     }
   }
 
-  /// Convertit les erreurs Appwrite en messages lisibles
+  /// Converts Appwrite errors to readable messages
   String _getReadableErrorMessage(AppwriteException e) {
     switch (e.code) {
       case 401:
-        return 'Mot de passe incorrect.';
+        return 'Incorrect password.';
       case 404:
-        return 'Demande non trouvee.';
+        return 'Request not found.';
       case 409:
-        return 'Une demande est deja en cours.';
+        return 'A request is already pending.';
       default:
-        return e.message ?? 'Une erreur est survenue.';
+        return e.message ?? 'An error occurred.';
     }
   }
 }
 
 // ============================================
-// Providers Riverpod
+// Riverpod Providers
 // ============================================
 
-/// Provider pour le repository de compte
+/// Provider for account repository
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository();
 });
 
-/// Provider pour recuperer la demande de suppression en cours
+/// Provider to retrieve pending deletion request
 ///
-/// Retourne null si aucune demande n'est en cours.
+/// Returns null if no request is pending.
 final pendingDeletionRequestProvider =
     FutureProvider.family<AccountDeletionRequest?, String>((ref, userId) async {
   final repository = ref.read(accountRepositoryProvider);
   return repository.getPendingDeletionRequest(userId);
 });
 
-/// Provider pour les donnees qui seront supprimees
+/// Provider for data to be deleted
 final dataToBeDeletedProvider = Provider<List<String>>((ref) {
   final repository = ref.read(accountRepositoryProvider);
   return repository.getDataToBeDeleted();
 });
 
-/// Provider pour les donnees qui seront anonymisees
+/// Provider for data to be anonymized
 final dataToBeAnonymizedProvider = Provider<List<String>>((ref) {
   final repository = ref.read(accountRepositoryProvider);
   return repository.getDataToBeAnonymized();
 });
 
-/// Notifier pour gerer les demandes de suppression
+/// Notifier for managing deletion requests
 class AccountDeletionNotifier extends AutoDisposeAsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  /// Demande la suppression du compte
+  /// Requests account deletion
   Future<AccountDeletionRequest> requestDeletion({
     required String userId,
     required String password,
@@ -359,7 +359,7 @@ class AccountDeletionNotifier extends AutoDisposeAsyncNotifier<void> {
         password: password,
       );
 
-      // Invalider le cache de la demande en cours
+      // Invalidate pending request cache
       ref.invalidate(pendingDeletionRequestProvider(userId));
 
       state = const AsyncValue.data(null);
@@ -370,7 +370,7 @@ class AccountDeletionNotifier extends AutoDisposeAsyncNotifier<void> {
     }
   }
 
-  /// Annule la demande de suppression
+  /// Cancels deletion request
   Future<void> cancelDeletion({
     required String requestId,
     required String userId,
@@ -381,7 +381,7 @@ class AccountDeletionNotifier extends AutoDisposeAsyncNotifier<void> {
       final repository = ref.read(accountRepositoryProvider);
       await repository.cancelAccountDeletion(requestId: requestId);
 
-      // Invalider le cache de la demande en cours
+      // Invalidate pending request cache
       ref.invalidate(pendingDeletionRequestProvider(userId));
 
       state = const AsyncValue.data(null);
@@ -392,7 +392,7 @@ class AccountDeletionNotifier extends AutoDisposeAsyncNotifier<void> {
   }
 }
 
-/// Provider pour le notifier de suppression de compte
+/// Provider for account deletion notifier
 final accountDeletionNotifierProvider =
     AutoDisposeAsyncNotifierProvider<AccountDeletionNotifier, void>(() {
   return AccountDeletionNotifier();

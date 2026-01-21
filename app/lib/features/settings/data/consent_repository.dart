@@ -5,10 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/consent_model.dart';
 
-/// Cle de stockage pour le consentement local
+/// Storage key for local consent
 const String _consentKey = 'user_consent';
 
-/// Exception personnalisee pour le consentement
+/// Custom exception for consent operations
 class ConsentException implements Exception {
   final String message;
   final int? code;
@@ -19,20 +19,20 @@ class ConsentException implements Exception {
   String toString() => 'ConsentException: $message';
 }
 
-/// Preferences de consentement stockees localement
+/// Consent preferences stored locally
 ///
-/// Version simplifiee du ConsentModel pour le stockage local.
+/// Simplified version of ConsentModel for local storage.
 class ConsentPreferences {
-  /// Consentement analytics
+  /// Analytics consent
   final bool analytics;
 
-  /// Consentement marketing
+  /// Marketing consent
   final bool marketing;
 
-  /// Date du consentement
+  /// Consent date
   final DateTime consentDate;
 
-  /// Version de la politique acceptee
+  /// Accepted policy version
   final String policyVersion;
 
   const ConsentPreferences({
@@ -42,7 +42,7 @@ class ConsentPreferences {
     this.policyVersion = '1.0',
   });
 
-  /// Cree a partir d'un JSON
+  /// Creates from JSON
   factory ConsentPreferences.fromJson(Map<String, dynamic> json) {
     return ConsentPreferences(
       analytics: json['analytics'] as bool? ?? false,
@@ -52,7 +52,7 @@ class ConsentPreferences {
     );
   }
 
-  /// Convertit en JSON
+  /// Converts to JSON
   Map<String, dynamic> toJson() {
     return {
       'analytics': analytics,
@@ -63,22 +63,22 @@ class ConsentPreferences {
   }
 }
 
-/// Repository pour la gestion du consentement RGPD
+/// Repository for GDPR consent management
 ///
-/// Gere le stockage local et la synchronisation avec Appwrite
-/// des preferences de consentement utilisateur.
+/// Handles local storage and synchronization with Appwrite
+/// for user consent preferences.
 class ConsentRepository {
   final SharedPreferences? _prefs;
 
-  /// Constructeur avec injection optionnelle de SharedPreferences
+  /// Constructor with optional SharedPreferences injection
   ConsentRepository({SharedPreferences? prefs}) : _prefs = prefs;
 
-  /// Obtient l'instance SharedPreferences
+  /// Gets the SharedPreferences instance
   Future<SharedPreferences> _getPrefs() async {
     return _prefs ?? await SharedPreferences.getInstance();
   }
 
-  /// Recupere les preferences de consentement stockees localement
+  /// Retrieves locally stored consent preferences
   Future<ConsentPreferences?> getLocalConsent() async {
     try {
       final prefs = await _getPrefs();
@@ -98,7 +98,7 @@ class ConsentRepository {
     }
   }
 
-  /// Sauvegarde les preferences de consentement localement
+  /// Saves consent preferences locally
   Future<bool> saveLocalConsent(ConsentPreferences consent) async {
     try {
       final prefs = await _getPrefs();
@@ -112,18 +112,18 @@ class ConsentRepository {
     }
   }
 
-  /// Verifie si un consentement existe localement
+  /// Checks if local consent exists
   Future<bool> hasLocalConsent() async {
     final consent = await getLocalConsent();
     return consent != null;
   }
 
-  /// Verifie si le consentement est requis (aucun consentement stocke)
+  /// Checks if consent is required (no stored consent)
   Future<bool> isConsentRequired() async {
     return !(await hasLocalConsent());
   }
 
-  /// Supprime le consentement local (pour deconnexion ou suppression de compte)
+  /// Clears local consent (for logout or account deletion)
   Future<bool> clearLocalConsent() async {
     try {
       final prefs = await _getPrefs();
@@ -137,10 +137,10 @@ class ConsentRepository {
   }
 
   // ============================================
-  // Methodes avec ConsentModel (pour compatibilite)
+  // Methods with ConsentModel (for compatibility)
   // ============================================
 
-  /// Convertit ConsentPreferences en ConsentModel
+  /// Converts ConsentPreferences to ConsentModel
   ConsentModel? preferencesToModel(ConsentPreferences? prefs, String userId) {
     if (prefs == null) return null;
     return ConsentModel(
@@ -154,7 +154,7 @@ class ConsentRepository {
     );
   }
 
-  /// Convertit ConsentModel en ConsentPreferences
+  /// Converts ConsentModel to ConsentPreferences
   ConsentPreferences modelToPreferences(ConsentModel model) {
     return ConsentPreferences(
       analytics: model.analyticsConsent,
@@ -164,30 +164,30 @@ class ConsentRepository {
     );
   }
 
-  /// Recupere le ConsentModel stocke localement
+  /// Retrieves locally stored ConsentModel
   Future<ConsentModel?> getLocalConsentModel(String userId) async {
     final prefs = await getLocalConsent();
     return preferencesToModel(prefs, userId);
   }
 
-  /// Sauvegarde un ConsentModel localement
+  /// Saves a ConsentModel locally
   Future<bool> saveLocalConsentModel(ConsentModel consent) async {
     final prefs = modelToPreferences(consent);
     return saveLocalConsent(prefs);
   }
 
-  /// Met a jour le consentement
+  /// Updates consent
   Future<ConsentModel?> updateConsent({
     required String userId,
     bool? analyticsConsent,
     bool? marketingConsent,
   }) async {
     try {
-      // Recuperer le consentement existant ou en creer un nouveau
+      // Get existing consent or create a new one
       var consent = await getLocalConsentModel(userId);
       consent ??= ConsentModel.initial(userId);
 
-      // Mettre a jour les valeurs
+      // Update values
       final updatedConsent = consent.copyWith(
         userId: userId,
         analyticsConsent: analyticsConsent ?? consent.analyticsConsent,
@@ -195,7 +195,7 @@ class ConsentRepository {
         lastUpdated: DateTime.now(),
       );
 
-      // Sauvegarder localement
+      // Save locally
       final saved = await saveLocalConsentModel(updatedConsent);
       if (!saved) {
         return null;
@@ -210,7 +210,7 @@ class ConsentRepository {
     }
   }
 
-  /// Cree un nouveau consentement initial
+  /// Creates a new initial consent
   Future<ConsentModel?> createInitialConsent({
     required String userId,
     required bool analyticsConsent,
@@ -228,7 +228,7 @@ class ConsentRepository {
         policyVersion: '1.0',
       );
 
-      // Sauvegarder localement
+      // Save locally
       final saved = await saveLocalConsentModel(consent);
       if (!saved) {
         return null;

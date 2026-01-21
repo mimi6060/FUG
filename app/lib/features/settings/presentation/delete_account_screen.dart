@@ -5,13 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../data/account_repository.dart';
 
-/// Ecran de suppression de compte (conformite RGPD)
+/// Account deletion screen (GDPR compliance)
 ///
-/// Permet a l'utilisateur d'exercer son droit a l'oubli:
-/// - Information claire sur les donnees supprimees
-/// - Delai de grace de 30 jours
-/// - Double confirmation avec mot de passe
-/// - Possibilite d'annuler pendant le delai de grace
+/// Allows users to exercise their right to be forgotten:
+/// - Clear information about deleted data
+/// - 30-day grace period
+/// - Double confirmation with password
+/// - Ability to cancel during grace period
 class DeleteAccountScreen extends ConsumerStatefulWidget {
   const DeleteAccountScreen({super.key});
 
@@ -44,7 +44,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Supprimer mon compte'),
+        title: const Text('Delete my account'),
         backgroundColor: theme.colorScheme.errorContainer,
         foregroundColor: theme.colorScheme.onErrorContainer,
       ),
@@ -52,7 +52,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         data: (currentUser) {
           if (currentUser == null) {
             return const Center(
-              child: Text('Vous devez etre connecte pour acceder a cette page.'),
+              child: Text('You must be logged in to access this page.'),
             );
           }
 
@@ -60,7 +60,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               .watch(pendingDeletionRequestProvider(currentUser.$id))
               .when(
                 data: (request) {
-                  // Si une demande est en cours, afficher l'ecran d'annulation
+                  // If a request is pending, show cancellation screen
                   if (request != null && request.canBeCancelled) {
                     return _buildPendingDeletionView(
                       context,
@@ -69,7 +69,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                     );
                   }
 
-                  // Sinon, afficher le formulaire de demande
+                  // Otherwise, show the request form
                   return _buildDeletionRequestForm(
                     context,
                     currentUser.$id,
@@ -90,13 +90,13 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const Center(
-          child: Text('Erreur de chargement'),
+          child: Text('Loading error'),
         ),
       ),
     );
   }
 
-  /// Vue affichee quand une demande de suppression est en cours
+  /// View displayed when a deletion request is pending
   Widget _buildPendingDeletionView(
     BuildContext context,
     AccountDeletionRequest request,
@@ -109,7 +109,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Alerte visuelle
+          // Visual alert
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -126,7 +126,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Suppression programmee',
+                        'Scheduled deletion',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.orange.shade800,
@@ -134,7 +134,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Votre compte sera supprime dans ${request.daysUntilDeletion} jours.',
+                        'Your account will be deleted in ${request.daysUntilDeletion} days.',
                         style: TextStyle(color: Colors.orange.shade700),
                       ),
                     ],
@@ -146,7 +146,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
           const SizedBox(height: 24),
 
-          // Informations sur la demande
+          // Request information
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -154,25 +154,25 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Details de la demande',
+                    'Request details',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow(
-                    'Date de demande',
+                    'Request date',
                     _formatDate(request.requestedAt),
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
-                    'Suppression prevue',
+                    'Scheduled deletion',
                     _formatDate(request.scheduledDeletionAt),
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
-                    'Jours restants',
-                    '${request.daysUntilDeletion} jours',
+                    'Days remaining',
+                    '${request.daysUntilDeletion} days',
                   ),
                 ],
               ),
@@ -181,10 +181,10 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
           const SizedBox(height: 24),
 
-          // Message explicatif
+          // Explanatory message
           Text(
-            'Vous pouvez annuler cette demande a tout moment avant la date de suppression prevue. '
-            'Apres cette date, votre compte et toutes vos donnees seront definitivement supprimes.',
+            'You can cancel this request at any time before the scheduled deletion date. '
+            'After this date, your account and all your data will be permanently deleted.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -192,7 +192,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
           const SizedBox(height: 32),
 
-          // Bouton d'annulation
+          // Cancel button
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
@@ -206,7 +206,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.restore),
-              label: Text(_isLoading ? 'Annulation...' : 'Annuler la suppression'),
+              label: Text(_isLoading ? 'Cancelling...' : 'Cancel deletion'),
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -216,12 +216,12 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
           const SizedBox(height: 16),
 
-          // Bouton retour
+          // Back button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => context.pop(),
-              child: const Text('Retour aux parametres'),
+              child: const Text('Back to settings'),
             ),
           ),
         ],
@@ -229,7 +229,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     );
   }
 
-  /// Formulaire de demande de suppression
+  /// Deletion request form
   Widget _buildDeletionRequestForm(
     BuildContext context,
     String userId,
@@ -245,7 +245,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avertissement
+            // Warning
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -265,7 +265,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Attention',
+                          'Warning',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onErrorContainer,
@@ -273,7 +273,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Cette action est irreversible apres le delai de grace.',
+                          'This action is irreversible after the grace period.',
                           style: TextStyle(
                             color: theme.colorScheme.onErrorContainer,
                           ),
@@ -287,7 +287,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             const SizedBox(height: 24),
 
-            // Delai de grace
+            // Grace period
             Card(
               color: Colors.blue.shade50,
               child: Padding(
@@ -301,7 +301,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Delai de grace: 30 jours',
+                            'Grace period: 30 days',
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue.shade800,
@@ -309,7 +309,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Vous pouvez annuler votre demande a tout moment pendant cette periode.',
+                            'You can cancel your request at any time during this period.',
                             style: TextStyle(color: Colors.blue.shade700),
                           ),
                         ],
@@ -322,9 +322,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             const SizedBox(height: 24),
 
-            // Donnees supprimees
+            // Deleted data
             Text(
-              'Donnees qui seront supprimees',
+              'Data that will be deleted',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -349,9 +349,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             const SizedBox(height: 24),
 
-            // Donnees anonymisees
+            // Anonymized data
             Text(
-              'Donnees anonymisees (non supprimees)',
+              'Anonymized data (not deleted)',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -386,7 +386,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                 });
               },
               title: const Text(
-                'Je comprends que mes donnees seront definitivement supprimees apres 30 jours.',
+                'I understand that my data will be permanently deleted after 30 days.',
               ),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
@@ -401,7 +401,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                 });
               },
               title: const Text(
-                'Je confirme vouloir supprimer mon compte et toutes mes donnees.',
+                'I confirm that I want to delete my account and all my data.',
               ),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
@@ -409,9 +409,9 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             const SizedBox(height: 24),
 
-            // Mot de passe
+            // Password
             Text(
-              'Confirmez avec votre mot de passe',
+              'Confirm with your password',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -421,8 +421,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               controller: _passwordController,
               obscureText: !_showPassword,
               decoration: InputDecoration(
-                labelText: 'Mot de passe',
-                hintText: 'Entrez votre mot de passe',
+                labelText: 'Password',
+                hintText: 'Enter your password',
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -438,7 +438,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer votre mot de passe';
+                  return 'Please enter your password';
                 }
                 return null;
               },
@@ -446,7 +446,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             const SizedBox(height: 32),
 
-            // Bouton de suppression
+            // Deletion button
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -464,7 +464,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       )
                     : const Icon(Icons.delete_forever),
                 label: Text(
-                  _isLoading ? 'Traitement...' : 'Supprimer mon compte',
+                  _isLoading ? 'Processing...' : 'Delete my account',
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: theme.colorScheme.error,
@@ -476,12 +476,12 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             const SizedBox(height: 16),
 
-            // Bouton annuler
+            // Cancel button
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => context.pop(),
-                child: const Text('Annuler'),
+                child: const Text('Cancel'),
               ),
             ),
 
@@ -516,26 +516,26 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       return;
     }
 
-    // Confirmation finale
+    // Final confirmation
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirmation finale'),
+        title: const Text('Final confirmation'),
         content: const Text(
-          'Etes-vous absolument sur de vouloir supprimer votre compte ?\n\n'
-          'Vous avez 30 jours pour changer d\'avis.',
+          'Are you absolutely sure you want to delete your account?\n\n'
+          'You have 30 days to change your mind.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Non, annuler'),
+            child: const Text('No, cancel'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Oui, supprimer'),
+            child: const Text('Yes, delete'),
           ),
         ],
       ),
@@ -557,24 +557,24 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
       if (!mounted) return;
 
-      // Afficher un message de confirmation
+      // Show confirmation message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Demande de suppression enregistree. '
-            'Vous avez 30 jours pour annuler.',
+            'Deletion request submitted. '
+            'You have 30 days to cancel.',
           ),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 5),
         ),
       );
 
-      // Deconnecter l'utilisateur
+      // Sign out user
       await ref.read(authStateProvider.notifier).signOut();
 
       if (!mounted) return;
 
-      // Rediriger vers la page de connexion
+      // Redirect to login page
       context.go('/login');
     } on AccountException catch (e) {
       if (!mounted) return;
@@ -609,12 +609,12 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Demande de suppression annulee avec succes.'),
+          content: Text('Deletion request cancelled successfully.'),
           backgroundColor: Colors.green,
         ),
       );
 
-      // Retourner aux parametres
+      // Return to settings
       context.pop();
     } on AccountException catch (e) {
       if (!mounted) return;

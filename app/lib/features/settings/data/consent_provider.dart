@@ -3,44 +3,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/consent_model.dart';
 import 'consent_repository.dart';
 
-/// Provider pour le repository de consentement
+/// Provider for consent repository
 final consentRepositoryProvider = Provider<ConsentRepository>((ref) {
   return ConsentRepository();
 });
 
-/// Provider pour verifier si un consentement local existe
+/// Provider to check if local consent exists
 final hasLocalConsentProvider = FutureProvider<bool>((ref) async {
   final repository = ref.watch(consentRepositoryProvider);
   return repository.hasLocalConsent();
 });
 
-/// Provider pour recuperer les preferences de consentement actuelles
+/// Provider to retrieve current consent preferences
 final currentConsentPreferencesProvider =
     FutureProvider<ConsentPreferences?>((ref) async {
   final repository = ref.watch(consentRepositoryProvider);
   return repository.getLocalConsent();
 });
 
-/// Provider pour recuperer le ConsentModel actuel (necessite un userId)
+/// Provider to retrieve current ConsentModel (requires userId)
 final currentConsentProvider =
     FutureProvider.family<ConsentModel?, String>((ref, userId) async {
   final repository = ref.watch(consentRepositoryProvider);
   return repository.getLocalConsentModel(userId);
 });
 
-/// Provider pour le consentement analytics
+/// Provider for analytics consent
 final analyticsConsentProvider =
     StateNotifierProvider<ConsentNotifier, bool>((ref) {
   return ConsentNotifier(ref, ConsentType.analytics);
 });
 
-/// Provider pour le consentement marketing
+/// Provider for marketing consent
 final marketingConsentProvider =
     StateNotifierProvider<ConsentNotifier, bool>((ref) {
   return ConsentNotifier(ref, ConsentType.marketing);
 });
 
-/// Notifier pour gerer un type de consentement individuel
+/// Notifier to manage individual consent type
 class ConsentNotifier extends StateNotifier<bool> {
   final Ref _ref;
   final ConsentType _type;
@@ -63,27 +63,27 @@ class ConsentNotifier extends StateNotifier<bool> {
   }
 }
 
-/// Provider pour la gestion complete du consentement
+/// Provider for complete consent management
 final consentManagerProvider =
     AsyncNotifierProvider<ConsentManager, ConsentModel?>(() {
   return ConsentManager();
 });
 
-/// Manager pour la gestion du consentement RGPD
+/// Manager for GDPR consent management
 class ConsentManager extends AsyncNotifier<ConsentModel?> {
   ConsentRepository get _repository => ref.read(consentRepositoryProvider);
 
   @override
   Future<ConsentModel?> build() async {
-    // Retourne null car on a besoin d'un userId pour creer un ConsentModel
-    // Le ConsentModel sera charge via currentConsentProvider.family
+    // Returns null because we need a userId to create a ConsentModel
+    // ConsentModel will be loaded via currentConsentProvider.family
     final prefs = await _repository.getLocalConsent();
     if (prefs == null) return null;
-    // On utilise un userId generique pour le build initial
+    // Use a generic userId for initial build
     return _repository.preferencesToModel(prefs, 'unknown');
   }
 
-  /// Sauvegarde le consentement initial (premier lancement)
+  /// Saves initial consent (first launch)
   Future<bool> saveInitialConsent({
     required String userId,
     required bool analyticsConsent,
@@ -100,7 +100,7 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
 
       if (consent != null) {
         state = AsyncValue.data(consent);
-        // Invalider les providers pour forcer refresh
+        // Invalidate providers to force refresh
         ref.invalidate(hasLocalConsentProvider);
         ref.invalidate(currentConsentPreferencesProvider);
         return true;
@@ -114,7 +114,7 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
     }
   }
 
-  /// Met a jour le consentement existant
+  /// Updates existing consent
   Future<bool> updateConsent({
     required String userId,
     bool? analyticsConsent,
@@ -143,7 +143,7 @@ class ConsentManager extends AsyncNotifier<ConsentModel?> {
     }
   }
 
-  /// Efface le consentement (deconnexion ou suppression)
+  /// Clears consent (logout or deletion)
   Future<bool> clearConsent() async {
     state = const AsyncValue.loading();
 
