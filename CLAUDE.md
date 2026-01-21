@@ -131,6 +131,81 @@ curl -X PATCH "http://localhost:8088/api/v1/workspaces/fug/projects/PROJECT_ID/i
 
 ---
 
+## Orchestration BMAD Multi-Agents (OBLIGATOIRE)
+
+**RÈGLE CRITIQUE:** Quand plusieurs agents sont lancés pour implémenter des features, ils DOIVENT suivre l'orchestration BMAD.
+
+### Workflow Obligatoire par Feature
+
+Chaque feature doit être gérée par un **Agent Lead (Orchestrateur)** qui délègue à une équipe:
+
+```
+┌─────────────────────────────────────────┐
+│           AGENT LEAD (Orchestrateur)    │
+│  - Ne code PAS lui-même                 │
+│  - Coordonne les phases                 │
+│  - Valide les livrables                 │
+├─────────────────────────────────────────┤
+│                                         │
+│  PHASE 1: ANALYST                       │
+│  └─► Agent qui analyse specs et code    │
+│      existant, produit rapport          │
+│                                         │
+│  PHASE 2: DEV                           │
+│  └─► Agent qui implémente selon specs   │
+│      et rapport analyst                 │
+│                                         │
+│  PHASE 3: QA                            │
+│  └─► Agent qui écrit tests, vérifie     │
+│      conformité, produit rapport QA     │
+│                                         │
+│  PHASE 4: COMMIT                        │
+│  └─► Commit final après validation QA   │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+### Règles pour les Agents
+
+1. **Lire CLAUDE.md** - Chaque agent DOIT lire et respecter ce fichier
+2. **Travailler dans le bon worktree** - Utiliser le worktree Git assigné
+3. **Suivre Clean Architecture** - data/domain/presentation
+4. **Utiliser Riverpod** - Pour le state management
+5. **Écrire des tests** - Phase QA obligatoire
+6. **Ne pas merger** - Seul le CTO/PO merge après review
+7. **Synchroniser Plane** - Mettre à jour le statut des stories
+
+### Lancement d'Agents en Parallèle
+
+Quand on lance plusieurs features en parallèle:
+
+```bash
+# Créer les worktrees
+git worktree add ../FUG-worktrees/feature-xxx -b feature/xxx develop
+
+# Chaque agent travaille dans son worktree isolé
+# Pas de conflits entre agents
+```
+
+### Template Prompt pour Agent Lead
+
+```
+Tu es un Tech Lead BMAD qui orchestre une équipe d'agents.
+
+WORKTREE: /chemin/vers/worktree
+BRANCH: feature/xxx
+FEATURE: Description
+
+TU NE CODES PAS. Tu délègues à des agents spécialisés.
+
+PHASE 1: Lance Agent Analyst pour analyser
+PHASE 2: Lance Agent Dev pour implémenter
+PHASE 3: Lance Agent QA pour tester
+PHASE 4: Commit final
+```
+
+---
+
 ## Conventions de Code
 
 ### Dart/Flutter
