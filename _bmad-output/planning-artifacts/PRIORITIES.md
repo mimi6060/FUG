@@ -19,13 +19,21 @@ Raison: Sans conformité RGPD/DSA/App Store, l'application risque:
 
 ## Ordre de Priorité Global
 
+### 0. INFRASTRUCTURE (FONDATION)
+
+| Priorité | Story | Description | Sprint |
+|----------|-------|-------------|--------|
+| **P0** | INFRA-001 | Appwrite Infrastructure as Code | Sprint 9 |
+
+> **INFRA-001 est CRITIQUE:** Sans automatisation complète, impossible de déployer en staging/prod de manière fiable.
+
 ### 1. CONFORMITÉ LÉGALE (BLOQUANT)
 
 | Priorité | Story | Description | Sprint |
 |----------|-------|-------------|--------|
-| **P0** | MOD-001 | Conformité RGPD (consentement, suppression, export) | Sprint 9 |
-| **P0** | MOD-002 | Apple Sign-In (obligatoire App Store) | Sprint 9 |
-| **P0** | US-006 | Suppression de compte (RGPD art. 17) | Sprint 9 |
+| **P0** | MOD-001 | Conformité RGPD (consentement, suppression, export) | Sprint 9 ✅ |
+| **P0** | MOD-002 | Apple Sign-In (obligatoire App Store - OPTIONNEL) | Sprint 9 ✅ |
+| **P0** | US-006 | Suppression de compte (RGPD art. 17) | Sprint 9 ✅ |
 | **P1** | MOD-003 | Conformité DSA (signalement, modération) | Sprint 10 |
 | **P1** | MOD-006 | Politique de confidentialité complète | Sprint 10 |
 
@@ -81,28 +89,35 @@ Raison: Sans conformité RGPD/DSA/App Store, l'application risque:
 
 ---
 
-## Sprint Actuel: Sprint 9 - Conformité
+## Sprint Actuel: Sprint 9 - Infrastructure & Conformité
 
-**Objectif:** Mettre l'app aux normes avant toute autre chose.
+**Objectif:** Infrastructure automatisée + mise aux normes.
 
 ### Stories Sprint 9
 
-1. [ ] **MOD-001**: Conformité RGPD Complète
-   - [ ] MOD-001-A: Écran de consentement
-   - [ ] MOD-001-B: Export des données
-   - [ ] US-006: Suppression de compte
+1. [ ] **INFRA-001**: Appwrite Infrastructure as Code (EN COURS)
+   - [ ] INFRA-001-A: Bootstrap Script
+   - [ ] INFRA-001-B: Migration System Enhancement
+   - [ ] INFRA-001-C: Bootstrap Migrations
+   - [ ] INFRA-001-D: Documentation
 
-2. [ ] **MOD-002**: Apple Sign-In
-   - [ ] Config Apple Developer
-   - [ ] Config Appwrite Auth
-   - [ ] Bouton iOS
+2. [x] **MOD-001**: Conformité RGPD Complète ✅
+   - [x] MOD-001-A: Écran de consentement
+   - [ ] MOD-001-B: Export des données
+   - [x] US-006: Suppression de compte
+
+3. [x] **MOD-002**: Apple Sign-In ✅ (code prêt, config optionnelle)
+   - [ ] Config Apple Developer (si iOS décidé)
+   - [x] Config Appwrite Auth (Google configuré)
+   - [x] Bouton iOS (code Flutter prêt)
 
 ### Definition of Done Sprint 9
 
-- [ ] Consentement RGPD fonctionnel
-- [ ] Suppression de compte fonctionnelle (avec délai 30j)
+- [x] Consentement RGPD fonctionnel
+- [x] Suppression de compte fonctionnelle (avec délai 30j)
 - [ ] Export données disponible
-- [ ] Apple Sign-In fonctionnel sur iOS
+- [x] Google Sign-In configuré
+- [ ] Infrastructure automatisée (INFRA-001)
 - [ ] Tests manuels validés
 
 ---
