@@ -148,7 +148,15 @@ temp/
 *.crt
 *.p12
 *.pfx
+*.p8
 !*.example.pem
+
+# =================================
+# OAuth Credentials
+# =================================
+infrastructure/setup/.google-credentials
+infrastructure/setup/.apple-credentials
+infrastructure/setup/.env
 
 # =================================
 # Archives
