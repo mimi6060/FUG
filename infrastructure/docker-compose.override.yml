@@ -23,7 +23,7 @@ services:
       - /app/build
       - /app/.dart_tool
     ports:
-      - "8080:8080"
+      - "8090:8080"
       - "45678:45678"  # Port pour le debugging
     labels:
       - "traefik.enable=true"
@@ -75,7 +75,7 @@ services:
     ports:
       - "80:80"      # HTTP
       - "443:443"    # HTTPS
-      - "8080:8080"  # Traefik Dashboard
+      - "8888:8080"  # Traefik Dashboard (changed to 8888 to avoid conflict)
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.localhost`)"
