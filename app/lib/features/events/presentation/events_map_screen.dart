@@ -532,43 +532,15 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
               ),
             ),
 
-          // Indicateur du nombre d'evenements
+          // Indicateur du nombre d'evenements et slider de rayon (a gauche)
           Positioned(
             bottom: 100,
             left: 16,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: Text(
-                '${_markers.length} FUG${_markers.length > 1 ? 's' : ''} a proximite',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-
-          // Slider de rayon
-          Positioned(
-            bottom: 100,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -578,38 +550,52 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nombre de FUGs
                   Text(
-                    '${_searchRadius.toInt()} km',
-                    style: theme.textTheme.bodySmall,
+                    '${_markers.length} FUG${_markers.length > 1 ? 's' : ''} a proximite',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  RotatedBox(
-                    quarterTurns: 3,
-                    child: SizedBox(
-                      width: 150, // Fixed width for slider track length
-                      child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
-                        ),
-                        child: Slider(
-                          value: _searchRadius,
-                          min: 1,
-                          max: 50,
-                          divisions: 49,
-                          onChanged: (value) {
-                            setState(() {
-                              _searchRadius = value;
-                            });
-                          },
-                          onChangeEnd: (value) {
-                            _loadNearbyEvents();
-                          },
+                  // Slider de rayon horizontal
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.radar, size: 16),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        width: 120,
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 3,
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                          ),
+                          child: Slider(
+                            value: _searchRadius,
+                            min: 1,
+                            max: 50,
+                            divisions: 49,
+                            onChanged: (value) {
+                              setState(() {
+                                _searchRadius = value;
+                              });
+                            },
+                            onChangeEnd: (value) {
+                              _loadNearbyEvents();
+                            },
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${_searchRadius.toInt()} km',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
                   ),
                 ],
               ),
