@@ -1,9 +1,12 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../data/auth_repository.dart';
+import 'widgets/apple_sign_in_button.dart';
 
 /// Ecran de connexion de l'application FUG
 ///
@@ -24,6 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _isAppleSignInLoading = false;
 
   @override
   void dispose() {
@@ -49,6 +53,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ref.read(authErrorProvider.notifier).state = e.message;
     } catch (e) {
       ref.read(authErrorProvider.notifier).state = 'Une erreur inattendue est survenue.';
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    if (_isAppleSignInLoading) return;
+
+    setState(() {
+      _isAppleSignInLoading = true;
+    });
+    ref.read(authErrorProvider.notifier).state = null;
+
+    try {
+      await ref.read(authStateProvider.notifier).signInWithApple();
+      // La navigation est geree automatiquement par GoRouter
+    } on AuthException catch (e) {
+      ref.read(authErrorProvider.notifier).state = e.message;
+    } catch (e) {
+      ref.read(authErrorProvider.notifier).state =
+          'Une erreur inattendue est survenue.';
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAppleSignInLoading = false;
+        });
+      }
     }
   }
 
@@ -285,24 +314,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  OutlinedButton.icon(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            // TODO: Implementer Apple Sign-In
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Apple Sign-In a implementer'),
-                              ),
-                            );
-                          },
-                    icon: const Icon(Icons.apple, size: 24),
-                    label: const Text('Continuer avec Apple'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                  // Bouton Apple Sign-In (iOS uniquement)
+                  if (Platform.isIOS) ...[
+                    AppleSignInButton(
+                      onPressed: (isLoading || _isAppleSignInLoading)
+                          ? null
+                          : _signInWithApple,
+                      isLoading: _isAppleSignInLoading,
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ] else ...[
+                    const SizedBox(height: 12),
+                  ],
 
                   // Lien pour aller vers l'inscription
                   Row(
