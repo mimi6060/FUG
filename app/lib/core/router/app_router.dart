@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/events/presentation/events_map_screen.dart';
+import '../../features/events/presentation/events_list_screen.dart';
 import '../../features/events/presentation/event_detail_screen.dart';
 import '../../features/events/presentation/create_event_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -82,7 +83,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/events',
         name: 'events',
-        builder: (context, state) => const EventsMapScreen(),
+        builder: (context, state) => const EventsListScreen(),
         routes: [
           // Creation d'evenement
           GoRoute(

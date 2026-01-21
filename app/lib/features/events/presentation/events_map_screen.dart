@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,26 +37,112 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
   // Liste des evenements pour reference
   List<EventModel> _events = [];
 
+  bool _locationInitialized = false;
+
+  // Track if map controller is ready
+  bool _mapReady = false;
+
   @override
   void initState() {
     super.initState();
-    _initializeLocation();
+    // Delay initialization to ensure the map is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeLocation();
+    });
   }
 
   Future<void> _initializeLocation() async {
+    if (kDebugMode) {
+      print('_initializeLocation started');
+    }
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
     try {
-      final position = await ref.read(currentPositionProvider.future);
-      if (position != null) {
-        setState(() {
-          _currentPosition = LatLng(position.latitude, position.longitude);
-        });
+      if (kDebugMode) {
+        print('Calling currentPositionProvider...');
       }
-      await _loadNearbyEvents();
+      final position = await ref.read(currentPositionProvider.future);
+      if (kDebugMode) {
+        print('Position received: $position');
+      }
+      if (position != null && mounted) {
+        final newPosition = LatLng(position.latitude, position.longitude);
+        if (kDebugMode) {
+          print('Moving map to: $newPosition');
+        }
+        setState(() {
+          _currentPosition = newPosition;
+          _locationInitialized = true;
+        });
+        // Move the map to the user's position
+        _mapController.move(newPosition, 13);
+      } else if (mounted) {
+        if (kDebugMode) {
+          print('Position is null - using default position');
+        }
+        // Position is null, show a message but continue with default position
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Position non disponible. Affichage de la position par defaut.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } on LocationException catch (e) {
+      if (kDebugMode) {
+        print('LocationException in _initializeLocation: ${e.message} (code: ${e.code})');
+      }
+      if (mounted) {
+        String message = e.message;
+        // Provide additional guidance for permission issues on web
+        if (kIsWeb) {
+          if (e.code == 'PERMISSION_DENIED') {
+            message = 'Permission de localisation refusee. Cliquez sur l\'icone cadenas dans la barre d\'adresse pour autoriser la localisation.';
+          } else if (e.code == 'PERMISSION_DENIED_FOREVER') {
+            message = 'Permission de localisation bloquee. Modifiez les parametres de votre navigateur pour autoriser la localisation pour ce site.';
+          }
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Reessayer',
+              onPressed: () {
+                ref.invalidate(currentPositionProvider);
+                _initializeLocation();
+              },
+            ),
+          ),
+        );
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Erreur de localisation: $e';
-        _isLoading = false;
-      });
+      if (kDebugMode) {
+        print('Error in _initializeLocation: $e');
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur de localisation: $e'),
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'Reessayer',
+              onPressed: () {
+                ref.invalidate(currentPositionProvider);
+                _initializeLocation();
+              },
+            ),
+          ),
+        );
+      }
+    }
+
+    // Always load nearby events, even if location failed (use default position)
+    if (mounted) {
+      await _loadNearbyEvents();
     }
   }
 
@@ -156,15 +243,162 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
     );
   }
 
+  bool _isCentering = false;
+
   Future<void> _centerOnUser() async {
-    final position = await ref.read(currentPositionProvider.future);
-    if (position != null) {
-      final newPosition = LatLng(position.latitude, position.longitude);
-      _mapController.move(newPosition, 14);
-      setState(() {
-        _currentPosition = newPosition;
-      });
-      await _loadNearbyEvents();
+    if (_isCentering) return;
+
+    setState(() {
+      _isCentering = true;
+    });
+
+    try {
+      // Invalidate the provider to get fresh position
+      ref.invalidate(currentPositionProvider);
+      final position = await ref.read(currentPositionProvider.future);
+
+      if (position != null && mounted) {
+        final newPosition = LatLng(position.latitude, position.longitude);
+        _mapController.move(newPosition, 14);
+        setState(() {
+          _currentPosition = newPosition;
+          _isCentering = false;
+        });
+        await _loadNearbyEvents();
+      } else if (mounted) {
+        setState(() {
+          _isCentering = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Impossible d\'obtenir votre position. Verifiez vos permissions de localisation.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } on LocationException catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCentering = false;
+        });
+        String message = e.message;
+        // Provide additional guidance for permission issues on web
+        if (e.code == 'PERMISSION_DENIED') {
+          message = 'Permission de localisation refusee. Cliquez sur l\'icone cadenas dans la barre d\'adresse pour autoriser.';
+        } else if (e.code == 'PERMISSION_DENIED_FOREVER') {
+          message = 'Permission de localisation bloquee. Modifiez les parametres de votre navigateur pour autoriser la localisation.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 5),
+            action: e.code == 'PERMISSION_DENIED_FOREVER'
+                ? SnackBarAction(
+                    label: 'Parametres',
+                    onPressed: () {
+                      ref.read(locationServiceProvider).openAppSettings();
+                    },
+                  )
+                : null,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCentering = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur de localisation: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _zoomIn() {
+    if (kDebugMode) {
+      print('_zoomIn called, mapReady: $_mapReady');
+    }
+    if (!_mapReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Carte en cours de chargement...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
+    try {
+      final camera = _mapController.camera;
+      final currentZoom = camera.zoom;
+      final newZoom = (currentZoom + 1).clamp(1.0, 18.0);
+      if (kDebugMode) {
+        print('Current zoom: $currentZoom, new zoom: $newZoom');
+      }
+      _mapController.move(camera.center, newZoom);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Zoom: ${newZoom.toStringAsFixed(1)}x'),
+          duration: const Duration(milliseconds: 500),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(bottom: 150, left: 16, right: 16),
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Zoom in failed: $e');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur de zoom: $e'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void _zoomOut() {
+    if (kDebugMode) {
+      print('_zoomOut called, mapReady: $_mapReady');
+    }
+    if (!_mapReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Carte en cours de chargement...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
+    try {
+      final camera = _mapController.camera;
+      final currentZoom = camera.zoom;
+      final newZoom = (currentZoom - 1).clamp(1.0, 18.0);
+      if (kDebugMode) {
+        print('Current zoom: $currentZoom, new zoom: $newZoom');
+      }
+      _mapController.move(camera.center, newZoom);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Zoom: ${newZoom.toStringAsFixed(1)}x'),
+          duration: const Duration(milliseconds: 500),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(bottom: 150, left: 16, right: 16),
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Zoom out failed: $e');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur de zoom: $e'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -197,6 +431,14 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
             options: MapOptions(
               initialCenter: _currentPosition,
               initialZoom: 13,
+              onMapReady: () {
+                setState(() {
+                  _mapReady = true;
+                });
+                if (kDebugMode) {
+                  print('Map is ready');
+                }
+              },
               onPositionChanged: (position, hasGesture) {
                 if (hasGesture && position.center != null) {
                   setState(() {
@@ -335,26 +577,38 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                 ],
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     '${_searchRadius.toInt()} km',
                     style: theme.textTheme.bodySmall,
                   ),
+                  const SizedBox(height: 8),
                   RotatedBox(
                     quarterTurns: 3,
-                    child: Slider(
-                      value: _searchRadius,
-                      min: 1,
-                      max: 50,
-                      divisions: 49,
-                      onChanged: (value) {
-                        setState(() {
-                          _searchRadius = value;
-                        });
-                      },
-                      onChangeEnd: (value) {
-                        _loadNearbyEvents();
-                      },
+                    child: SizedBox(
+                      width: 150, // Fixed width for slider track length
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 4,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+                        ),
+                        child: Slider(
+                          value: _searchRadius,
+                          min: 1,
+                          max: 50,
+                          divisions: 49,
+                          onChanged: (value) {
+                            setState(() {
+                              _searchRadius = value;
+                            });
+                          },
+                          onChangeEnd: (value) {
+                            _loadNearbyEvents();
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -366,11 +620,30 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Boutons de zoom
+          FloatingActionButton.small(
+            heroTag: 'zoom_in',
+            onPressed: _zoomIn,
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(height: 8),
+          FloatingActionButton.small(
+            heroTag: 'zoom_out',
+            onPressed: _zoomOut,
+            child: const Icon(Icons.remove),
+          ),
+          const SizedBox(height: 8),
           // Bouton de centrage sur l'utilisateur
           FloatingActionButton.small(
             heroTag: 'center',
-            onPressed: _centerOnUser,
-            child: const Icon(Icons.my_location),
+            onPressed: _isCentering ? null : _centerOnUser,
+            child: _isCentering
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location),
           ),
           const SizedBox(height: 8),
           // Bouton de creation d'evenement
@@ -390,13 +663,13 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
               // Deja sur la carte
               break;
             case 1:
-              context.push('/events');
+              context.go('/events');
               break;
             case 2:
-              context.push('/notifications');
+              context.go('/notifications');
               break;
             case 3:
-              context.push('/profile');
+              context.go('/profile');
               break;
           }
         },

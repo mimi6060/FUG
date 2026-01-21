@@ -17,6 +17,12 @@ class LocationException implements Exception {
 class LocationService {
   /// Verifie si les services de localisation sont actives
   Future<bool> isLocationServiceEnabled() async {
+    // On web, isLocationServiceEnabled always returns true since the browser
+    // handles location services differently. The actual availability is
+    // determined when requesting permission or getting position.
+    if (kIsWeb) {
+      return true;
+    }
     return await Geolocator.isLocationServiceEnabled();
   }
 
@@ -67,6 +73,16 @@ class LocationService {
       );
     }
 
+    // On web, we need longer timeout since the browser
+    // handles location services differently
+    if (kIsWeb) {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 15),
+      );
+    }
+
+    // On mobile platforms, use standard settings
     return await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
       timeLimit: const Duration(seconds: 10),
@@ -74,7 +90,12 @@ class LocationService {
   }
 
   /// Obtient la derniere position connue (plus rapide)
+  /// Note: Cette methode n'est pas supportee sur le web et retourne null
   Future<Position?> getLastKnownPosition() async {
+    // getLastKnownPosition is not supported on the web platform
+    if (kIsWeb) {
+      return null;
+    }
     return await Geolocator.getLastKnownPosition();
   }
 
@@ -142,21 +163,48 @@ final currentPositionProvider = FutureProvider<Position?>((ref) async {
   final service = ref.watch(locationServiceProvider);
 
   try {
-    // D'abord essayer la derniere position connue (plus rapide)
-    final lastPosition = await service.getLastKnownPosition();
-    if (lastPosition != null) {
-      // Retourner la derniere position et rafraichir en arriere-plan
-      _refreshPositionInBackground(ref);
-      return lastPosition;
+    // Sur le web, getLastKnownPosition n'est pas supporte
+    // On utilise directement getCurrentPosition
+    if (kIsWeb) {
+      if (kDebugMode) {
+        print('Web platform detected - calling getCurrentPosition directly');
+      }
+      final position = await service.getCurrentPosition();
+      if (kDebugMode) {
+        print('Web position obtained: ${position.latitude}, ${position.longitude}');
+      }
+      return position;
     }
 
-    // Sinon obtenir la position actuelle
+    // Sur mobile, essayer d'abord la derniere position connue (plus rapide)
+    try {
+      final lastPosition = await service.getLastKnownPosition();
+      if (lastPosition != null) {
+        // Retourner la derniere position et rafraichir en arriere-plan
+        _refreshPositionInBackground(ref);
+        return lastPosition;
+      }
+    } catch (e) {
+      // getLastKnownPosition peut echouer, continuer avec getCurrentPosition
+      if (kDebugMode) {
+        print('getLastKnownPosition failed: $e');
+      }
+    }
+
+    // Obtenir la position actuelle
     return await service.getCurrentPosition();
+  } on LocationException catch (e) {
+    // Re-throw LocationException so the UI can handle it properly
+    if (kDebugMode) {
+      print('LocationException: ${e.message} (code: ${e.code})');
+    }
+    rethrow;
   } catch (e) {
     if (kDebugMode) {
       print('Error getting current position: $e');
     }
-    return null;
+    // Re-throw so the UI layer can display the error
+    rethrow;
   }
 });
 
