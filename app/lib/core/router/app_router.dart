@@ -15,6 +15,7 @@ import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/social/presentation/user_search_screen.dart';
 import '../../features/social/presentation/followers_list_screen.dart';
 import '../../features/settings/presentation/consent_screen.dart';
+import '../../features/settings/presentation/delete_account_screen.dart';
 import '../../features/settings/data/consent_provider.dart';
 
 /// Cle de navigation globale
@@ -242,6 +243,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'consent',
             name: 'settingsConsent',
             builder: (context, state) => const ConsentScreen(isFirstLaunch: false),
+          ),
+          // Suppression de compte (RGPD)
+          GoRoute(
+            path: 'delete-account',
+            name: 'deleteAccount',
+            builder: (context, state) => const DeleteAccountScreen(),
           ),
         ],
       ),
