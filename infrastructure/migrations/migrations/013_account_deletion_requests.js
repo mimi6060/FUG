@@ -89,13 +89,14 @@ export default {
     log.info('Created attribute: scheduledDeletionAt');
 
     // status - current status of the deletion request
+    // Note: required=false with default allows omitting status (defaults to 'pending')
     await databases.createEnumAttribute(
       databaseId,
       COLLECTION_ID,
       'status',
       ['pending', 'cancelled', 'completed'],
-      true,
-      'pending'
+      false,  // not required (has default)
+      'pending'  // default value
     );
     log.info('Created attribute: status');
 
