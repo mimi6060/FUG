@@ -48,10 +48,77 @@ Ce projet utilise le framework **BMAD-METHOD v6** pour le développement assist�
 
 1. **Analyser** - Lire `docs/` et `_bmad/project-brief.md`
 2. **Planifier** - Créer une spec dans `_bmad-output/`
-3. **Migration** - Si besoin, créer dans `infrastructure/migrations/migrations/`
-4. **Implémenter** - Code Flutter dans `app/lib/features/`
-5. **Tester** - Tests dans `app/test/`
-6. **Documenter** - Mettre à jour `docs/`
+3. **Synchroniser Plane** - Créer/mettre à jour les stories (voir section ci-dessous)
+4. **Migration** - Si besoin, créer dans `infrastructure/migrations/migrations/`
+5. **Implémenter** - Code Flutter dans `app/lib/features/`
+6. **Tester** - Tests dans `app/test/`
+7. **Documenter** - Mettre à jour `docs/`
+8. **Clôturer** - Marquer stories comme Done dans Plane
+
+---
+
+## Gestion des Stories (Plane)
+
+**IMPORTANT:** Toute modification ou ajout de stories BMAD doit être répercutée dans Plane.
+
+### Accès Plane
+
+- **URL**: http://localhost:8088
+- **Workspace**: fug
+- **Project**: MVP v1.0
+- **API Key**: Utiliser la variable dans `import-stories.sh`
+
+### Synchronisation BMAD <-> Plane
+
+| Action BMAD | Action Plane |
+|-------------|--------------|
+| Nouvelle feature dans `_bmad-output/planning-artifacts/features/` | Créer stories correspondantes dans Plane |
+| Modification d'une feature | Mettre à jour description story Plane |
+| Feature complétée | Marquer stories comme Done |
+| Nouvelle epic | Créer nouveau module dans Plane |
+
+### Structure des Features BMAD
+
+```
+_bmad-output/planning-artifacts/features/
+├── auth-feature-prd.md
+├── events-feature-prd.md
+├── gamification-feature-prd.md
+└── modernisation-2026/           # Epic E0
+    ├── 00-index.md               # Index et priorités
+    ├── MOD-001-rgpd-compliance.md
+    ├── MOD-002-apple-signin.md
+    └── ...
+```
+
+### Versioning des Specs
+
+Le changelog des specs est maintenu dans:
+`_bmad-output/planning-artifacts/versions/CHANGELOG.md`
+
+### Commandes Plane API
+
+```bash
+# Lister les stories
+curl -s "http://localhost:8088/api/v1/workspaces/fug/projects/PROJECT_ID/issues/" \
+  -H "x-api-key: API_KEY"
+
+# Mettre à jour statut
+curl -X PATCH "http://localhost:8088/api/v1/workspaces/fug/projects/PROJECT_ID/issues/ISSUE_ID/" \
+  -H "x-api-key: API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"state": "STATE_ID"}'
+```
+
+### IDs Plane Importants
+
+| Element | ID |
+|---------|---|
+| Project MVP v1.0 | `f110c685-ede4-4756-8e41-8cb39bb316f3` |
+| State: Backlog | `cd62817e-581b-47bd-b8eb-0486aff77ca3` |
+| State: Todo | `ea7339fb-b9ec-4a10-a49c-53fc3e8bc795` |
+| State: In Progress | `c7be50de-1d35-4292-b95d-d0c82003c655` |
+| State: Done | `f1b62e61-f55a-4b14-a80b-03c3adee9d77` |
 
 ### Agents BMAD recommandés
 
@@ -171,15 +238,17 @@ appwrite functions createDeployment
 
 | Action | Points |
 |--------|--------|
-| Créer une FUG | +25 |
-| Rejoindre une FUG | +15 |
-| Gagner un follower | +10 |
-| Suivre quelqu'un | +5 |
+| Créer une FUG | +10 |
+| Rejoindre une FUG | +5 |
+| Recevoir un follower | +2 |
+| Débloquer un badge | +points du badge |
 
 ### Statuts d'événement
 
-- `active` - FUG en cours
-- `ended` - FUG terminée
+- `draft` - Brouillon (non publié)
+- `active` - Publié, en attente de début
+- `ongoing` - FUG en cours
+- `completed` - FUG terminée
 - `cancelled` - FUG annulée
 
 ### Catégories
