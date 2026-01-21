@@ -211,10 +211,16 @@ fi
 # Create session with admin credentials
 log_step "Creating admin session..."
 
+# Use -c to capture cookies and -D to capture headers
+COOKIE_FILE=$(mktemp)
+HEADER_FILE=$(mktemp)
+
 SESSION_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
     "$APPWRITE_ENDPOINT/account/sessions/email" \
     -H "Content-Type: application/json" \
     -H "X-Appwrite-Project: console" \
+    -c "$COOKIE_FILE" \
+    -D "$HEADER_FILE" \
     -d "{
         \"email\": \"$ADMIN_EMAIL\",
         \"password\": \"$ADMIN_PASSWORD\"
@@ -226,14 +232,23 @@ SESSION_BODY=$(echo "$SESSION_RESPONSE" | sed '$d')
 if [ "$HTTP_CODE" != "201" ]; then
     log_error "Failed to create admin session (HTTP $HTTP_CODE)"
     echo "$SESSION_BODY" | head -5
+    rm -f "$COOKIE_FILE" "$HEADER_FILE"
     exit 1
 fi
 
-# Extract session secret
-SESSION_SECRET=$(echo "$SESSION_BODY" | grep -o '"secret":"[^"]*"' | head -1 | cut -d'"' -f4)
+# Extract session secret from Set-Cookie header (Appwrite 1.5+)
+SESSION_SECRET=$(grep -i "a_session_console=" "$HEADER_FILE" | sed 's/.*a_session_console=\([^;]*\).*/\1/' | head -1)
+
+# Cleanup temp files
+rm -f "$COOKIE_FILE" "$HEADER_FILE"
 
 if [ -z "$SESSION_SECRET" ]; then
-    log_error "Could not extract session secret"
+    # Fallback: try JSON body (older Appwrite versions)
+    SESSION_SECRET=$(echo "$SESSION_BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('secret',''))" 2>/dev/null)
+fi
+
+if [ -z "$SESSION_SECRET" ]; then
+    log_error "Could not extract session secret from headers or body"
     exit 1
 fi
 
@@ -245,6 +260,23 @@ log_success "Admin session created"
 
 log_step "Creating project: $PROJECT_NAME..."
 
+# First create a team for the project
+TEAM_ID="team-$PROJECT_ID"
+TEAM_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+    "$APPWRITE_ENDPOINT/teams" \
+    -H "Content-Type: application/json" \
+    -H "X-Appwrite-Project: console" \
+    -H "Cookie: a_session_console=$SESSION_SECRET" \
+    -d "{
+        \"teamId\": \"$TEAM_ID\",
+        \"name\": \"$PROJECT_NAME Team\"
+    }" 2>/dev/null)
+
+TEAM_HTTP_CODE=$(echo "$TEAM_RESPONSE" | tail -n1)
+if [ "$TEAM_HTTP_CODE" != "201" ] && [ "$TEAM_HTTP_CODE" != "409" ]; then
+    log_warn "Could not create team (HTTP $TEAM_HTTP_CODE), trying with existing..."
+fi
+
 PROJECT_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
     "$APPWRITE_ENDPOINT/projects" \
     -H "Content-Type: application/json" \
@@ -253,7 +285,7 @@ PROJECT_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
     -d "{
         \"projectId\": \"$PROJECT_ID\",
         \"name\": \"$PROJECT_NAME\",
-        \"teamId\": \"unique()\",
+        \"teamId\": \"$TEAM_ID\",
         \"region\": \"default\"
     }" 2>/dev/null)
 

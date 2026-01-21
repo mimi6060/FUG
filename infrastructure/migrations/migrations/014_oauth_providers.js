@@ -124,10 +124,30 @@ export default {
       throw new Error(`Failed to create admin session: ${error.message}`);
     }
 
-    const session = await response.json();
-    log.success('Admin session created');
+    // In Appwrite 1.5+, session secret is in Set-Cookie header, not JSON body
+    const setCookie = response.headers.get('set-cookie');
+    let sessionSecret = null;
 
-    return session.secret;
+    if (setCookie) {
+      // Extract session from cookie: a_session_console=<base64_encoded_json>
+      const match = setCookie.match(/a_session_console=([^;]+)/);
+      if (match) {
+        sessionSecret = match[1];
+      }
+    }
+
+    // Fallback to JSON body for older Appwrite versions
+    if (!sessionSecret) {
+      const session = await response.json();
+      sessionSecret = session.secret;
+    }
+
+    if (!sessionSecret) {
+      throw new Error('Could not extract session secret from response');
+    }
+
+    log.success('Admin session created');
+    return sessionSecret;
   },
 
   /**
