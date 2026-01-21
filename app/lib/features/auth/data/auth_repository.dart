@@ -1,7 +1,11 @@
+import 'dart:io' show Platform;
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/foundation.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 import '../../../core/services/appwrite_service.dart';
 import '../../../core/config/appwrite_config.dart';
 import '../domain/user_model.dart';
@@ -195,6 +199,155 @@ class AuthRepository {
         _getReadableErrorMessage(e),
         code: e.code,
       );
+    }
+  }
+
+  /// Connexion avec Apple Sign-In (iOS uniquement)
+  ///
+  /// Utilise le package sign_in_with_apple pour obtenir les credentials
+  /// puis cree une session OAuth2 via Appwrite.
+  ///
+  /// Gestion des cas particuliers:
+  /// - Email relay Apple (xyz@privaterelay.appleid.com)
+  /// - Nom masque par l'utilisateur
+  Future<models.User> signInWithApple() async {
+    // Verifier que nous sommes sur iOS
+    if (!Platform.isIOS) {
+      throw AuthException('Apple Sign-In est disponible uniquement sur iOS.');
+    }
+
+    try {
+      // 1. Obtenir les credentials Apple
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // 2. Creer la session OAuth2 avec Appwrite
+      await _account.createOAuth2Session(
+        provider: OAuthProvider.apple,
+        success: 'appwrite-callback-${AppwriteConfig.projectId}://auth',
+        failure: 'appwrite-callback-${AppwriteConfig.projectId}://auth/error',
+      );
+
+      // 3. Recuperer l'utilisateur connecte
+      final user = await _account.get();
+
+      // 4. Verifier/creer le profil utilisateur
+      await _getOrCreateUserProfileFromApple(
+        user: user,
+        credential: credential,
+      );
+
+      return user;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
+        throw AuthException('Connexion annulee par l\'utilisateur.');
+      }
+      throw AuthException('Erreur Apple Sign-In: ${e.message}');
+    } on SignInWithAppleNotSupportedException {
+      throw AuthException(
+        'Apple Sign-In n\'est pas supporte sur cet appareil.',
+      );
+    } on AppwriteException catch (e) {
+      throw AuthException(
+        _getReadableErrorMessage(e),
+        code: e.code,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Apple Sign-In error: $e');
+      }
+      throw AuthException('Une erreur est survenue lors de la connexion Apple.');
+    }
+  }
+
+  /// Verifie si Apple Sign-In est disponible sur l'appareil
+  static Future<bool> isAppleSignInAvailable() async {
+    if (!Platform.isIOS) return false;
+    return await SignInWithApple.isAvailable();
+  }
+
+  /// Cree ou met a jour le profil utilisateur apres une connexion Apple
+  ///
+  /// Gere les cas:
+  /// - Email relay Apple (privaterelay.appleid.com)
+  /// - Nom masque (givenName/familyName peuvent etre null)
+  Future<void> _getOrCreateUserProfileFromApple({
+    required models.User user,
+    required AuthorizationCredentialAppleID credential,
+  }) async {
+    try {
+      // Verifier si le profil existe deja
+      final existingProfile = await getUserProfile(user.$id);
+
+      if (existingProfile == null) {
+        // Construire le nom a partir des donnees Apple
+        // Note: Apple ne fournit le nom que lors de la premiere connexion
+        String? displayName;
+        if (credential.givenName != null || credential.familyName != null) {
+          displayName = [
+            credential.givenName,
+            credential.familyName,
+          ].where((s) => s != null && s.isNotEmpty).join(' ');
+        }
+
+        // Si pas de nom fourni, utiliser le nom de l'account Appwrite
+        // ou un nom par defaut
+        final name = displayName?.isNotEmpty == true
+            ? displayName!
+            : (user.name.isNotEmpty ? user.name : 'Utilisateur FUG');
+
+        // Determiner si c'est un email relay Apple
+        final isPrivateRelay =
+            user.email.contains('privaterelay.appleid.com');
+
+        await _databases.createDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.usersCollectionId,
+          documentId: user.$id,
+          data: {
+            'userId': user.$id,
+            'email': user.email,
+            'name': name,
+            'avatar': null,
+            'bio': null,
+            'points': 0,
+            'level': 1,
+            'followersCount': 0,
+            'followingCount': 0,
+            'locationLat': null,
+            'locationLng': null,
+            'notificationRadius': 10.0,
+            'fcmToken': null,
+            'isPrivateEmail': isPrivateRelay,
+            'authProvider': 'apple',
+            'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
+          },
+          permissions: [
+            Permission.read(Role.user(user.$id)),
+            Permission.update(Role.user(user.$id)),
+            Permission.delete(Role.user(user.$id)),
+          ],
+        );
+
+        // Mettre a jour le nom dans Account si necessaire
+        if (displayName != null && displayName.isNotEmpty) {
+          try {
+            await _account.updateName(name: displayName);
+          } catch (_) {
+            // Ignorer les erreurs de mise a jour du nom
+          }
+        }
+      }
+    } on AppwriteException catch (e) {
+      if (kDebugMode) {
+        print('Error creating Apple user profile: ${e.message}');
+      }
+      // Ne pas bloquer la connexion si le profil echoue
     }
   }
 

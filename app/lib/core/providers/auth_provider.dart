@@ -76,6 +76,16 @@ class AuthStateNotifier extends AsyncNotifier<models.User?> {
     });
   }
 
+  /// Connexion avec Apple Sign-In (iOS uniquement)
+  Future<void> signInWithApple() async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      await _repository.signInWithApple();
+      return _repository.getCurrentUser();
+    });
+  }
+
   /// Deconnexion
   Future<void> signOut() async {
     state = const AsyncValue.loading();
