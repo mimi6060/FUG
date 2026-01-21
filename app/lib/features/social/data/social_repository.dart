@@ -59,7 +59,7 @@ class SocialRepository {
   final AppwriteService _appwrite;
 
   /// Collection des relations de suivi
-  static const String _followsCollection = 'follows';
+  static const String _followsCollection = 'followers';
 
   /// Collection des blocages
   static const String _blocksCollection = 'blocks';

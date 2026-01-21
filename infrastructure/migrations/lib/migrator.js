@@ -17,8 +17,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Constants
-const MIGRATIONS_COLLECTION_ID = '_migrations';
-const LOCK_DOCUMENT_ID = '_migration_lock';
+const MIGRATIONS_COLLECTION_ID = 'migrations_tracking';
+const LOCK_DOCUMENT_ID = 'migration_lock';
 const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
@@ -75,7 +75,7 @@ export class Migrator {
           await databases.createCollection(
             config.databaseId,
             MIGRATIONS_COLLECTION_ID,
-            '_migrations',
+            'Migrations Tracking',
             [
               Permission.read(Role.any()),
               Permission.write(Role.any()),
@@ -151,7 +151,7 @@ export class Migrator {
   /**
    * Wait for collection attributes to be available
    */
-  async waitForAttributes(collectionId, maxWait = 30000) {
+  async waitForAttributes(collectionId, maxWait = 120000) {
     const { databases, config } = this.services;
     const start = Date.now();
 

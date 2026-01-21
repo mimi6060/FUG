@@ -56,29 +56,21 @@ class EventRepository {
     try {
       final now = DateTime.now();
       final data = {
+        'creatorId': organizerId,
         'title': title,
         'description': description,
-        'organizerId': organizerId,
-        'organizerName': organizerName,
-        'categoryId': categoryId,
-        'categoryName': categoryName,
-        'imageUrl': imageUrl,
-        'additionalImages': additionalImages ?? [],
-        'address': address,
-        'latitude': latitude,
-        'longitude': longitude,
-        'venueName': venueName,
+        'status': EventStatus.published.value,
+        'category': categoryId, // Using categoryId as category enum value
+        'maxParticipants': maxParticipants ?? 0,
+        'participantCount': 0,
         'startDate': startDate.toIso8601String(),
         'endDate': endDate.toIso8601String(),
-        'maxParticipants': maxParticipants,
-        'currentParticipants': 0,
-        'price': price,
-        'currency': currency,
-        'tags': tags ?? [],
-        'status': EventStatus.published.value,
-        'isFeatured': false,
-        'rating': 0.0,
-        'reviewCount': 0,
+        'imageUrl': imageUrl,
+        'locationLat': latitude,
+        'locationLng': longitude,
+        'locationName': venueName ?? address,
+        'locationAddress': address,
+        'isOnline': false,
         'createdAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
       };
@@ -150,20 +142,15 @@ class EventRepository {
 
       if (title != null) data['title'] = title;
       if (description != null) data['description'] = description;
-      if (categoryId != null) data['categoryId'] = categoryId;
-      if (categoryName != null) data['categoryName'] = categoryName;
+      if (categoryId != null) data['category'] = categoryId;
       if (imageUrl != null) data['imageUrl'] = imageUrl;
-      if (additionalImages != null) data['additionalImages'] = additionalImages;
-      if (address != null) data['address'] = address;
-      if (latitude != null) data['latitude'] = latitude;
-      if (longitude != null) data['longitude'] = longitude;
-      if (venueName != null) data['venueName'] = venueName;
+      if (address != null) data['locationAddress'] = address;
+      if (latitude != null) data['locationLat'] = latitude;
+      if (longitude != null) data['locationLng'] = longitude;
+      if (venueName != null) data['locationName'] = venueName;
       if (startDate != null) data['startDate'] = startDate.toIso8601String();
       if (endDate != null) data['endDate'] = endDate.toIso8601String();
       if (maxParticipants != null) data['maxParticipants'] = maxParticipants;
-      if (price != null) data['price'] = price;
-      if (currency != null) data['currency'] = currency;
-      if (tags != null) data['tags'] = tags;
       if (status != null) data['status'] = status.value;
 
       final doc = await _databases.updateDocument(
@@ -219,7 +206,7 @@ class EventRepository {
       ];
 
       if (categoryId != null) {
-        queries.add(Query.equal('categoryId', categoryId));
+        queries.add(Query.equal('category', categoryId));
       }
 
       if (status != null) {
@@ -273,7 +260,7 @@ class EventRepository {
       ];
 
       if (categoryId != null) {
-        queries.add(Query.equal('categoryId', categoryId));
+        queries.add(Query.equal('category', categoryId));
       }
 
       final result = await _databases.listDocuments(
@@ -394,15 +381,15 @@ class EventRepository {
       // Construire les requêtes
       final queries = <String>[
         Query.equal('status', EventStatus.published.value),
-        Query.greaterThanEqual('latitude', bounds['minLat']!),
-        Query.lessThanEqual('latitude', bounds['maxLat']!),
-        Query.greaterThanEqual('longitude', bounds['minLon']!),
-        Query.lessThanEqual('longitude', bounds['maxLon']!),
+        Query.greaterThanEqual('locationLat', bounds['minLat']!),
+        Query.lessThanEqual('locationLat', bounds['maxLat']!),
+        Query.greaterThanEqual('locationLng', bounds['minLon']!),
+        Query.lessThanEqual('locationLng', bounds['maxLon']!),
         Query.limit(limit * 2), // Marge pour le filtrage par distance
       ];
 
       if (categoryId != null) {
-        queries.add(Query.equal('categoryId', categoryId));
+        queries.add(Query.equal('category', categoryId));
       }
 
       if (afterDate != null) {
@@ -471,7 +458,7 @@ class EventRepository {
       ];
 
       if (categoryId != null) {
-        queries.add(Query.equal('categoryId', categoryId));
+        queries.add(Query.equal('category', categoryId));
       }
 
       final result = await _databases.listDocuments(
@@ -512,7 +499,7 @@ class EventRepository {
         collectionId: AppwriteConfig.eventsCollectionId,
         documentId: eventId,
         data: {
-          'currentParticipants': event.currentParticipants + 1,
+          'participantCount': event.currentParticipants + 1,
           'updatedAt': DateTime.now().toIso8601String(),
         },
       );
@@ -539,7 +526,7 @@ class EventRepository {
         collectionId: AppwriteConfig.eventsCollectionId,
         documentId: eventId,
         data: {
-          'currentParticipants': event.currentParticipants - 1,
+          'participantCount': event.currentParticipants - 1,
           'updatedAt': DateTime.now().toIso8601String(),
         },
       );

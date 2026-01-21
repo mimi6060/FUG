@@ -198,6 +198,14 @@ appwrite functions createDeployment
 
 ---
 
+## Règles Git
+
+- **Ne JAMAIS ajouter** `Co-Authored-By: Claude` dans les commits
+- Utiliser des messages de commit en anglais avec le format conventional commits
+- Suivre le Git Flow: `main`, `develop`, `feature/*`, `bugfix/*`, `release/*`
+
+---
+
 ## Avant de Coder
 
 1. **Lire** `_bmad/project-brief.md` pour le contexte

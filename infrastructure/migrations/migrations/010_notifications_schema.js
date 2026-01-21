@@ -55,7 +55,7 @@ export default {
         'nearby_event',
         'system',
       ],
-      true,
+      false,
       'system'
     );
     log.info('Created attribute: type');
@@ -114,7 +114,7 @@ export default {
       databaseId,
       collectionId,
       'isRead',
-      true,
+      false,
       false // default
     );
     log.info('Created attribute: isRead');

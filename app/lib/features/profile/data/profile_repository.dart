@@ -88,7 +88,7 @@ class ProfileRepository {
     try {
       final result = await _databases.listDocuments(
         databaseId: AppwriteConfig.databaseId,
-        collectionId: 'follows',
+        collectionId: 'followers',
         queries: [
           Query.equal('followingId', userId),
           Query.limit(1),
@@ -105,7 +105,7 @@ class ProfileRepository {
     try {
       final result = await _databases.listDocuments(
         databaseId: AppwriteConfig.databaseId,
-        collectionId: 'follows',
+        collectionId: 'followers',
         queries: [
           Query.equal('followerId', userId),
           Query.limit(1),
@@ -138,10 +138,10 @@ class ProfileRepository {
 
       if (name != null) data['name'] = name;
       if (bio != null) data['bio'] = bio;
-      if (location != null) data['location'] = location;
-      if (latitude != null) data['latitude'] = latitude;
-      if (longitude != null) data['longitude'] = longitude;
-      if (interests != null) data['interests'] = interests;
+      // Note: 'location' field doesn't exist in DB schema
+      if (latitude != null) data['locationLat'] = latitude;
+      if (longitude != null) data['locationLng'] = longitude;
+      // Note: 'interests' field doesn't exist in DB schema
 
       await _databases.updateDocument(
         databaseId: AppwriteConfig.databaseId,
@@ -208,7 +208,7 @@ class ProfileRepository {
         collectionId: AppwriteConfig.usersCollectionId,
         documentId: userId,
         data: {
-          'avatarUrl': avatarUrl,
+          'avatar': avatarUrl,
           'updatedAt': DateTime.now().toIso8601String(),
         },
       );
@@ -252,7 +252,7 @@ class ProfileRepository {
         collectionId: AppwriteConfig.usersCollectionId,
         documentId: userId,
         data: {
-          'avatarUrl': avatarUrl,
+          'avatar': avatarUrl,
           'updatedAt': DateTime.now().toIso8601String(),
         },
       );
@@ -293,7 +293,7 @@ class ProfileRepository {
         collectionId: AppwriteConfig.usersCollectionId,
         documentId: userId,
         data: {
-          'avatarUrl': null,
+          'avatar': null,
           'updatedAt': DateTime.now().toIso8601String(),
         },
       );

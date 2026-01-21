@@ -1,4 +1,5 @@
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/foundation.dart';
 import '../../../core/services/appwrite_service.dart';
@@ -116,16 +117,16 @@ class AuthRepository {
           'userId': user.$id,
           'email': user.email,
           'name': user.name,
-          'avatarUrl': null,
+          'avatar': null,
           'bio': null,
-          'location': null,
-          'latitude': null,
-          'longitude': null,
-          'interests': [],
-          'eventsCreated': 0,
-          'eventsAttended': 0,
-          'rating': 0.0,
-          'isVerified': false,
+          'points': 0,
+          'level': 1,
+          'followersCount': 0,
+          'followingCount': 0,
+          'locationLat': null,
+          'locationLng': null,
+          'notificationRadius': 10.0,
+          'fcmToken': null,
           'createdAt': DateTime.now().toIso8601String(),
           'updatedAt': DateTime.now().toIso8601String(),
         },

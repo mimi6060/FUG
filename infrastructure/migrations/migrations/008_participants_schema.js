@@ -55,7 +55,7 @@ export default {
       collectionId,
       'status',
       ['pending', 'confirmed', 'cancelled', 'attended'],
-      true,
+      false,
       'pending'
     );
     log.info('Created attribute: status');
@@ -66,7 +66,7 @@ export default {
       collectionId,
       'role',
       ['organizer', 'co-organizer', 'participant'],
-      true,
+      false,
       'participant'
     );
     log.info('Created attribute: role');

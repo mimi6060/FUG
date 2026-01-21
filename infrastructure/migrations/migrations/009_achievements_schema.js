@@ -80,7 +80,7 @@ export default {
       'achievements',
       'category',
       ['social', 'events', 'engagement', 'milestones', 'special'],
-      true,
+      false,
       'milestones'
     );
     log.info('Created attribute: category');
@@ -115,7 +115,7 @@ export default {
       'achievements',
       'tier',
       ['bronze', 'silver', 'gold', 'platinum'],
-      true,
+      false,
       'bronze'
     );
     log.info('Created attribute: tier');
@@ -186,7 +186,7 @@ export default {
       databaseId,
       'user_achievements',
       'isUnlocked',
-      true,
+      false,
       false // default
     );
     log.info('Created attribute: isUnlocked');

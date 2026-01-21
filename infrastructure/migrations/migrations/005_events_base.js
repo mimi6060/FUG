@@ -66,7 +66,7 @@ export default {
       collectionId,
       'status',
       ['draft', 'published', 'cancelled', 'completed'],
-      true,
+      false,
       'draft'
     );
     log.info('Created attribute: status');
@@ -77,7 +77,7 @@ export default {
       collectionId,
       'category',
       ['sport', 'music', 'food', 'tech', 'art', 'social', 'education', 'other'],
-      true,
+      false,
       'other'
     );
     log.info('Created attribute: category');

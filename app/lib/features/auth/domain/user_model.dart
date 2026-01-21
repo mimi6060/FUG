@@ -74,11 +74,11 @@ class UserModel extends Equatable {
       id: json['userId'] as String? ?? json['\$id'] as String,
       email: json['email'] as String,
       name: json['name'] as String,
-      avatarUrl: json['avatarUrl'] as String?,
+      avatarUrl: json['avatar'] as String?, // DB field is 'avatar'
       bio: json['bio'] as String?,
       location: json['location'] as String?,
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
+      latitude: (json['locationLat'] as num?)?.toDouble(), // DB field is 'locationLat'
+      longitude: (json['locationLng'] as num?)?.toDouble(), // DB field is 'locationLng'
       interests: List<String>.from(json['interests'] ?? []),
       eventsCreated: json['eventsCreated'] as int? ?? 0,
       eventsAttended: json['eventsAttended'] as int? ?? 0,
@@ -89,22 +89,16 @@ class UserModel extends Equatable {
     );
   }
 
-  /// Convertit le UserModel en Map JSON
+  /// Convertit le UserModel en Map JSON (format base de données)
   Map<String, dynamic> toJson() {
     return {
       'userId': id,
       'email': email,
       'name': name,
-      'avatarUrl': avatarUrl,
+      'avatar': avatarUrl, // DB field is 'avatar'
       'bio': bio,
-      'location': location,
-      'latitude': latitude,
-      'longitude': longitude,
-      'interests': interests,
-      'eventsCreated': eventsCreated,
-      'eventsAttended': eventsAttended,
-      'rating': rating,
-      'isVerified': isVerified,
+      'locationLat': latitude, // DB field is 'locationLat'
+      'locationLng': longitude, // DB field is 'locationLng'
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
