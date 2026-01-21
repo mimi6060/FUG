@@ -214,9 +214,8 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
             children: [
               TileLayer(
                 urlTemplate: isDarkMode
-                    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: isDarkMode ? const ['a', 'b', 'c', 'd'] : const ['a', 'b', 'c'],
+                    ? 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.fug.app',
               ),
               MarkerLayer(

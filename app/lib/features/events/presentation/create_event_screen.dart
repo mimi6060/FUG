@@ -584,8 +584,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                           ),
                           children: [
                             TileLayer(
-                              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              subdomains: const ['a', 'b', 'c'],
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                               userAgentPackageName: 'com.fug.app',
                             ),
                             MarkerLayer(
