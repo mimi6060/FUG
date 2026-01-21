@@ -14,6 +14,8 @@ import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/social/presentation/user_search_screen.dart';
 import '../../features/social/presentation/followers_list_screen.dart';
+import '../../features/settings/presentation/consent_screen.dart';
+import '../../features/settings/data/consent_provider.dart';
 
 /// Cle de navigation globale
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -21,26 +23,42 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 /// Provider pour le GoRouter
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
+  final hasLocalConsent = ref.watch(hasLocalConsentProvider);
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     debugLogDiagnostics: true,
 
-    /// Gestion de la redirection selon l'etat d'authentification
+    /// Gestion de la redirection selon l'etat d'authentification et consentement
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull != null;
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
+      final isConsentPage = state.matchedLocation == '/consent';
 
       // Si pas connecte et pas sur une page d'auth, rediriger vers login
       if (!isLoggedIn && !isLoggingIn && !isRegistering) {
         return '/login';
       }
 
-      // Si connecte et sur une page d'auth, rediriger vers home
-      if (isLoggedIn && (isLoggingIn || isRegistering)) {
-        return '/home';
+      // Si connecte, verifier le consentement
+      if (isLoggedIn) {
+        // Si sur page d'auth, rediriger
+        if (isLoggingIn || isRegistering) {
+          // Verifier si consentement requis
+          final consentGiven = hasLocalConsent.valueOrNull ?? false;
+          if (!consentGiven) {
+            return '/consent';
+          }
+          return '/home';
+        }
+
+        // Si pas de consentement et pas sur la page de consentement
+        final consentGiven = hasLocalConsent.valueOrNull ?? false;
+        if (!consentGiven && !isConsentPage) {
+          return '/consent';
+        }
       }
 
       return null;
@@ -66,6 +84,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+
+      // ================================================
+      // Route de consentement RGPD
+      // ================================================
+      GoRoute(
+        path: '/consent',
+        name: 'consent',
+        builder: (context, state) => const ConsentScreen(isFirstLaunch: true),
       ),
 
       // ================================================
@@ -209,6 +236,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const _SettingsScreen(),
+        routes: [
+          // Gestion du consentement RGPD
+          GoRoute(
+            path: 'consent',
+            name: 'settingsConsent',
+            builder: (context, state) => const ConsentScreen(isFirstLaunch: false),
+          ),
+        ],
       ),
     ],
 
@@ -243,10 +278,9 @@ class _SettingsScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip),
-            title: const Text('Confidentialite'),
-            onTap: () {
-              // TODO: Parametres de confidentialite
-            },
+            title: const Text('Confidentialite et consentement'),
+            subtitle: const Text('Gerer vos preferences RGPD'),
+            onTap: () => context.push('/settings/consent'),
           ),
           ListTile(
             leading: const Icon(Icons.help),
