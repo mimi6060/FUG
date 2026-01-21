@@ -9,9 +9,13 @@ import { readdir, readFile } from 'fs/promises';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'crypto';
-import { getAppwriteServices, ensureDatabase } from './appwrite-client.js';
+import { getAppwriteServices, ensureDatabase, loadConfig } from './appwrite-client.js';
 import { createLogger } from './logger.js';
 import { Permission, Role, Query, ID } from 'node-appwrite';
+
+// Migration types - exported for use in migrations
+export const MIGRATION_TYPE_BOOTSTRAP = 'bootstrap'; // Only runs on fresh install
+export const MIGRATION_TYPE_UPGRADE = 'upgrade'; // Runs on existing installs (default)
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,6 +26,103 @@ const LOCK_DOCUMENT_ID = 'migration_lock';
 const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 /**
+ * Create a migration context for bootstrap migrations
+ * Provides helper methods to check installation state
+ */
+class MigrationContext {
+  constructor(migrator) {
+    this.migrator = migrator;
+    this.services = migrator.services;
+    this.config = migrator.services?.config;
+    this.log = migrator.log;
+    this._cache = {};
+  }
+
+  /**
+   * Check if the FUG project exists
+   */
+  async projectExists() {
+    if (this._cache.projectExists !== undefined) {
+      return this._cache.projectExists;
+    }
+
+    try {
+      const { databases, config } = this.services;
+      // Try to access the database to check if project is configured
+      await databases.get(config.databaseId);
+      this._cache.projectExists = true;
+      return true;
+    } catch (error) {
+      if (error.code === 404 || error.code === 401) {
+        this._cache.projectExists = false;
+        return false;
+      }
+      // Unknown error, assume project exists to be safe
+      this._cache.projectExists = true;
+      return true;
+    }
+  }
+
+  /**
+   * Check if the database exists
+   */
+  async databaseExists() {
+    if (this._cache.databaseExists !== undefined) {
+      return this._cache.databaseExists;
+    }
+
+    try {
+      const { databases, config } = this.services;
+      await databases.get(config.databaseId);
+      this._cache.databaseExists = true;
+      return true;
+    } catch (error) {
+      if (error.code === 404) {
+        this._cache.databaseExists = false;
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a collection exists
+   */
+  async collectionExists(collectionId) {
+    try {
+      const { databases, config } = this.services;
+      await databases.getCollection(config.databaseId, collectionId);
+      return true;
+    } catch (error) {
+      if (error.code === 404) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Check if this is a fresh installation (no migrations have run)
+   */
+  async isFreshInstall() {
+    if (this._cache.isFreshInstall !== undefined) {
+      return this._cache.isFreshInstall;
+    }
+
+    try {
+      const applied = await this.migrator.getAppliedMigrations();
+      const result = Object.keys(applied).length === 0;
+      this._cache.isFreshInstall = result;
+      return result;
+    } catch (error) {
+      // If we can't check, assume fresh install
+      this._cache.isFreshInstall = true;
+      return true;
+    }
+  }
+}
+
+/**
  * Create a Migrator instance
  */
 export class Migrator {
@@ -30,6 +131,7 @@ export class Migrator {
     this.dryRun = options.dryRun || false;
     this.verbose = options.verbose || false;
     this.migrationsPath = options.migrationsPath || join(__dirname, '..', 'migrations');
+    this.includeBootstrap = options.includeBootstrap !== false; // Include bootstrap migrations by default
 
     this.log = createLogger({
       silent: options.silent || false,
@@ -38,6 +140,7 @@ export class Migrator {
 
     this.services = null;
     this.initialized = false;
+    this.context = null;
   }
 
   /**
@@ -48,6 +151,9 @@ export class Migrator {
 
     this.services = getAppwriteServices(this.environment);
 
+    // Create migration context for bootstrap migrations
+    this.context = new MigrationContext(this);
+
     // Ensure database exists
     await ensureDatabase(this.environment);
 
@@ -55,6 +161,45 @@ export class Migrator {
     await this.ensureMigrationsCollection();
 
     this.initialized = true;
+  }
+
+  /**
+   * Check if a migration should run based on its type and shouldRun() method
+   */
+  async shouldRunMigration(migration, filename) {
+    const migrationType = migration.type || MIGRATION_TYPE_UPGRADE;
+
+    // Handle bootstrap migrations when --skip-bootstrap is used
+    if (migrationType === MIGRATION_TYPE_BOOTSTRAP) {
+      if (!this.includeBootstrap) {
+        this.log.debug(`Bootstrap migration ${filename} skipped (--skip-bootstrap)`);
+        return false;
+      }
+
+      // Bootstrap migrations only run on fresh installations
+      const isFresh = await this.context.isFreshInstall();
+      if (!isFresh) {
+        this.log.debug(`Bootstrap migration ${filename} skipped (not a fresh install)`);
+        return false;
+      }
+    }
+
+    // Check if migration has a custom shouldRun method
+    if (typeof migration.shouldRun === 'function') {
+      try {
+        const shouldRun = await migration.shouldRun(this.context);
+        if (!shouldRun) {
+          this.log.debug(`Migration ${filename} skipped (shouldRun returned false)`);
+          return false;
+        }
+      } catch (error) {
+        this.log.warn(`Error in shouldRun for ${filename}: ${error.message}`);
+        // If shouldRun fails, skip the migration to be safe
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -469,18 +614,29 @@ export class Migrator {
           continue;
         }
 
-        this.log.migration(name, 'up');
-
         try {
           const migration = await this.loadMigration(file);
+
+          // Check if migration should run (bootstrap type, shouldRun method, etc.)
+          const shouldRun = await this.shouldRunMigration(migration, file);
+          if (!shouldRun) {
+            this.log.info(`Skipped: ${name} (condition not met)`);
+            skippedCount++;
+            continue;
+          }
+
+          this.log.migration(name, 'up');
+
           const checksum = await this.calculateChecksum(file);
 
           if (!this.dryRun) {
+            // Pass context as 5th argument for bootstrap migrations
             await migration.up(
               this.services.client,
               this.services.databases,
               this.log,
-              this.services.config
+              this.services.config,
+              this.context
             );
 
             await this.recordMigration(name, newBatch, checksum);
@@ -688,33 +844,64 @@ export class Migrator {
 
 /**
  * Create migration file template
+ * @param {string} name - Migration name
+ * @param {number} number - Migration number
+ * @param {Object} options - Template options
+ * @param {string} options.type - Migration type: 'upgrade' (default) or 'bootstrap'
  */
-export function createMigrationTemplate(name, number) {
+export function createMigrationTemplate(name, number, options = {}) {
   const paddedNumber = String(number).padStart(3, '0');
   const migrationName = `${paddedNumber}_${name}`;
+  const migrationType = options.type || 'upgrade';
+
+  const bootstrapExample = migrationType === 'bootstrap' ? `
+  // type: 'bootstrap' means this migration only runs on fresh installations
+  type: 'bootstrap',
+
+  /**
+   * Optional: Custom condition for running this migration
+   * @param {MigrationContext} context - Context with helper methods
+   * @returns {Promise<boolean>} True if migration should run
+   */
+  async shouldRun(context) {
+    // Example: Only run if database doesn't exist
+    return !await context.databaseExists();
+  },
+` : `
+  // type: 'upgrade' (default) - runs on all installations
+  // type: 'bootstrap' - only runs on fresh installations
+  type: 'upgrade',
+`;
 
   const template = `/**
  * Migration: ${migrationName}
  * Created: ${new Date().toISOString()}
+ * Type: ${migrationType}
  */
 
 export default {
   name: '${migrationName}',
-
+${bootstrapExample}
   /**
    * Run the migration
    * @param {Client} client - Appwrite client
    * @param {Databases} databases - Appwrite Databases service
    * @param {Object} log - Logger instance
    * @param {Object} config - Environment configuration
+   * @param {MigrationContext} context - Context with helper methods (optional)
    */
-  async up(client, databases, log, config) {
+  async up(client, databases, log, config, context) {
     const databaseId = config.databaseId;
 
     // TODO: Implement migration
     // Example:
     // await databases.createCollection(databaseId, 'collection_id', 'Collection Name');
     // await databases.createStringAttribute(databaseId, 'collection_id', 'field_name', 255, true);
+    //
+    // For idempotent operations, use context helpers:
+    // if (!await context.collectionExists('collection_id')) {
+    //   await databases.createCollection(...);
+    // }
 
     log.info('Migration ${migrationName} applied');
   },

@@ -1,42 +1,164 @@
 # FUG Infrastructure Setup
 
-> Scripts for automated Appwrite configuration and deployment.
+> Automated Appwrite Infrastructure as Code (IaC) for the FUG project.
+
+---
+
+## Important: Infrastructure as Code
+
+**All Appwrite modifications MUST go through migrations or bootstrap scripts.**
+
+- NO manual changes in the Appwrite console
+- All changes are version-controlled
+- Reproducible across dev/staging/production
+- Audit trail via git history
 
 ---
 
 ## Quick Start
 
-### 1. Fresh Server Installation
+### Fresh Installation
 
 ```bash
-# Bootstrap Appwrite (creates project, database, runs migrations)
-./bootstrap-appwrite.sh
+# 1. Start Appwrite
+cd infrastructure && docker-compose up -d
+
+# 2. Bootstrap everything (creates project, admin, database, runs migrations)
+cd setup && ./bootstrap.sh
+
+# 3. Save the admin password shown at the end!
 ```
 
-### 2. Configure OAuth Providers
+The bootstrap script:
+- Creates the FUG project
+- Creates admin account with generated secure password
+- Creates API key for migrations
+- Creates the database
+- Runs all migrations
+
+### Existing Installation (Upgrades)
 
 ```bash
-# After setting up credentials files
-./configure-oauth.sh
+# Run pending migrations only
+cd infrastructure/migrations
+node migrate.js up --env=development
 ```
 
 ---
 
-## OAuth Providers Priority
+## Bootstrap Script
+
+### Usage
+
+```bash
+# Development (default)
+./bootstrap.sh
+
+# Staging
+./bootstrap.sh --env=staging
+
+# Production
+./bootstrap.sh --env=production
+```
+
+### What It Does
+
+1. **Checks Appwrite health** - Verifies Appwrite is running
+2. **Creates admin account** - Email: `fous.toi.une.guinze@gmail.com`
+3. **Generates password** - 24-character secure random password
+4. **Creates project** - FUG project in Appwrite
+5. **Creates API key** - Full permissions for migrations
+6. **Creates database** - fug-db database
+7. **Generates .env** - Configuration for migration system
+8. **Runs migrations** - All schema migrations
+9. **Displays password** - **SAVE THIS - shown only once!**
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `APPWRITE_ENDPOINT` | Appwrite API URL | Based on --env |
+| `PROJECT_ID` | Project ID | `fug` |
+| `PROJECT_NAME` | Display name | `FUG` |
+| `DATABASE_ID` | Database ID | `fug-db` |
+
+### Endpoints by Environment
+
+| Environment | Endpoint |
+|-------------|----------|
+| development | `http://localhost:9000/v1` |
+| staging | `https://staging.fug-app.com/v1` |
+| production | `https://api.fug-app.com/v1` |
+
+---
+
+## Migration System
+
+All database changes go through migrations.
+
+### Commands
+
+```bash
+cd infrastructure/migrations
+
+# Check status
+node migrate.js status --env=development
+
+# Apply pending migrations
+node migrate.js up --env=development
+
+# Rollback last batch
+node migrate.js down --env=development
+
+# Create new migration
+node migrate.js create my-migration-name
+
+# Create bootstrap migration (fresh install only)
+node migrate.js create my-bootstrap-migration --bootstrap
+```
+
+### Migration Types
+
+| Type | Description | When it runs |
+|------|-------------|--------------|
+| `upgrade` | Standard migration | Always (if not already applied) |
+| `bootstrap` | Fresh install only | Only on new installations |
+
+### Creating Migrations
+
+```bash
+# Standard upgrade migration
+node migrate.js create add-user-preferences
+
+# Bootstrap migration (only runs on fresh installs)
+node migrate.js create initial-setup --bootstrap
+```
+
+---
+
+## OAuth Providers
+
+### Priority
 
 | Provider | Priority | Cost | Platform | Status |
 |----------|----------|------|----------|--------|
-| **Google** | HIGH | Free | Android + Web | Ready to configure |
-| **Apple** | LOW | $99/year | iOS only | Optional - decide later |
+| **Google** | HIGH | Free | Android + Web | Configured via migration |
+| **Apple** | LOW | $99/year | iOS only | Optional |
 
-### Recommendation
+### Configuration
 
-Start with **Google Sign-In only** for MVP:
-- Free Google Cloud account
-- Works on Android and Web
-- Most users have Google accounts
+OAuth providers are configured via migrations (see `014_oauth_providers.js`).
 
-Apple Sign-In can be added later if iOS release is decided.
+Set environment variables before running migrations:
+
+```bash
+export GOOGLE_CLIENT_ID=your-client-id
+export GOOGLE_CLIENT_SECRET=your-client-secret
+```
+
+See:
+- [GOOGLE_SIGNIN_SETUP.md](./GOOGLE_SIGNIN_SETUP.md) - Google OAuth setup
+- [APPLE_SIGNIN_SETUP.md](./APPLE_SIGNIN_SETUP.md) - Apple OAuth setup
 
 ---
 
@@ -45,92 +167,23 @@ Apple Sign-In can be added later if iOS release is decided.
 ```
 infrastructure/setup/
 ├── README.md                    # This file
-├── bootstrap-appwrite.sh        # Initial Appwrite setup (automated)
-├── configure-oauth.sh           # OAuth provider configuration (automated)
-├── GOOGLE_SIGNIN_SETUP.md       # Google OAuth setup guide
-├── APPLE_SIGNIN_SETUP.md        # Apple OAuth setup guide (optional)
-├── .google-credentials          # Google credentials (DO NOT COMMIT)
-├── .apple-credentials           # Apple credentials (DO NOT COMMIT)
-└── .env                         # Local environment (DO NOT COMMIT)
+├── bootstrap.sh                 # Main bootstrap script (IaC)
+├── bootstrap-appwrite.sh        # Legacy bootstrap (deprecated)
+├── configure-oauth.sh           # OAuth configuration helper
+├── GOOGLE_SIGNIN_SETUP.md       # Google OAuth guide
+├── APPLE_SIGNIN_SETUP.md        # Apple OAuth guide
+└── .google-credentials          # Google credentials (gitignored)
+
+infrastructure/migrations/
+├── migrate.js                   # Migration CLI
+├── .env                         # Migration config (gitignored)
+├── lib/                         # Migration system
+└── migrations/                  # Migration files
+    ├── 000_bootstrap_verify.js  # Bootstrap verification
+    ├── 001_initial_schema.js    # Initial collections
+    ├── ...
+    └── 014_oauth_providers.js   # OAuth configuration
 ```
-
----
-
-## Google Sign-In Setup
-
-### 1. Google Cloud Console (Manual)
-
-See [GOOGLE_SIGNIN_SETUP.md](./GOOGLE_SIGNIN_SETUP.md)
-
-Summary:
-1. Create Google Cloud project
-2. Configure OAuth consent screen
-3. Create OAuth 2.0 credentials
-4. Copy Client ID and Secret
-
-### 2. Create Credentials File
-
-```bash
-cat > .google-credentials << 'EOF'
-GOOGLE_CLIENT_ID=123456789-xxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxxx
-EOF
-```
-
-### 3. Run Configuration
-
-```bash
-./configure-oauth.sh
-```
-
----
-
-## Apple Sign-In Setup (Optional)
-
-> **Cost:** $99/year Apple Developer Program
-> **Decision:** To be made before iOS release
-
-See [APPLE_SIGNIN_SETUP.md](./APPLE_SIGNIN_SETUP.md) if iOS is decided.
-
----
-
-## Bootstrap Script Details
-
-`bootstrap-appwrite.sh` performs:
-
-1. **Creates admin session** - Uses Appwrite admin credentials
-2. **Creates project** - New FUG project in Appwrite
-3. **Creates API key** - For migrations and backend operations
-4. **Creates database** - fug-db database
-5. **Generates .env** - Configuration for migrations
-6. **Runs migrations** - All database schema migrations
-7. **Configures OAuth** - If credentials files exist
-
-### Usage
-
-```bash
-# Interactive mode (prompts for admin credentials)
-./bootstrap-appwrite.sh
-
-# With environment variables
-APPWRITE_ADMIN_EMAIL=admin@example.com \
-APPWRITE_ADMIN_PASSWORD=secret \
-./bootstrap-appwrite.sh
-
-# Production environment
-./bootstrap-appwrite.sh --env production
-```
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APPWRITE_ENDPOINT` | Appwrite API URL | `http://localhost:9000/v1` |
-| `APPWRITE_ADMIN_EMAIL` | Admin email | (prompted) |
-| `APPWRITE_ADMIN_PASSWORD` | Admin password | (prompted) |
-| `PROJECT_NAME` | Project name | `FUG` |
-| `PROJECT_ID` | Project ID | `fug-{timestamp}` |
-| `DATABASE_ID` | Database ID | `fug-db` |
 
 ---
 
@@ -138,62 +191,96 @@ APPWRITE_ADMIN_PASSWORD=secret \
 
 ### Files to NEVER commit
 
-Add to `.gitignore`:
-```gitignore
-# OAuth credentials
+These are in `.gitignore`:
+
+```
 infrastructure/setup/.google-credentials
 infrastructure/setup/.apple-credentials
 infrastructure/setup/.env
-
-# Private keys
+infrastructure/migrations/.env
 *.p8
 *.pem
 ```
 
+### Admin Password
+
+- Generated randomly (24 characters)
+- Displayed once at bootstrap completion
+- Never stored in files
+- Must be saved in a secure password manager
+
 ### Production Secrets
 
-For production, use:
+For production environments, use:
 - Environment variables
 - Docker secrets
 - HashiCorp Vault
-- Cloud provider secret managers (AWS Secrets Manager, GCP Secret Manager)
+- Cloud secret managers (AWS Secrets Manager, GCP Secret Manager)
 
 ---
 
 ## Troubleshooting
 
-### "Connection refused" error
-- Ensure Appwrite is running: `docker-compose up -d`
-- Check endpoint URL
-
-### "Unauthorized" error
-- Verify admin credentials
-- Check API key has required scopes
-
-### OAuth callback errors
-- Verify redirect URIs match exactly
-- Check provider console configuration
-
----
-
-## Migration System
-
-Migrations are in `../migrations/`. See that directory for:
-- `migrate.js` - Migration runner
-- `migrations/` - Migration files
+### "Cannot connect to Appwrite"
 
 ```bash
-# Check migration status
-cd ../migrations
-node migrate.js status
+# Check Appwrite is running
+docker-compose ps
 
-# Run pending migrations
-node migrate.js up
+# Start Appwrite
+docker-compose up -d
 
-# Rollback last batch
-node migrate.js down
+# Check logs
+docker-compose logs appwrite
+```
+
+### "Project already exists"
+
+If running bootstrap on an existing installation:
+- Run migrations only: `node migrate.js up`
+- Or continue bootstrap (will skip existing resources)
+
+### "Admin account already exists"
+
+Enter the existing admin password when prompted.
+If forgotten, reset via Appwrite console or recreate the instance.
+
+### Migration errors
+
+```bash
+# Check status
+node migrate.js status --env=development --verbose
+
+# Test connection
+node migrate.js test --env=development
 ```
 
 ---
 
-*Last updated: 2026-01-21*
+## Deployment Workflow
+
+### Development
+
+```bash
+cd infrastructure
+docker-compose up -d
+cd setup && ./bootstrap.sh
+```
+
+### Staging/Production
+
+```bash
+# Set environment variables
+export APPWRITE_ENDPOINT=https://api.fug-app.com/v1
+export GOOGLE_CLIENT_ID=...
+export GOOGLE_CLIENT_SECRET=...
+
+# Bootstrap (first time) or migrate (upgrades)
+./bootstrap.sh --env=production
+# or
+node migrate.js up --env=production
+```
+
+---
+
+*Last updated: 2026-01-22*

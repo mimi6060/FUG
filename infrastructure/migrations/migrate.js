@@ -76,11 +76,12 @@ async function getNextMigrationNumber() {
 program
   .name('fug-migrate')
   .description('FUG Database Migration System for Appwrite')
-  .version('1.0.0')
+  .version('1.1.0')
   .option('-e, --env <environment>', 'Environment (development, test, production)', 'development')
   .option('--dry-run', 'Show what would be done without making changes')
   .option('-v, --verbose', 'Show detailed output')
-  .option('--force', 'Force execution without confirmation prompts');
+  .option('--force', 'Force execution without confirmation prompts')
+  .option('--skip-bootstrap', 'Skip bootstrap migrations (only run upgrade migrations)');
 
 /**
  * Command: up - Apply pending migrations
@@ -98,10 +99,16 @@ program
       logger.success('Connection successful');
       logger.blank();
 
+      if (opts.skipBootstrap) {
+        logger.info('Skipping bootstrap migrations (--skip-bootstrap)');
+        logger.blank();
+      }
+
       const migrator = new Migrator({
         environment: opts.env,
         dryRun: opts.dryRun,
         verbose: opts.verbose,
+        includeBootstrap: !opts.skipBootstrap,
       });
 
       const result = await migrator.up({ force: opts.force });
@@ -213,7 +220,8 @@ program
 program
   .command('create <name>')
   .description('Create a new migration file')
-  .action(async (name) => {
+  .option('-b, --bootstrap', 'Create a bootstrap migration (only runs on fresh installs)')
+  .action(async (name, cmdOpts) => {
     const opts = program.opts();
 
     try {
@@ -229,15 +237,19 @@ program
       }
 
       const number = await getNextMigrationNumber();
-      const { filename, content } = createMigrationTemplate(cleanName, number);
+      const migrationType = cmdOpts.bootstrap ? 'bootstrap' : 'upgrade';
+      const { filename, content } = createMigrationTemplate(cleanName, number, { type: migrationType });
 
       const migrationsPath = join(__dirname, 'migrations');
       const filePath = join(migrationsPath, filename);
 
       await writeFile(filePath, content, 'utf-8');
 
-      logger.success(`Created migration: ${filename}`);
+      logger.success(`Created ${migrationType} migration: ${filename}`);
       logger.info(`Path: ${filePath}`);
+      if (cmdOpts.bootstrap) {
+        logger.info('Note: Bootstrap migrations only run on fresh installations.');
+      }
     } catch (error) {
       logger.error(error.message);
       if (opts.verbose) {

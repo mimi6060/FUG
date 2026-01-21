@@ -206,6 +206,100 @@ PHASE 4: Commit final
 
 ---
 
+## Regles Infrastructure Appwrite (OBLIGATOIRE)
+
+**REGLE CRITIQUE:** Aucune modification manuelle dans la console Appwrite. TOUT doit passer par migration.
+
+### Principe
+
+L'infrastructure Appwrite est geree exclusivement via le systeme de migrations. Cela garantit:
+- **Reproductibilite** sur nouveaux serveurs
+- **Historique** des changements via git
+- **Pas de clonage** de DB entre environnements
+- **Facilite les upgrades** staging -> production
+
+### Ce qui DOIT passer par migration
+
+| Element | Exemples |
+|---------|----------|
+| Collections | Creation, modification, suppression |
+| Attributs | Ajout de champs, modification de types |
+| Index | Index simples, composites, fulltext |
+| OAuth Providers | Google, Apple, configuration |
+| Storage Buckets | Creation, permissions |
+| Functions | Configuration (le code reste dans `functions/`) |
+
+### Comment creer une migration
+
+```bash
+cd infrastructure/migrations
+node migrate.js create mon-nom-de-migration
+```
+
+Cela cree un fichier `migrations/XXX-mon-nom-de-migration.js` avec la structure:
+
+```javascript
+export const up = async (db, appwrite) => {
+  // Code pour appliquer la migration
+};
+
+export const down = async (db, appwrite) => {
+  // Code pour annuler la migration (rollback)
+};
+```
+
+### Workflow Migration
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. DEVELOPPEMENT LOCAL                                 │
+│     cd infrastructure/migrations                        │
+│     node migrate.js create ma-migration                 │
+│     node migrate.js up --env=development                │
+│     # Tester que tout fonctionne                        │
+├─────────────────────────────────────────────────────────┤
+│  2. COMMIT                                              │
+│     git add migrations/                                 │
+│     git commit -m "feat(migration): add ma-migration"   │
+├─────────────────────────────────────────────────────────┤
+│  3. STAGING                                             │
+│     node migrate.js up --env=staging                    │
+│     # Valider en conditions reelles                     │
+├─────────────────────────────────────────────────────────┤
+│  4. PRODUCTION                                          │
+│     node migrate.js up --env=production                 │
+│     # Migration appliquee de facon identique            │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Commandes utiles
+
+```bash
+# Voir le statut des migrations
+node migrate.js status --env=development
+
+# Appliquer toutes les migrations en attente
+node migrate.js up --env=development
+
+# Annuler la derniere migration
+node migrate.js down --env=development
+
+# Creer une nouvelle migration
+node migrate.js create nom-de-la-migration
+```
+
+### Ce qui est INTERDIT
+
+- Creer une collection via la console Appwrite
+- Ajouter un attribut manuellement
+- Configurer OAuth via l'interface web
+- Creer un bucket storage via la console
+- Modifier les permissions directement dans Appwrite
+
+**Toute modification manuelle sera ecrasee lors de la prochaine migration ou perdue lors d'un nouveau deploiement.**
+
+---
+
 ## Conventions de Code
 
 ### Dart/Flutter

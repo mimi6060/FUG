@@ -4,7 +4,7 @@
 > **Epic:** Infrastructure Automation
 > **Effort:** Medium (2-3 days)
 > **Dependencies:** None (foundational)
-> **Status:** To Do
+> **Status:** Done
 
 ---
 
