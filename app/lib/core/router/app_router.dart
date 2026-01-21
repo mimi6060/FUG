@@ -14,6 +14,8 @@ import '../../features/profile/presentation/edit_profile_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/social/presentation/user_search_screen.dart';
 import '../../features/social/presentation/followers_list_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/settings/presentation/delete_account_screen.dart';
 
 /// Cle de navigation globale
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -208,7 +210,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         name: 'settings',
-        builder: (context, state) => const _SettingsScreen(),
+        builder: (context, state) => const SettingsScreen(),
+        routes: [
+          // Suppression de compte (RGPD)
+          GoRoute(
+            path: 'delete-account',
+            name: 'deleteAccount',
+            builder: (context, state) => const DeleteAccountScreen(),
+          ),
+        ],
       ),
     ],
 
@@ -216,87 +226,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => _ErrorScreen(error: state.error),
   );
 });
-
-/// Ecran de parametres temporaire
-class _SettingsScreen extends StatelessWidget {
-  const _SettingsScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Parametres'),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Compte'),
-            onTap: () => context.push('/profile/edit'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notifications'),
-            onTap: () {
-              // TODO: Parametres de notifications
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: const Text('Confidentialite'),
-            onTap: () {
-              // TODO: Parametres de confidentialite
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Aide'),
-            onTap: () {
-              // TODO: Ecran d'aide
-            },
-          ),
-          const Divider(),
-          Consumer(
-            builder: (context, ref, child) {
-              return ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text(
-                  'Deconnexion',
-                  style: TextStyle(color: Colors.red),
-                ),
-                onTap: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Deconnexion'),
-                      content: const Text(
-                        'Etes-vous sur de vouloir vous deconnecter?',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Annuler'),
-                        ),
-                        FilledButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Deconnexion'),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirmed == true) {
-                    await ref.read(authStateProvider.notifier).signOut();
-                  }
-                },
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Ecran d'erreur
 class _ErrorScreen extends StatelessWidget {
