@@ -5,6 +5,8 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
+  # MOD-004: Flutter 3.16+ required for Android 10+ / iOS 14+ support
+  flutter: '>=3.16.0'
 
 dependencies:
   flutter:

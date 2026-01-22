@@ -52,10 +52,37 @@ flutter run
 
 ### Pre-requis
 
-- Flutter SDK >= 3.2.0
+- Flutter SDK >= 3.16.0
 - Dart SDK >= 3.2.0
 - Docker (pour Appwrite local)
 - Compte Appwrite Cloud (ou instance self-hosted)
+
+### Versions OS Minimales (MOD-004)
+
+| Plateforme | Version Minimum | API Level | Notes |
+|------------|-----------------|-----------|-------|
+| **Android** | 10.0 (Q) | API 29 | Scoped storage, privacy enhancements |
+| **iOS** | 14.0 | N/A | App Tracking Transparency, widgets |
+| **Web** | Navigateurs modernes | N/A | Chrome, Firefox, Safari, Edge |
+
+> **Justification (2026):** Ces versions garantissent la securite et l'acces aux fonctionnalites modernes. Market share: Android 10+ = 85%+, iOS 14+ = 95%+.
+
+#### Configuration des plateformes natives
+
+Lors de la premiere generation des plateformes (`flutter create --platforms=android,ios`):
+
+**Android** (`android/app/build.gradle`):
+```groovy
+defaultConfig {
+    minSdk = 29      // Android 10
+    targetSdk = 34   // Android 14
+}
+```
+
+**iOS** (`ios/Podfile`):
+```ruby
+platform :ios, '14.0'
+```
 
 ---
 
