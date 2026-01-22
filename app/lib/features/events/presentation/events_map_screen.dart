@@ -204,7 +204,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                 border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withAlpha(77),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -516,7 +516,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                           border: Border.all(color: Colors.white, width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.4),
+                              color: Colors.blue.withAlpha(102),
                               blurRadius: 10,
                               spreadRadius: 3,
                             ),
@@ -548,7 +548,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                         border: Border.all(color: Colors.white, width: 3),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withAlpha(77),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -588,7 +588,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha(26),
                         blurRadius: 8,
                       ),
                     ],
@@ -879,7 +879,7 @@ class _EventPreviewSheet extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: event.isFree
-                            ? Colors.green.withOpacity(0.1)
+                            ? Colors.green.withAlpha(26)
                             : theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -960,7 +960,7 @@ class _EventPreviewSheet extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
+                          color: Colors.red.withAlpha(26),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
