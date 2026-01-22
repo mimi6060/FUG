@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Privacy policy screen - RGPD compliant
@@ -19,17 +20,18 @@ class PrivacyPolicyScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Politique de confidentialite'),
+        title: Text(l10n.ppTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.download),
-            tooltip: 'Telecharger en PDF',
-            onPressed: () => _downloadPdf(context),
+            tooltip: l10n.ppDownloadPdf,
+            onPressed: () => _downloadPdf(context, l10n),
           ),
         ],
       ),
@@ -43,37 +45,28 @@ class PrivacyPolicyScreen extends ConsumerWidget {
               version: policyVersion,
               lastUpdated: lastUpdated,
               colorScheme: colorScheme,
+              l10n: l10n,
             ),
             const SizedBox(height: 24),
 
             // Table of contents
-            _TableOfContents(theme: theme, colorScheme: colorScheme),
+            _TableOfContents(theme: theme, colorScheme: colorScheme, l10n: l10n),
             const SizedBox(height: 24),
 
             // Section 1: Who are we?
             _PolicySection(
               id: 'responsable',
-              title: '1. Qui sommes-nous ?',
+              title: l10n.ppSection1Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'FUG (Fous-toi Une Guinze) est une application mobile de reseau social geolocalisee, '
-                      'editee par The Develobeers.',
-                ),
+                _PolicyParagraph(text: l10n.ppSection1Content),
                 const SizedBox(height: 12),
                 _InfoCard(
                   colorScheme: colorScheme,
-                  children: const [
-                    _InfoRow(label: 'Editeur', value: 'The Develobeers'),
-                    _InfoRow(
-                      label: 'Contact',
-                      value: 'privacy@fug.app',
-                    ),
-                    _InfoRow(
-                      label: 'Siege social',
-                      value: 'Belgique',
-                    ),
+                  children: [
+                    _InfoRow(label: l10n.ppPublisher, value: 'The Develobeers'),
+                    _InfoRow(label: l10n.ppContact, value: 'privacy@fug.app'),
+                    _InfoRow(label: l10n.ppHeadquarters, value: 'Belgique'),
                   ],
                 ),
               ],
@@ -82,107 +75,70 @@ class PrivacyPolicyScreen extends ConsumerWidget {
             // Section 2: What data do we collect?
             _PolicySection(
               id: 'donnees',
-              title: '2. Quelles donnees collectons-nous ?',
+              title: l10n.ppSection2Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'Nous collectons differentes categories de donnees pour fournir notre service:',
-                ),
+                _PolicyParagraph(text: l10n.ppSection2Content),
                 const SizedBox(height: 12),
-                _DataTable(colorScheme: colorScheme),
+                _DataTable(colorScheme: colorScheme, l10n: l10n),
               ],
             ),
 
             // Section 3: Why do we collect this data?
             _PolicySection(
               id: 'finalites',
-              title: '3. Pourquoi collectons-nous ces donnees ?',
+              title: l10n.ppSection3Title,
               theme: theme,
-              children: const [
-                _PolicyParagraph(
-                  text: 'Vos donnees sont utilisees pour:',
-                ),
-                SizedBox(height: 8),
-                _BulletPoint(text: 'Gerer votre compte utilisateur'),
-                _BulletPoint(
-                  text:
-                      'Permettre le fonctionnement du service (evenements, carte, recherche)',
-                ),
-                _BulletPoint(
-                  text:
-                      'Vous envoyer des notifications relatives a vos activites',
-                ),
-                _BulletPoint(
-                  text:
-                      'Ameliorer notre service via des statistiques anonymes (avec votre consentement)',
-                ),
-                _BulletPoint(
-                  text: 'Assurer la securite et prevenir les fraudes',
-                ),
+              children: [
+                _PolicyParagraph(text: l10n.ppSection3Content),
+                const SizedBox(height: 8),
+                _BulletPoint(text: l10n.ppSection3Item1),
+                _BulletPoint(text: l10n.ppSection3Item2),
+                _BulletPoint(text: l10n.ppSection3Item3),
+                _BulletPoint(text: l10n.ppSection3Item4),
+                _BulletPoint(text: l10n.ppSection3Item5),
               ],
             ),
 
             // Section 4: Legal basis
             _PolicySection(
               id: 'base-legale',
-              title: '4. Sur quelle base legale ?',
+              title: l10n.ppSection4Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'Conformement au RGPD, chaque traitement de donnees repose sur une base legale:',
-                ),
+                _PolicyParagraph(text: l10n.ppSection4Content),
                 const SizedBox(height: 12),
-                _LegalBasisTable(colorScheme: colorScheme),
+                _LegalBasisTable(colorScheme: colorScheme, l10n: l10n),
               ],
             ),
 
             // Section 5: Retention periods
             _PolicySection(
               id: 'conservation',
-              title: '5. Combien de temps conservons-nous vos donnees ?',
+              title: l10n.ppSection5Title,
               theme: theme,
               children: [
-                _RetentionTable(colorScheme: colorScheme),
+                _RetentionTable(colorScheme: colorScheme, l10n: l10n),
               ],
             ),
 
             // Section 6: Data sharing
             _PolicySection(
               id: 'destinataires',
-              title: '6. Avec qui partageons-nous vos donnees ?',
+              title: l10n.ppSection6Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'Nous ne vendons jamais vos donnees personnelles. Elles peuvent etre partagees avec:',
-                ),
+                _PolicyParagraph(text: l10n.ppSection6Content),
                 const SizedBox(height: 8),
-                const _BulletPoint(
-                  text:
-                      'Notre hebergeur (Appwrite) pour le stockage securise des donnees',
-                ),
-                const _BulletPoint(
-                  text:
-                      'Les autres utilisateurs de FUG (uniquement les informations de profil public)',
-                ),
-                const _BulletPoint(
-                  text:
-                      'Les autorites competentes si requis par la loi',
-                ),
+                _BulletPoint(text: l10n.ppSection6Item1),
+                _BulletPoint(text: l10n.ppSection6Item2),
+                _BulletPoint(text: l10n.ppSection6Item3),
                 const SizedBox(height: 12),
                 _InfoCard(
                   colorScheme: colorScheme,
-                  children: const [
-                    _InfoRow(
-                      label: 'Transfert hors UE',
-                      value: 'Non',
-                    ),
-                    _InfoRow(
-                      label: 'Vente de donnees',
-                      value: 'Jamais',
-                    ),
+                  children: [
+                    _InfoRow(label: l10n.ppTransferOutsideEU, value: l10n.ppTransferOutsideEUValue),
+                    _InfoRow(label: l10n.ppDataSale, value: l10n.ppDataSaleValue),
                   ],
                 ),
               ],
@@ -191,89 +147,66 @@ class PrivacyPolicyScreen extends ConsumerWidget {
             // Section 7: User rights
             _PolicySection(
               id: 'droits',
-              title: '7. Quels sont vos droits ?',
+              title: l10n.ppSection7Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'Conformement au RGPD, vous disposez des droits suivants:',
-                ),
+                _PolicyParagraph(text: l10n.ppSection7Content),
                 const SizedBox(height: 12),
-                _UserRightsCard(colorScheme: colorScheme, theme: theme),
+                _UserRightsCard(colorScheme: colorScheme, theme: theme, l10n: l10n),
                 const SizedBox(height: 16),
-                const _PolicyParagraph(
-                  text:
-                      'Pour exercer vos droits, contactez-nous a privacy@fug.app ou utilisez '
-                      'les fonctionnalites disponibles dans les parametres de l\'application.',
-                ),
+                _PolicyParagraph(text: l10n.ppSection7Footer),
               ],
             ),
 
             // Section 8: Cookies and trackers
             _PolicySection(
               id: 'cookies',
-              title: '8. Cookies et traceurs',
+              title: l10n.ppSection8Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'L\'application mobile FUG utilise des identifiants techniques pour fonctionner:',
-                ),
+                _PolicyParagraph(text: l10n.ppSection8Content),
                 const SizedBox(height: 12),
-                _CookiesTable(colorScheme: colorScheme),
+                _CookiesTable(colorScheme: colorScheme, l10n: l10n),
               ],
             ),
 
             // Section 9: Security
             _PolicySection(
               id: 'securite',
-              title: '9. Comment protegeoons-nous vos donnees ?',
+              title: l10n.ppSection9Title,
               theme: theme,
-              children: const [
-                _PolicyParagraph(
-                  text: 'Nous mettons en oeuvre des mesures de securite appropriees:',
-                ),
-                SizedBox(height: 8),
-                _BulletPoint(text: 'Chiffrement des donnees en transit (HTTPS/TLS)'),
-                _BulletPoint(text: 'Chiffrement des mots de passe (bcrypt)'),
-                _BulletPoint(text: 'Controle d\'acces strict aux donnees'),
-                _BulletPoint(text: 'Journalisation des acces'),
-                _BulletPoint(text: 'Mises a jour regulieres de securite'),
+              children: [
+                _PolicyParagraph(text: l10n.ppSection9Content),
+                const SizedBox(height: 8),
+                _BulletPoint(text: l10n.ppSection9Item1),
+                _BulletPoint(text: l10n.ppSection9Item2),
+                _BulletPoint(text: l10n.ppSection9Item3),
+                _BulletPoint(text: l10n.ppSection9Item4),
+                _BulletPoint(text: l10n.ppSection9Item5),
               ],
             ),
 
             // Section 10: Modifications
             _PolicySection(
               id: 'modifications',
-              title: '10. Modifications de cette politique',
+              title: l10n.ppSection10Title,
               theme: theme,
-              children: const [
-                _PolicyParagraph(
-                  text:
-                      'Nous pouvons mettre a jour cette politique de confidentialite. '
-                      'En cas de modification substantielle, vous serez informe(e) par '
-                      'notification dans l\'application au moins 30 jours avant l\'entree en vigueur.',
-                ),
-                SizedBox(height: 12),
-                _PolicyParagraph(
-                  text:
-                      'L\'historique des versions est disponible sur demande.',
-                ),
+              children: [
+                _PolicyParagraph(text: l10n.ppSection10Content1),
+                const SizedBox(height: 12),
+                _PolicyParagraph(text: l10n.ppSection10Content2),
               ],
             ),
 
             // Section 11: Contact
             _PolicySection(
               id: 'contact',
-              title: '11. Nous contacter',
+              title: l10n.ppSection11Title,
               theme: theme,
               children: [
-                const _PolicyParagraph(
-                  text:
-                      'Pour toute question concernant cette politique ou vos donnees personnelles:',
-                ),
+                _PolicyParagraph(text: l10n.ppSection11Content),
                 const SizedBox(height: 12),
-                _ContactCard(colorScheme: colorScheme),
+                _ContactCard(colorScheme: colorScheme, l10n: l10n),
               ],
             ),
 
@@ -282,9 +215,9 @@ class PrivacyPolicyScreen extends ConsumerWidget {
             // Download PDF button
             Center(
               child: FilledButton.icon(
-                onPressed: () => _downloadPdf(context),
+                onPressed: () => _downloadPdf(context, l10n),
                 icon: const Icon(Icons.download),
-                label: const Text('Telecharger en PDF'),
+                label: Text(l10n.ppDownloadPdf),
               ),
             ),
 
@@ -293,8 +226,8 @@ class PrivacyPolicyScreen extends ConsumerWidget {
             // Version history link
             Center(
               child: TextButton(
-                onPressed: () => _showVersionHistory(context),
-                child: const Text('Voir l\'historique des versions'),
+                onPressed: () => _showVersionHistory(context, l10n),
+                child: Text(l10n.ppVersionHistory),
               ),
             ),
 
@@ -305,18 +238,18 @@ class PrivacyPolicyScreen extends ConsumerWidget {
     );
   }
 
-  void _downloadPdf(BuildContext context) {
+  void _downloadPdf(BuildContext context, AppLocalizations l10n) {
     // TODO: Implement PDF download
     // For MVP, show coming soon message
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Telechargement PDF bientot disponible'),
+      SnackBar(
+        content: Text(l10n.ppDownloadPdfSoon),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  void _showVersionHistory(BuildContext context) {
+  void _showVersionHistory(BuildContext context, AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -326,14 +259,14 @@ class PrivacyPolicyScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Historique des versions',
+              l10n.ppVersionHistory,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            const ListTile(
-              leading: Icon(Icons.check_circle, color: Colors.green),
-              title: Text('Version 1.0'),
-              subtitle: Text('21 janvier 2026 - Version initiale'),
+            ListTile(
+              leading: const Icon(Icons.check_circle, color: Colors.green),
+              title: Text(l10n.ppVersion('1.0')),
+              subtitle: Text('21 janvier 2026 - ${l10n.ppInitialVersion}'),
             ),
             const SizedBox(height: 16),
           ],
@@ -351,11 +284,13 @@ class _VersionBanner extends StatelessWidget {
   final String version;
   final String lastUpdated;
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
   const _VersionBanner({
     required this.version,
     required this.lastUpdated,
     required this.colorScheme,
+    required this.l10n,
   });
 
   @override
@@ -376,14 +311,14 @@ class _VersionBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Version $version',
+                  l10n.ppVersion(version),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimaryContainer,
                   ),
                 ),
                 Text(
-                  'Derniere mise a jour: $lastUpdated',
+                  l10n.ppLastUpdated(lastUpdated),
                   style: TextStyle(
                     fontSize: 12,
                     color: colorScheme.onPrimaryContainer.withAlpha(204),
@@ -401,10 +336,12 @@ class _VersionBanner extends StatelessWidget {
 class _TableOfContents extends StatelessWidget {
   final ThemeData theme;
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
   const _TableOfContents({
     required this.theme,
     required this.colorScheme,
+    required this.l10n,
   });
 
   @override
@@ -419,23 +356,23 @@ class _TableOfContents extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Sommaire',
+            l10n.ppTableOfContents,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
-          const _TocItem(number: '1', title: 'Qui sommes-nous ?'),
-          const _TocItem(number: '2', title: 'Quelles donnees collectons-nous ?'),
-          const _TocItem(number: '3', title: 'Pourquoi collectons-nous ces donnees ?'),
-          const _TocItem(number: '4', title: 'Sur quelle base legale ?'),
-          const _TocItem(number: '5', title: 'Combien de temps conservons-nous vos donnees ?'),
-          const _TocItem(number: '6', title: 'Avec qui partageons-nous vos donnees ?'),
-          const _TocItem(number: '7', title: 'Quels sont vos droits ?'),
-          const _TocItem(number: '8', title: 'Cookies et traceurs'),
-          const _TocItem(number: '9', title: 'Comment protegeons-nous vos donnees ?'),
-          const _TocItem(number: '10', title: 'Modifications de cette politique'),
-          const _TocItem(number: '11', title: 'Nous contacter'),
+          _TocItem(number: '1', title: l10n.ppSection1Title.substring(3)),
+          _TocItem(number: '2', title: l10n.ppSection2Title.substring(3)),
+          _TocItem(number: '3', title: l10n.ppSection3Title.substring(3)),
+          _TocItem(number: '4', title: l10n.ppSection4Title.substring(3)),
+          _TocItem(number: '5', title: l10n.ppSection5Title.substring(3)),
+          _TocItem(number: '6', title: l10n.ppSection6Title.substring(3)),
+          _TocItem(number: '7', title: l10n.ppSection7Title.substring(3)),
+          _TocItem(number: '8', title: l10n.ppSection8Title.substring(3)),
+          _TocItem(number: '9', title: l10n.ppSection9Title.substring(3)),
+          _TocItem(number: '10', title: l10n.ppSection10Title.substring(4)),
+          _TocItem(number: '11', title: l10n.ppSection11Title.substring(4)),
         ],
       ),
     );
@@ -597,8 +534,9 @@ class _InfoRow extends StatelessWidget {
 
 class _DataTable extends StatelessWidget {
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
-  const _DataTable({required this.colorScheme});
+  const _DataTable({required this.colorScheme, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -609,29 +547,29 @@ class _DataTable extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _DataTableHeader(colorScheme: colorScheme),
+          _DataTableHeader(colorScheme: colorScheme, l10n: l10n),
           _DataTableRow(
-            category: 'Identite',
-            data: 'Email, pseudo, nom',
-            purpose: 'Compte utilisateur',
+            category: l10n.ppDataIdentity,
+            data: l10n.ppDataIdentityData,
+            purpose: l10n.ppDataIdentityPurpose,
             colorScheme: colorScheme,
           ),
           _DataTableRow(
-            category: 'Profil',
-            data: 'Photo, bio',
-            purpose: 'Personnalisation',
+            category: l10n.ppDataProfile,
+            data: l10n.ppDataProfileData,
+            purpose: l10n.ppDataProfilePurpose,
             colorScheme: colorScheme,
           ),
           _DataTableRow(
-            category: 'Localisation',
-            data: 'Position GPS',
-            purpose: 'Fonctionnalite principale',
+            category: l10n.ppDataLocation,
+            data: l10n.ppDataLocationData,
+            purpose: l10n.ppDataLocationPurpose,
             colorScheme: colorScheme,
           ),
           _DataTableRow(
-            category: 'Activite',
-            data: 'Evenements, participations',
-            purpose: 'Service',
+            category: l10n.ppDataActivity,
+            data: l10n.ppDataActivityData,
+            purpose: l10n.ppDataActivityPurpose,
             colorScheme: colorScheme,
             isLast: true,
           ),
@@ -643,8 +581,9 @@ class _DataTable extends StatelessWidget {
 
 class _DataTableHeader extends StatelessWidget {
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
-  const _DataTableHeader({required this.colorScheme});
+  const _DataTableHeader({required this.colorScheme, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -654,27 +593,27 @@ class _DataTableHeader extends StatelessWidget {
         color: colorScheme.primaryContainer.withAlpha(77),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Expanded(
             flex: 2,
             child: Text(
-              'Categorie',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              l10n.ppDataCategory,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
-              'Donnees',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              l10n.ppDataData,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
-              'Finalite',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              l10n.ppDataPurpose,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -720,8 +659,9 @@ class _DataTableRow extends StatelessWidget {
 
 class _LegalBasisTable extends StatelessWidget {
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
-  const _LegalBasisTable({required this.colorScheme});
+  const _LegalBasisTable({required this.colorScheme, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -738,41 +678,41 @@ class _LegalBasisTable extends StatelessWidget {
               color: colorScheme.primaryContainer.withAlpha(77),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    'Traitement',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppLegalTreatment,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   child: Text(
-                    'Base legale',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppLegalBasis,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
           ),
           _LegalBasisRow(
-            treatment: 'Gestion du compte',
-            basis: 'Execution du contrat',
+            treatment: l10n.ppLegalAccount,
+            basis: l10n.ppLegalAccountBasis,
             colorScheme: colorScheme,
           ),
           _LegalBasisRow(
-            treatment: 'Geolocalisation',
-            basis: 'Consentement',
+            treatment: l10n.ppLegalGeo,
+            basis: l10n.ppLegalGeoBasis,
             colorScheme: colorScheme,
           ),
           _LegalBasisRow(
-            treatment: 'Analytics',
-            basis: 'Consentement',
+            treatment: l10n.ppLegalAnalytics,
+            basis: l10n.ppLegalAnalyticsBasis,
             colorScheme: colorScheme,
           ),
           _LegalBasisRow(
-            treatment: 'Securite',
-            basis: 'Interet legitime',
+            treatment: l10n.ppLegalSecurity,
+            basis: l10n.ppLegalSecurityBasis,
             colorScheme: colorScheme,
             isLast: true,
           ),
@@ -816,8 +756,9 @@ class _LegalBasisRow extends StatelessWidget {
 
 class _RetentionTable extends StatelessWidget {
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
-  const _RetentionTable({required this.colorScheme});
+  const _RetentionTable({required this.colorScheme, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -834,41 +775,41 @@ class _RetentionTable extends StatelessWidget {
               color: colorScheme.primaryContainer.withAlpha(77),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    'Donnee',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppRetentionData,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   child: Text(
-                    'Duree',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppRetentionDuration,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
           ),
           _RetentionRow(
-            data: 'Compte actif',
-            duration: 'Duree du compte',
+            data: l10n.ppRetentionActive,
+            duration: l10n.ppRetentionActiveDuration,
             colorScheme: colorScheme,
           ),
           _RetentionRow(
-            data: 'Compte supprime',
-            duration: '30 jours puis anonymisation',
+            data: l10n.ppRetentionDeleted,
+            duration: l10n.ppRetentionDeletedDuration,
             colorScheme: colorScheme,
           ),
           _RetentionRow(
-            data: 'Logs techniques',
-            duration: '12 mois',
+            data: l10n.ppRetentionLogs,
+            duration: l10n.ppRetentionLogsDuration,
             colorScheme: colorScheme,
           ),
           _RetentionRow(
-            data: 'Donnees anonymisees',
-            duration: 'Illimitee',
+            data: l10n.ppRetentionAnonymized,
+            duration: l10n.ppRetentionAnonymizedDuration,
             colorScheme: colorScheme,
             isLast: true,
           ),
@@ -913,10 +854,12 @@ class _RetentionRow extends StatelessWidget {
 class _UserRightsCard extends StatelessWidget {
   final ColorScheme colorScheme;
   final ThemeData theme;
+  final AppLocalizations l10n;
 
   const _UserRightsCard({
     required this.colorScheme,
     required this.theme,
+    required this.l10n,
   });
 
   @override
@@ -930,38 +873,38 @@ class _UserRightsCard extends StatelessWidget {
         children: [
           _RightTile(
             icon: Icons.visibility,
-            title: 'Droit d\'acces',
-            description: 'Obtenir une copie de vos donnees',
+            title: l10n.ppRightAccess,
+            description: l10n.ppRightAccessDesc,
             colorScheme: colorScheme,
           ),
           _RightTile(
             icon: Icons.edit,
-            title: 'Droit de rectification',
-            description: 'Corriger vos informations',
+            title: l10n.ppRightRectification,
+            description: l10n.ppRightRectificationDesc,
             colorScheme: colorScheme,
           ),
           _RightTile(
             icon: Icons.delete,
-            title: 'Droit a l\'effacement',
-            description: 'Supprimer votre compte et vos donnees',
+            title: l10n.ppRightErasure,
+            description: l10n.ppRightErasureDesc,
             colorScheme: colorScheme,
           ),
           _RightTile(
             icon: Icons.download,
-            title: 'Droit a la portabilite',
-            description: 'Exporter vos donnees',
+            title: l10n.ppRightPortability,
+            description: l10n.ppRightPortabilityDesc,
             colorScheme: colorScheme,
           ),
           _RightTile(
             icon: Icons.block,
-            title: 'Droit d\'opposition',
-            description: 'Refuser certains traitements',
+            title: l10n.ppRightObjection,
+            description: l10n.ppRightObjectionDesc,
             colorScheme: colorScheme,
           ),
           _RightTile(
             icon: Icons.undo,
-            title: 'Retrait du consentement',
-            description: 'Modifier vos preferences a tout moment',
+            title: l10n.ppRightWithdraw,
+            description: l10n.ppRightWithdrawDesc,
             colorScheme: colorScheme,
             isLast: true,
           ),
@@ -1025,8 +968,9 @@ class _RightTile extends StatelessWidget {
 
 class _CookiesTable extends StatelessWidget {
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
-  const _CookiesTable({required this.colorScheme});
+  const _CookiesTable({required this.colorScheme, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -1043,48 +987,48 @@ class _CookiesTable extends StatelessWidget {
               color: colorScheme.primaryContainer.withAlpha(77),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'Traceur',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppCookieTracker,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 3,
                   child: Text(
-                    'Finalite',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppCookiePurpose,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 2,
                   child: Text(
-                    'Consentement',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    l10n.ppCookieConsent,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
           ),
           _CookieRow(
-            tracker: 'Session',
-            purpose: 'Authentification',
-            consent: 'Non requis',
+            tracker: l10n.ppCookieSession,
+            purpose: l10n.ppCookieSessionPurpose,
+            consent: l10n.ppCookieSessionConsent,
             colorScheme: colorScheme,
           ),
           _CookieRow(
-            tracker: 'Preferences',
-            purpose: 'Theme, langue',
-            consent: 'Non requis',
+            tracker: l10n.ppCookiePreferences,
+            purpose: l10n.ppCookiePreferencesPurpose,
+            consent: l10n.ppCookiePreferencesConsent,
             colorScheme: colorScheme,
           ),
           _CookieRow(
-            tracker: 'Analytics',
-            purpose: 'Statistiques',
-            consent: 'Requis',
+            tracker: l10n.ppCookieAnalytics,
+            purpose: l10n.ppCookieAnalyticsPurpose,
+            consent: l10n.ppCookieAnalyticsConsent,
             colorScheme: colorScheme,
             isLast: true,
           ),
@@ -1131,8 +1075,9 @@ class _CookieRow extends StatelessWidget {
 
 class _ContactCard extends StatelessWidget {
   final ColorScheme colorScheme;
+  final AppLocalizations l10n;
 
-  const _ContactCard({required this.colorScheme});
+  const _ContactCard({required this.colorScheme, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -1149,14 +1094,14 @@ class _ContactCard extends StatelessWidget {
             children: [
               Icon(Icons.email, color: colorScheme.primary),
               const SizedBox(width: 12),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Email',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    l10n.ppContactEmail,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
-                  Text('privacy@fug.app'),
+                  const Text('privacy@fug.app'),
                 ],
               ),
             ],
@@ -1166,15 +1111,15 @@ class _ContactCard extends StatelessWidget {
             children: [
               Icon(Icons.timer, color: colorScheme.primary),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Delai de reponse',
-                      style: TextStyle(fontWeight: FontWeight.w500),
+                      l10n.ppContactDelay,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
-                    Text('Nous vous repondrons sous 30 jours maximum'),
+                    Text(l10n.ppContactDelayValue),
                   ],
                 ),
               ),
