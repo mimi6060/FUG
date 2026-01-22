@@ -133,76 +133,146 @@ curl -X PATCH "http://localhost:8088/api/v1/workspaces/fug/projects/PROJECT_ID/i
 
 ## Orchestration BMAD Multi-Agents (OBLIGATOIRE)
 
-**RÈGLE CRITIQUE:** Quand plusieurs agents sont lancés pour implémenter des features, ils DOIVENT suivre l'orchestration BMAD.
+**RÈGLE CRITIQUE:** Quand plusieurs agents sont lancés pour implémenter des features, ils DOIVENT suivre l'orchestration BMAD avec le tool `Task` et des agents PO.
+
+### Comment Lancer des Agents BMAD
+
+**IMPORTANT:** Utiliser le tool `Task` avec `subagent_type="general-purpose"` pour créer des agents PO qui orchestrent le workflow BMAD.
+
+```
+Pour chaque feature à implémenter:
+1. Créer un git worktree dédié AVANT de lancer l'agent
+2. Lancer un agent PO via Task tool qui travaille dans ce worktree
+3. L'agent PO exécute les 4 phases BMAD (Analyst → Dev → QA → Commit)
+```
+
+### Création des Worktrees (AVANT lancement agents)
+
+```bash
+# Créer le répertoire parent si nécessaire
+mkdir -p /home/knabo/dev/FUG-worktrees
+
+# Créer un worktree par feature
+git worktree add /home/knabo/dev/FUG-worktrees/feature-name -b feature/feature-name develop
+```
+
+**IMPORTANT:** Les worktrees DOIVENT être créés AVANT de lancer les agents Task.
+
+### Permissions des Sub-Agents (CRITIQUE)
+
+**RÈGLE:** Les agents Task (PO) doivent avoir les permissions d'écriture sur leur worktree.
+
+Dans le prompt du Task agent, inclure explicitement:
+```
+PERMISSIONS REQUISES:
+- Write: autorisé sur /home/knabo/dev/FUG-worktrees/<feature>/
+- Edit: autorisé sur /home/knabo/dev/FUG-worktrees/<feature>/
+- Bash: autorisé pour git, npm, flutter dans le worktree
+```
+
+Si les permissions sont refusées, l'agent DOIT:
+1. Signaler le problème dans son output
+2. Fournir le code complet à créer manuellement
+3. NE PAS abandonner - continuer avec les autres phases
 
 ### Workflow Obligatoire par Feature
 
-Chaque feature doit être gérée par un **Agent Lead (Orchestrateur)** qui délègue à une équipe:
+Chaque feature doit être gérée par un **Agent PO (Product Owner)** qui exécute les phases:
 
 ```
 ┌─────────────────────────────────────────┐
-│           AGENT LEAD (Orchestrateur)    │
-│  - Ne code PAS lui-même                 │
-│  - Coordonne les phases                 │
-│  - Valide les livrables                 │
+│           AGENT PO (via Task tool)      │
+│  - Travaille dans son worktree dédié    │
+│  - Exécute les 4 phases séquentiellement│
+│  - A les permissions d'écriture         │
 ├─────────────────────────────────────────┤
 │                                         │
 │  PHASE 1: ANALYST                       │
-│  └─► Agent qui analyse specs et code    │
-│      existant, produit rapport          │
+│  └─► Lire specs, analyser code existant │
+│      Produire rapport d'analyse         │
 │                                         │
 │  PHASE 2: DEV                           │
-│  └─► Agent qui implémente selon specs   │
-│      et rapport analyst                 │
+│  └─► Implémenter selon specs            │
+│      Écrire dans le worktree            │
 │                                         │
 │  PHASE 3: QA                            │
-│  └─► Agent qui écrit tests, vérifie     │
-│      conformité, produit rapport QA     │
+│  └─► Écrire tests, vérifier conformité  │
+│      Produire rapport QA                │
 │                                         │
 │  PHASE 4: COMMIT                        │
-│  └─► Commit final après validation QA   │
+│  └─► git add, git commit dans worktree  │
 │                                         │
 └─────────────────────────────────────────┘
 ```
 
-### Règles pour les Agents
+### Règles pour les Agents PO
 
-1. **Lire CLAUDE.md** - Chaque agent DOIT lire et respecter ce fichier
-2. **Travailler dans le bon worktree** - Utiliser le worktree Git assigné
+1. **Lire CLAUDE.md** - Chaque agent DOIT lire `/home/knabo/dev/FUG/CLAUDE.md`
+2. **Travailler dans le bon worktree** - Utiliser UNIQUEMENT le worktree assigné
 3. **Suivre Clean Architecture** - data/domain/presentation
 4. **Utiliser Riverpod** - Pour le state management
 5. **Écrire des tests** - Phase QA obligatoire
-6. **Ne pas merger** - Seul le CTO/PO merge après review
-7. **Synchroniser Plane** - Mettre à jour le statut des stories
+6. **Ne pas merger** - Seul le CTO/Orchestrateur merge après review
+7. **Commit dans le worktree** - Pas de push, juste commit local
 
 ### Lancement d'Agents en Parallèle
 
 Quand on lance plusieurs features en parallèle:
 
 ```bash
-# Créer les worktrees
-git worktree add ../FUG-worktrees/feature-xxx -b feature/xxx develop
+# 1. Créer TOUS les worktrees d'abord
+git worktree add /home/knabo/dev/FUG-worktrees/mod-001 -b feature/mod-001 develop
+git worktree add /home/knabo/dev/FUG-worktrees/mod-002 -b feature/mod-002 develop
+git worktree add /home/knabo/dev/FUG-worktrees/us-020 -b feature/us-020 develop
 
+# 2. Lancer les agents Task en parallèle (dans un seul message avec plusieurs tool calls)
 # Chaque agent travaille dans son worktree isolé
 # Pas de conflits entre agents
 ```
 
-### Template Prompt pour Agent Lead
+### Template Prompt pour Agent PO (Task tool)
 
 ```
-Tu es un Tech Lead BMAD qui orchestre une équipe d'agents.
+Tu es un Agent PO BMAD qui implémente une feature complète.
 
-WORKTREE: /chemin/vers/worktree
-BRANCH: feature/xxx
-FEATURE: Description
+WORKTREE: /home/knabo/dev/FUG-worktrees/<feature-name>
+BRANCH: feature/<feature-name>
+FEATURE: <Description de la feature>
+SPEC: <Chemin vers la spec dans _bmad-output/>
 
-TU NE CODES PAS. Tu délègues à des agents spécialisés.
+IMPORTANT: Tu dois d'abord lire /home/knabo/dev/FUG/CLAUDE.md pour les conventions.
 
-PHASE 1: Lance Agent Analyst pour analyser
-PHASE 2: Lance Agent Dev pour implémenter
-PHASE 3: Lance Agent QA pour tester
-PHASE 4: Commit final
+Tu travailles UNIQUEMENT dans ton worktree. Tu as les permissions d'écriture.
+
+PHASE 1 - ANALYST:
+- Lis la spec de la feature
+- Analyse le code existant dans le repo principal
+- Produis un rapport d'analyse
+
+PHASE 2 - DEV:
+- Implémente la feature dans ton worktree
+- Suis Clean Architecture (data/domain/presentation)
+- Crée les migrations si nécessaire
+
+PHASE 3 - QA:
+- Écris les tests unitaires
+- Vérifie la conformité avec la spec
+- Produis un rapport QA
+
+PHASE 4 - COMMIT:
+- git add des fichiers modifiés
+- git commit avec message conventionnel
+- NE PAS push (l'orchestrateur s'en charge)
 ```
+
+### Après Complétion des Agents
+
+L'orchestrateur (session principale) doit:
+1. Vérifier les outputs de chaque agent
+2. Merger les branches des worktrees vers develop
+3. Résoudre les conflits éventuels
+4. Nettoyer les worktrees (`git worktree remove`)
+5. Mettre à jour Plane avec les statuts
 
 ---
 
