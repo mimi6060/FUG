@@ -214,6 +214,9 @@ class NotificationsScreen extends ConsumerWidget {
         // TODO: Navigation vers les messages
         break;
       case NotificationType.system:
+      case NotificationType.reportReceived:
+      case NotificationType.contentModerated:
+      case NotificationType.appealDecision:
         // Pas de navigation
         break;
     }
@@ -361,6 +364,12 @@ class _NotificationTile extends StatelessWidget {
         return Icons.message;
       case NotificationType.system:
         return Icons.info;
+      case NotificationType.reportReceived:
+        return Icons.flag;
+      case NotificationType.contentModerated:
+        return Icons.gavel;
+      case NotificationType.appealDecision:
+        return Icons.policy;
     }
   }
 
@@ -385,6 +394,10 @@ class _NotificationTile extends StatelessWidget {
         return theme.colorScheme.primary;
       case NotificationType.system:
         return theme.colorScheme.onSurfaceVariant;
+      case NotificationType.reportReceived:
+      case NotificationType.contentModerated:
+      case NotificationType.appealDecision:
+        return Colors.red;
     }
   }
 }

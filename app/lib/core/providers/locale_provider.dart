@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../main.dart';
+import '../config/appwrite_config.dart';
 import '../services/appwrite_service.dart';
 import 'auth_provider.dart';
 
@@ -106,7 +107,7 @@ class LocaleNotifier extends StateNotifier<Locale?> {
     if (currentUser != null) {
       try {
         final userDoc = await AppwriteService.instance.databases.getDocument(
-          databaseId: AppwriteService.databaseId,
+          databaseId: AppwriteConfig.databaseId,
           collectionId: 'users',
           documentId: currentUser.$id,
         );
@@ -156,7 +157,7 @@ class LocaleNotifier extends StateNotifier<Locale?> {
 
     try {
       await AppwriteService.instance.databases.updateDocument(
-        databaseId: AppwriteService.databaseId,
+        databaseId: AppwriteConfig.databaseId,
         collectionId: 'users',
         documentId: currentUser.$id,
         data: {
