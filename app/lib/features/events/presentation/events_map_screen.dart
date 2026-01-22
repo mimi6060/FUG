@@ -27,7 +27,15 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
 
   // Position par defaut (Paris)
   static const LatLng _defaultPosition = LatLng(48.8566, 2.3522);
-  LatLng _currentPosition = _defaultPosition;
+
+  // Position GPS de l'utilisateur (pour le marqueur bleu)
+  LatLng? _userGpsPosition;
+
+  // Précision de la position en mètres (pour le cercle de précision)
+  double _positionAccuracy = 0;
+
+  // Centre actuel de la carte (pour charger les evenements)
+  LatLng _mapCenter = _defaultPosition;
 
   // Rayon de recherche en km
   double _searchRadius = 10.0;
@@ -77,9 +85,12 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
         final newPosition = LatLng(position.latitude, position.longitude);
         if (kDebugMode) {
           print('Moving map to: $newPosition');
+          print('Position accuracy: ${position.accuracy} meters');
         }
         setState(() {
-          _currentPosition = newPosition;
+          _userGpsPosition = newPosition;
+          _mapCenter = newPosition;
+          _positionAccuracy = position.accuracy;
           _locationInitialized = true;
         });
         // Move the map to the user's position
@@ -160,8 +171,8 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
     try {
       final events = await ref.read(nearbyEventsProvider(
         NearbyEventsParams(
-          latitude: _currentPosition.latitude,
-          longitude: _currentPosition.longitude,
+          latitude: _mapCenter.latitude,
+          longitude: _mapCenter.longitude,
           radiusKm: _searchRadius,
         ),
       ).future);
@@ -271,9 +282,15 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
 
       if (position != null && mounted) {
         final newPosition = LatLng(position.latitude, position.longitude);
+        if (kDebugMode) {
+          print('GPS Position: ${position.latitude}, ${position.longitude}');
+          print('Accuracy: ${position.accuracy} meters');
+        }
         _mapController.move(newPosition, 14);
         setState(() {
-          _currentPosition = newPosition;
+          _userGpsPosition = newPosition;
+          _mapCenter = newPosition;
+          _positionAccuracy = position.accuracy;
           _isCentering = false;
         });
         await _loadNearbyEvents();
@@ -470,7 +487,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _currentPosition,
+              initialCenter: _mapCenter,
               initialZoom: 13,
               onMapReady: () {
                 setState(() {
@@ -481,9 +498,11 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                 }
               },
               onPositionChanged: (position, hasGesture) {
+                // Mettre a jour le centre de la carte (pour les evenements)
+                // mais PAS la position GPS de l'utilisateur
                 if (hasGesture && position.center != null) {
                   setState(() {
-                    _currentPosition = position.center!;
+                    _mapCenter = position.center!;
                   });
                 }
               },
@@ -501,12 +520,26 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                     : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.fug.app',
               ),
+              // Accuracy circle (drawn first so it appears behind the marker)
+              if (_locationInitialized && _userGpsPosition != null && _positionAccuracy > 0)
+                CircleLayer(
+                  circles: [
+                    CircleMarker(
+                      point: _userGpsPosition!,
+                      radius: _positionAccuracy,
+                      useRadiusInMeter: true,
+                      color: Colors.blue.withAlpha(30),
+                      borderColor: Colors.blue.withAlpha(100),
+                      borderStrokeWidth: 2,
+                    ),
+                  ],
+                ),
               // User position marker
-              if (_locationInitialized)
+              if (_locationInitialized && _userGpsPosition != null)
                 MarkerLayer(
                   markers: [
                     Marker(
-                      point: _currentPosition,
+                      point: _userGpsPosition!,
                       width: 30,
                       height: 30,
                       child: Container(
