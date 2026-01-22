@@ -44,15 +44,15 @@ export default {
     const fcmCreds = loadFcmCredentials(setupDir, log);
     const apnsCreds = loadApnsCredentials(setupDir, log);
 
-    const hasFcm = !!fcmCreds.serverKey;
+    const hasFcm = !!(fcmCreds.serviceAccountJson || fcmCreds.serverKey);
     const hasApns = !!(apnsCreds.keyId && apnsCreds.teamId && apnsCreds.authKey);
 
     if (!hasFcm && !hasApns) {
       log.warn('No messaging credentials found. Skipping provider configuration.');
       log.info('');
-      log.info('To configure FCM (Android), create infrastructure/setup/.fcm-credentials:');
-      log.info('  FCM_SERVER_KEY=your_firebase_server_key');
-      log.info('  FCM_SENDER_ID=your_sender_id (optional)');
+      log.info('To configure FCM (Android), place your Firebase service account JSON:');
+      log.info('  infrastructure/setup/firebase-service-account.json');
+      log.info('  (Download from Firebase Console > Project Settings > Service Accounts)');
       log.info('');
       log.info('To configure APNs (iOS), create infrastructure/setup/.apns-credentials:');
       log.info('  APNS_KEY_ID=your_key_id');
@@ -86,11 +86,14 @@ export default {
           endpoint,
           projectId,
           sessionSecret,
-          fcmCreds.serverKey,
-          fcmCreds.senderId,
+          fcmCreds,
           log
         );
-        log.info(`FCM Server Key: ${fcmCreds.serverKey.substring(0, 20)}...`);
+        if (fcmCreds.serviceAccountJson) {
+          log.info(`FCM Project: ${fcmCreds.serviceAccountJson.project_id}`);
+        } else {
+          log.info(`FCM Server Key: ${fcmCreds.serverKey.substring(0, 20)}...`);
+        }
       } catch (e) {
         log.error(`FCM configuration failed: ${e.message}`);
       }

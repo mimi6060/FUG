@@ -164,6 +164,8 @@ infrastructure/setup/.env
 infrastructure/setup/.fcm-credentials
 infrastructure/setup/.apns-credentials
 infrastructure/setup/*.p8
+infrastructure/setup/firebase-service-account.json
+infrastructure/setup/*-firebase-*.json
 
 # =================================
 # Archives

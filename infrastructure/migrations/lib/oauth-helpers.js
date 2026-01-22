@@ -251,16 +251,31 @@ export async function disableOAuthProvider(endpoint, projectId, sessionSecret, p
 // ============================================
 
 /**
- * Load FCM credentials from environment or .fcm-credentials file
+ * Load FCM credentials from environment or service account JSON file
+ * Supports both legacy server key and new V1 API with service account
  * @param {string} setupDir - Path to the setup directory
  * @param {object} log - Logger object
- * @returns {{serverKey: string|null, senderId: string|null}}
+ * @returns {{serviceAccountJson: object|null, serverKey: string|null, senderId: string|null}}
  */
 export function loadFcmCredentials(setupDir, log) {
+  let serviceAccountJson = null;
   let serverKey = process.env.FCM_SERVER_KEY;
   let senderId = process.env.FCM_SENDER_ID;
 
-  if (!serverKey) {
+  // Try to load service account JSON (V1 API - recommended)
+  const serviceAccountFile = path.join(setupDir, 'firebase-service-account.json');
+  if (fs.existsSync(serviceAccountFile)) {
+    try {
+      const content = fs.readFileSync(serviceAccountFile, 'utf-8');
+      serviceAccountJson = JSON.parse(content);
+      log.info('Loaded Firebase service account from JSON file');
+    } catch (e) {
+      log.warn(`Failed to parse firebase-service-account.json: ${e.message}`);
+    }
+  }
+
+  // Fallback to legacy credentials file
+  if (!serviceAccountJson && !serverKey) {
     const fcmFile = path.join(setupDir, '.fcm-credentials');
     if (fs.existsSync(fcmFile)) {
       const content = fs.readFileSync(fcmFile, 'utf-8');
@@ -273,12 +288,12 @@ export function loadFcmCredentials(setupDir, log) {
         if (key === 'FCM_SENDER_ID') senderId = value;
       }
       if (serverKey) {
-        log.info('Loaded FCM credentials from file');
+        log.info('Loaded FCM credentials from legacy file');
       }
     }
   }
 
-  return { serverKey, senderId };
+  return { serviceAccountJson, serverKey, senderId };
 }
 
 /**
@@ -335,15 +350,39 @@ export function loadApnsCredentials(setupDir, log) {
 
 /**
  * Configure FCM messaging provider in Appwrite
+ * Supports both V1 API (service account) and legacy (server key)
  * @param {string} endpoint - Appwrite endpoint (with /v1)
  * @param {string} projectId - Project ID
  * @param {string} sessionSecret - Admin session secret
- * @param {string} serverKey - FCM Server Key
- * @param {string} senderId - FCM Sender ID (optional)
+ * @param {object} credentials - FCM credentials {serviceAccountJson, serverKey, senderId}
  * @param {object} log - Logger object
  */
-export async function configureFcmProvider(endpoint, projectId, sessionSecret, serverKey, senderId, log) {
+export async function configureFcmProvider(endpoint, projectId, sessionSecret, credentials, log) {
   log.info('Configuring FCM messaging provider...');
+
+  // Build request body based on available credentials
+  let requestBody;
+  if (credentials.serviceAccountJson) {
+    // V1 API with service account (recommended)
+    log.info('Using FCM V1 API with service account');
+    requestBody = {
+      providerId: 'fcm-provider',
+      name: 'FCM Push Notifications',
+      serviceAccountJSON: credentials.serviceAccountJson,
+      enabled: true,
+    };
+  } else if (credentials.serverKey) {
+    // Legacy API with server key (deprecated)
+    log.warn('Using legacy FCM API (deprecated) - consider migrating to service account');
+    requestBody = {
+      providerId: 'fcm-provider',
+      name: 'FCM Push Notifications',
+      serverKey: credentials.serverKey,
+      enabled: true,
+    };
+  } else {
+    throw new Error('No FCM credentials available');
+  }
 
   // Create FCM provider via Appwrite Messaging API
   const response = await fetch(`${endpoint}/messaging/providers/fcm`, {
@@ -353,18 +392,18 @@ export async function configureFcmProvider(endpoint, projectId, sessionSecret, s
       'X-Appwrite-Project': projectId,
       Cookie: `a_session_console=${sessionSecret}`,
     },
-    body: JSON.stringify({
-      providerId: 'fcm-provider',
-      name: 'FCM Push Notifications',
-      serverKey: serverKey,
-      enabled: true,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
     // Check if provider already exists
     if (response.status === 409) {
       log.info('FCM provider already exists, updating...');
+
+      // Build update body (same structure without providerId)
+      const updateBody = { ...requestBody };
+      delete updateBody.providerId;
+
       const updateResponse = await fetch(`${endpoint}/messaging/providers/fcm/fcm-provider`, {
         method: 'PATCH',
         headers: {
@@ -372,11 +411,7 @@ export async function configureFcmProvider(endpoint, projectId, sessionSecret, s
           'X-Appwrite-Project': projectId,
           Cookie: `a_session_console=${sessionSecret}`,
         },
-        body: JSON.stringify({
-          name: 'FCM Push Notifications',
-          serverKey: serverKey,
-          enabled: true,
-        }),
+        body: JSON.stringify(updateBody),
       });
 
       if (!updateResponse.ok) {
