@@ -1,0 +1,29 @@
+{
+  "name": "cancel-participation",
+  "version": "1.0.0",
+  "description": "Appwrite Function - Annulation de participation aux evenements FUG",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:ci": "NODE_OPTIONS='--experimental-vm-modules' jest --ci --coverage --reporters=default --reporters=jest-junit"
+  },
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0"
+  },
+  "keywords": [
+    "appwrite",
+    "function",
+    "fug",
+    "event",
+    "cancel"
+  ],
+  "author": "FUG Team",
+  "license": "MIT"
+}
