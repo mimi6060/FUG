@@ -1,0 +1,32 @@
+http:
+  routers:
+    appwrite:
+      rule: "Host(`localhost`)"
+      service: appwrite
+      entryPoints:
+        - web
+
+    appwrite-secure:
+      rule: "Host(`localhost`)"
+      service: appwrite
+      entryPoints:
+        - websecure
+      tls: {}
+
+    appwrite-realtime:
+      rule: "Host(`localhost`) && PathPrefix(`/v1/realtime`)"
+      service: appwrite-realtime
+      entryPoints:
+        - web
+        - websecure
+
+  services:
+    appwrite:
+      loadBalancer:
+        servers:
+          - url: "http://fug-appwrite:80"
+
+    appwrite-realtime:
+      loadBalancer:
+        servers:
+          - url: "http://fug-appwrite-realtime:80"
