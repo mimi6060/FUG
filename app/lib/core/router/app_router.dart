@@ -40,6 +40,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
       final isConsentPage = state.matchedLocation == '/consent';
+      final isPrivacyPolicy = state.matchedLocation == '/settings/privacy-policy';
 
       // Si pas connecte et pas sur une page d'auth, rediriger vers login
       if (!isLoggedIn && !isLoggingIn && !isRegistering) {
@@ -58,9 +59,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/home';
         }
 
-        // Si pas de consentement et pas sur la page de consentement
+        // Si pas de consentement et pas sur la page de consentement ou politique de confidentialite
         final consentGiven = hasLocalConsent.valueOrNull ?? false;
-        if (!consentGiven && !isConsentPage) {
+        if (!consentGiven && !isConsentPage && !isPrivacyPolicy) {
           return '/consent';
         }
       }
