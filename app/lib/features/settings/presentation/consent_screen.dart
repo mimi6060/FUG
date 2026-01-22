@@ -205,9 +205,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.security,
                 iconColor: colorScheme.secondary,
-                title: l10n.privacyAndData,
-                subtitle: l10n.rgpdPrivacyInfo,
-                details: l10n.rgpdPrivacyInfo,
+                title: l10n.consentEssentialTitle,
+                subtitle: l10n.consentEssentialSubtitle,
+                details: l10n.consentEssentialDetails,
                 value: _essentialConsent,
                 required: true,
                 onChanged: null, // Required, not modifiable
@@ -218,9 +218,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.analytics_outlined,
                 iconColor: colorScheme.tertiary,
-                title: l10n.notificationPreferences,
-                subtitle: l10n.manageYourAlerts,
-                details: l10n.manageYourAlerts,
+                title: l10n.consentAnalyticsTitle,
+                subtitle: l10n.consentAnalyticsSubtitle,
+                details: l10n.consentAnalyticsDetails,
                 value: _analyticsConsent,
                 required: false,
                 onChanged: _isLoading
@@ -237,9 +237,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.campaign_outlined,
                 iconColor: colorScheme.error,
-                title: l10n.notifications,
-                subtitle: l10n.notificationPreferences,
-                details: l10n.manageYourAlerts,
+                title: l10n.consentMarketingTitle,
+                subtitle: l10n.consentMarketingSubtitle,
+                details: l10n.consentMarketingDetails,
                 value: _marketingConsent,
                 required: false,
                 onChanged: _isLoading
@@ -259,14 +259,14 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _rejectOptional,
-                        child: Text(l10n.cancel),
+                        child: Text(l10n.rejectOptional),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _acceptAll,
-                        child: Text(l10n.apply),
+                        child: Text(l10n.acceptAll),
                       ),
                     ),
                   ],
@@ -278,7 +278,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               TextButton.icon(
                 onPressed: _openPrivacyPolicy,
                 icon: const Icon(Icons.description_outlined, size: 18),
-                label: Text(l10n.privacyPolicy),
+                label: Text(l10n.privacyPolicyCapitalized),
               ),
               const SizedBox(height: 24),
 
@@ -394,7 +394,7 @@ class _ConsentTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      l10n.information,
+                      l10n.consentRequired,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colorScheme.secondary,
                         fontWeight: FontWeight.w600,
