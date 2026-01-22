@@ -7,6 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../data/auth_repository.dart';
 import 'widgets/apple_sign_in_button.dart';
+import 'widgets/google_sign_in_button.dart';
 
 /// Ecran de connexion de l'application FUG
 ///
@@ -330,21 +331,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 16),
 
                   // Boutons OAuth
-                  OutlinedButton.icon(
+                  GoogleSignInButton(
                     onPressed: (isLoading || _isGoogleSignInLoading)
                         ? null
                         : _signInWithGoogle,
-                    icon: _isGoogleSignInLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.g_mobiledata, size: 24),
-                    label: Text(l10n.continueWithGoogle),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
+                    isLoading: _isGoogleSignInLoading,
+                    label: l10n.continueWithGoogle,
                   ),
                   const SizedBox(height: 12),
 

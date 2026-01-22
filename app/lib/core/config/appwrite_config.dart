@@ -10,7 +10,7 @@ class AppwriteConfig {
   static const String endpoint = 'http://localhost:9000/v1';
 
   /// ID du projet Appwrite
-  static const String projectId = '697015400010787139b8';
+  static const String projectId = 'fug';
 
   /// Clé API (optionnelle, pour les opérations serveur)
   static const String? apiKey = null;

@@ -208,11 +208,25 @@ class AuthRepository {
   /// Sur web: redirige vers Google puis retour
   Future<models.User> signInWithGoogle() async {
     try {
+      // URLs de callback selon la plateforme
+      final String successUrl;
+      final String failureUrl;
+
+      if (kIsWeb) {
+        // Pour le web, utiliser l'URL actuelle
+        successUrl = Uri.base.toString();
+        failureUrl = Uri.base.toString();
+      } else {
+        // Pour mobile, utiliser le scheme personnalise
+        successUrl = 'appwrite-callback-${AppwriteConfig.projectId}://auth';
+        failureUrl = 'appwrite-callback-${AppwriteConfig.projectId}://auth/error';
+      }
+
       // Utiliser le flow OAuth2 d'Appwrite
       await _account.createOAuth2Session(
         provider: OAuthProvider.google,
-        success: 'appwrite-callback-${AppwriteConfig.projectId}://auth',
-        failure: 'appwrite-callback-${AppwriteConfig.projectId}://auth/error',
+        success: successUrl,
+        failure: failureUrl,
         scopes: ['email', 'profile'],
       );
 
