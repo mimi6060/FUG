@@ -348,34 +348,38 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
             ref.read(createEventStateProvider.notifier).setStep(step);
           },
           controlsBuilder: (context, details) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Row(
-                children: [
-                  if (state.currentStep < 3)
-                    FilledButton(
-                      onPressed: details.onStepContinue,
-                      child: Text(l10n.continueBtn),
-                    )
-                  else
-                    FilledButton(
-                      onPressed: state.isLoading ? null : details.onStepContinue,
-                      child: state.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.createEvent),
-                    ),
-                  const SizedBox(width: 12),
-                  if (state.currentStep > 0)
-                    TextButton(
-                      onPressed: details.onStepCancel,
-                      child: Text(l10n.back),
-                    ),
-                ],
-              ),
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Wrap(
+                    spacing: 12,
+                    children: [
+                      if (state.currentStep < 3)
+                        FilledButton(
+                          onPressed: details.onStepContinue,
+                          child: Text(l10n.continueBtn),
+                        )
+                      else
+                        FilledButton(
+                          onPressed: state.isLoading ? null : details.onStepContinue,
+                          child: state.isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : Text(l10n.createEvent),
+                        ),
+                      if (state.currentStep > 0)
+                        TextButton(
+                          onPressed: details.onStepCancel,
+                          child: Text(l10n.back),
+                        ),
+                    ],
+                  ),
+                );
+              },
             );
           },
           steps: [
