@@ -293,7 +293,7 @@ class EventRepository {
         databaseId: AppwriteConfig.databaseId,
         collectionId: AppwriteConfig.eventsCollectionId,
         queries: [
-          Query.equal('organizerId', organizerId),
+          Query.equal('creatorId', organizerId),
           Query.limit(limit),
           Query.orderDesc('createdAt'),
         ],
