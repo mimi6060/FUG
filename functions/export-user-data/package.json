@@ -1,0 +1,29 @@
+{
+  "name": "export-user-data",
+  "version": "1.0.0",
+  "description": "Appwrite Function - Export des donnees utilisateur (RGPD)",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch"
+  },
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "keywords": [
+    "appwrite",
+    "function",
+    "fug",
+    "rgpd",
+    "gdpr",
+    "export",
+    "data-portability"
+  ],
+  "author": "FUG Team",
+  "license": "MIT"
+}
