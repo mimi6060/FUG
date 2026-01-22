@@ -1,23 +1,26 @@
 # FUG - Fous-toi Une Guinze
 
-> Application mobile de reseau social pour trouver des compagnons de boisson
+> Partagez des moments conviviaux - Reseau social geolocalize pour trouver des compagnons de sortie
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.2+-02569B?logo=flutter)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-3.16+-02569B?logo=flutter)](https://flutter.dev)
 [![Appwrite](https://img.shields.io/badge/Appwrite-1.4+-F02E65?logo=appwrite)](https://appwrite.io)
 [![License](https://img.shields.io/badge/License-Proprietary-red)]()
 [![BMAD](https://img.shields.io/badge/BMAD-Method-blue)](https://docs.bmad-method.org)
+[![Responsible](https://img.shields.io/badge/Consommation-Responsable-green)]()
 
 ---
 
 ## Description
 
-**FUG** est une application mobile permettant aux utilisateurs de:
+**FUG** est une application mobile qui connecte les gens autour de moments conviviaux:
 
-- Creer des evenements sociaux ("FUG") geolocalises
-- Decouvrir les evenements a proximite sur une carte
-- Rejoindre des evenements et rencontrer de nouvelles personnes
-- Suivre d'autres utilisateurs et voir leurs activites
-- Gagner des points de "murgilarity" et debloquer des badges
+- Creez des evenements sociaux ("FUG") geolocalises
+- Decouvrez les sorties a proximite sur une carte interactive
+- Rejoignez des evenements et rencontrez de nouvelles personnes
+- Suivez vos amis et soyez notifie de leurs activites
+- Gagnez des points de "Murgilarity" et debloquez des badges
+
+> FUG encourage une consommation responsable. L'abus d'alcool est dangereux pour la sante.
 
 **Equipe**: The Develobeers - Michel Lammens, Christophe Paquet
 

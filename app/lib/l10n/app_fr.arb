@@ -2,7 +2,7 @@
   "@@locale": "fr",
   "appTitle": "FUG - Fous-toi Une Guinze",
   "appName": "FUG",
-  "appTagline": "Fous-toi Une Guinze",
+  "appTagline": "Partagez des moments conviviaux",
 
   "loginTitle": "Connexion",
   "email": "Email",
@@ -196,5 +196,14 @@
   "categoryGaming": "Gaming",
   "categoryOutdoor": "Plein air",
   "categorySocial": "Social",
-  "categoryOther": "Autre"
+  "categoryOther": "Autre",
+
+  "responsibleDrinkingDisclaimer": "FUG encourage une consommation responsable d'alcool. L'abus d'alcool est dangereux pour la sante. A consommer avec moderation.",
+  "responsibleDrinkingShort": "A consommer avec moderation",
+  "responsibleDrinkingFooter": "L'abus d'alcool est dangereux pour la sante. A consommer avec moderation.",
+  "responsibleDrinkingEventTip": "Pensez a prevoir des options sans alcool pour vos invites. Bonne soiree!",
+  "responsibleDrinkingTipWater": "Buvez de l'eau entre chaque verre",
+  "responsibleDrinkingTipTransport": "Designez un conducteur sobre ou utilisez les transports en commun",
+  "responsibleDrinkingTipFood": "Mangez avant et pendant la soiree",
+  "ageRestrictionNotice": "Cette application est reservee aux personnes majeures (18+ ou age legal dans votre pays)."
 }

@@ -19,7 +19,7 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 | ID | Feature | Priorite | Justification | Statut |
 |----|---------|----------|---------------|--------|
 | MOD-004 | Versions OS Minimales | MOYENNE | Securite et maintenance | **DONE** |
-| MOD-005 | Reformulation Marketing | MOYENNE | Image de marque | To Do |
+| MOD-005 | Reformulation Marketing | MOYENNE | Image de marque | **DONE** |
 | MOD-006 | Politique Confidentialite | HAUTE | Transparence obligatoire | **DONE** |
 | MOD-010 | Internationalization (i18n) | **HAUTE** | UX multi-langue | **DONE** |
 
@@ -74,7 +74,7 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 
 ### Phase 2 (Sprint 11-12)
 - [x] MOD-004: Versions OS Minimales - **DONE** (README + pubspec flutter constraint)
-- [ ] MOD-005: Reformulation Marketing
+- [x] MOD-005: Reformulation Marketing - **DONE** (Spec + Vision doc + App Store descriptions + l10n messages)
 - [x] MOD-006: Politique de Confidentialite - **DONE** (1188 lines privacy screen)
 - [x] MOD-010: Internationalization (i18n) - **DONE** (FR/EN/NL + flags + DB sync)
 
@@ -114,15 +114,11 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 
 ## Next Steps
 
-1. **MOD-005**: Marketing reformulation
-   - Update app description and tagline
-   - Modernize visual branding
-
-2. **MOD-008**: IA et Recommandations
+1. **MOD-008**: IA et Recommandations
    - Image moderation with AI
    - Event recommendations
 
-3. **MOD-009**: Monetisation Ethique
+2. **MOD-009**: Monetisation Ethique
    - Premium features
    - Revenue model
 
@@ -177,5 +173,17 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 
 ---
 
+### 2026-01-22 - Sprint 11
+
+**MOD-005 (Marketing Reformulation)**
+- Created MOD-005-marketing-reformulation.md spec document
+- Updated "1. Document de vision.md" with professional language
+- Created metadata/ios/description.txt and metadata/android/description.txt
+- Updated README.md with new tagline and responsible drinking notice
+- Added l10n strings for responsible drinking messages (EN/FR/NL)
+- Updated app taglines in all locales
+
+---
+
 *Last updated: 2026-01-22*
-*Synchronized with Plane: Done (MOD-004, MOD-007, MOD-010 marked as Done)*
+*Synchronized with Plane: Done (MOD-004, MOD-005, MOD-007, MOD-010 marked as Done)*

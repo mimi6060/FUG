@@ -673,12 +673,12 @@
   {
     "id": "288d8f85-3a17-425e-b285-1f8ab326a217",
     "name": "MOD-008: IA et Recommandations",
-    "description": "<p>Modération auto images, recommandations événements, matching social. Feature: MOD-008-ai-features.md</p>",
+    "description": "<div><p>Decision document created: docs/decisions/MOD-008-ai-moderation-options.md</p><p>Pending decision on AI provider before implementation.</p></div>",
     "priority": "low",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "c7be50de-1d35-4292-b95d-d0c82003c655",
     "parent": null,
     "created_at": "2026-01-21T20:17:29.298695Z",
-    "updated_at": "2026-01-21T20:17:29.361501Z",
+    "updated_at": "2026-01-22T01:05:19.849170Z",
     "sequence_id": 62
   },
   {
@@ -695,12 +695,12 @@
   {
     "id": "e1504dca-3eb4-4416-853c-430999fadabf",
     "name": "MOD-009: Monétisation Éthique",
-    "description": "<p>FUG Premium, partenariats bars. Post-MVP. Feature: MOD-009-monetization.md</p>",
+    "description": "<div><p>Decision document created: docs/decisions/MOD-009-monetisation-ethique.md</p><p>Pending decision on pricing and features before implementation.</p></div>",
     "priority": "low",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "c7be50de-1d35-4292-b95d-d0c82003c655",
     "parent": null,
     "created_at": "2026-01-21T20:17:29.550195Z",
-    "updated_at": "2026-01-21T20:17:29.598643Z",
+    "updated_at": "2026-01-22T01:05:19.911216Z",
     "sequence_id": 64
   },
   {

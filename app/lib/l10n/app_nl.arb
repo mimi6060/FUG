@@ -2,7 +2,7 @@
   "@@locale": "nl",
   "appTitle": "FUG - Vind Stedelijke Bijeenkomsten",
   "appName": "FUG",
-  "appTagline": "Vind Stedelijke Bijeenkomsten",
+  "appTagline": "Deel gezellige momenten",
 
   "loginTitle": "Inloggen",
   "email": "E-mail",
@@ -196,5 +196,14 @@
   "categoryGaming": "Gaming",
   "categoryOutdoor": "Buiten",
   "categorySocial": "Sociaal",
-  "categoryOther": "Overig"
+  "categoryOther": "Overig",
+
+  "responsibleDrinkingDisclaimer": "FUG moedigt verantwoord drinken aan. Alcoholmisbruik is gevaarlijk voor je gezondheid. Drink met mate.",
+  "responsibleDrinkingShort": "Drink met mate",
+  "responsibleDrinkingFooter": "Alcoholmisbruik is gevaarlijk voor je gezondheid. Drink met mate.",
+  "responsibleDrinkingEventTip": "Overweeg alcoholvrije opties voor je gasten aan te bieden. Veel plezier!",
+  "responsibleDrinkingTipWater": "Drink water tussen de drankjes door",
+  "responsibleDrinkingTipTransport": "Wijs een nuchtere bestuurder aan of gebruik het openbaar vervoer",
+  "responsibleDrinkingTipFood": "Eet voor en tijdens het evenement",
+  "ageRestrictionNotice": "Deze app is alleen voor volwassenen (18+ of wettelijke leeftijd in jouw land)."
 }

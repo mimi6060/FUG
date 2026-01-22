@@ -187,13 +187,13 @@
 **State:** Done
 
 ## [ ] [LOW] MOD-008: IA et Recommandations
-**State:** Backlog
+**State:** In Progress
 
 ## [ ] [MEDIUM] MOD-008-A: Modération automatique images
 **State:** Backlog
 
 ## [ ] [LOW] MOD-009: Monétisation Éthique
-**State:** Backlog
+**State:** In Progress
 
 ## [x] [URGENT] INFRA-001: Appwrite Infrastructure as Code
 **State:** Done

@@ -2,7 +2,7 @@
   "@@locale": "en",
   "appTitle": "FUG - Find Urban Gatherings",
   "appName": "FUG",
-  "appTagline": "Find Urban Gatherings",
+  "appTagline": "Share convivial moments",
 
   "loginTitle": "Sign in",
   "email": "Email",
@@ -211,5 +211,14 @@
   "categoryGaming": "Gaming",
   "categoryOutdoor": "Outdoor",
   "categorySocial": "Social",
-  "categoryOther": "Other"
+  "categoryOther": "Other",
+
+  "responsibleDrinkingDisclaimer": "FUG encourages responsible drinking. Alcohol abuse is dangerous for your health. Please drink responsibly.",
+  "responsibleDrinkingShort": "Please drink responsibly",
+  "responsibleDrinkingFooter": "Alcohol abuse is dangerous for your health. Drink responsibly.",
+  "responsibleDrinkingEventTip": "Consider offering non-alcoholic options for your guests. Have a great time!",
+  "responsibleDrinkingTipWater": "Drink water between drinks",
+  "responsibleDrinkingTipTransport": "Designate a sober driver or use public transport",
+  "responsibleDrinkingTipFood": "Eat before and during the event",
+  "ageRestrictionNotice": "This app is reserved for adults (18+ or legal age in your country)."
 }

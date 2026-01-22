@@ -1,0 +1,67 @@
+# Google Play Store Metadata
+
+## App Title (30 characters max)
+FUG - Sorties & Rencontres
+
+## Short Description (80 characters max)
+Trouvez des compagnons de sortie et partagez des moments conviviaux pres de vous.
+
+## Full Description (4000 characters max)
+
+FUG vous connecte avec des personnes qui partagent votre envie de sortir et de decouvrir de nouveaux endroits.
+
+FONCTIONNALITES PRINCIPALES
+
+* Carte interactive des evenements a proximite
+* Creez vos propres sorties et invitez vos amis
+* Decouvrez les meilleurs bars, cafes et restaurants
+* Suivez vos amis et soyez notifie de leurs sorties
+* Gagnez des points et debloquez des badges
+
+POURQUOI FUG ?
+
+Vous cherchez de la compagnie pour un afterwork ? Un groupe pour decouvrir ce nouveau bar ? Des amis pour une soiree cinema suivie d'un verre ? FUG est fait pour vous.
+
+Notre communaute bienveillante reunit des personnes de tous horizons, unies par l'envie de partager des moments conviviaux.
+
+FONCTIONNALITES SOCIALES
+
+* Creez des evenements geolocalises
+* Rejoignez des sorties organisees par d'autres membres
+* Suivez vos amis pour etre notifie de leurs activites
+* Gagnez des points de "Murgilarity" et montez dans le classement
+* Debloquez des badges en participant a des evenements
+
+SECURITE ET CONFIDENTIALITE
+
+* Conformite RGPD complete
+* Export et suppression de vos donnees a tout moment
+* Verification de l'age (18+)
+* Systeme de signalement integre
+
+RESPECT ET RESPONSABILITE
+
+FUG encourage une consommation responsable. L'abus d'alcool est dangereux pour la sante. A consommer avec moderation.
+
+L'application est reservee aux personnes majeures (18+ ou age legal dans votre pays).
+
+---
+The Develobeers - Depuis 2014
+
+## Category
+Social
+
+## Content Rating
+Mature 17+ (References to alcohol)
+
+## Contact Email
+contact@fug.app
+
+## Privacy Policy
+https://fug.app/privacy
+
+## What's New
+- Nouvelle interface multilingue (FR/EN/NL)
+- Partage WhatsApp et export calendrier
+- Conformite RGPD et DSA amelioree
+- Ameliorations de performance et corrections de bugs

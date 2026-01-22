@@ -1,0 +1,57 @@
+# iOS App Store Metadata
+
+## App Name
+FUG - Sorties & Rencontres
+
+## Subtitle (30 characters max)
+Trouvez des compagnons de sortie
+
+## Promotional Text (170 characters max)
+Decouvrez les evenements sociaux autour de vous. Rejoignez des sorties, rencontrez de nouvelles personnes et partagez des moments conviviaux.
+
+## Description
+
+FUG vous connecte avec des personnes qui partagent votre envie de sortir et de decouvrir de nouveaux endroits.
+
+FONCTIONNALITES PRINCIPALES
+
+- Carte interactive des evenements a proximite
+- Creez vos propres sorties et invitez vos amis
+- Decouvrez les meilleurs bars, cafes et restaurants
+- Suivez vos amis et soyez notifie de leurs sorties
+- Gagnez des points et debloquez des badges
+
+POURQUOI FUG ?
+
+Vous cherchez de la compagnie pour un afterwork ? Un groupe pour decouvrir ce nouveau bar ? Des amis pour une soiree cinema suivie d'un verre ? FUG est fait pour vous.
+
+Notre communaute bienveillante reunit des personnes de tous horizons, unies par l'envie de partager des moments conviviaux.
+
+RESPECT ET RESPONSABILITE
+
+FUG encourage une consommation responsable. L'abus d'alcool est dangereux pour la sante. A consommer avec moderation.
+
+L'application est reservee aux personnes majeures (18+ ou age legal dans votre pays).
+
+---
+The Develobeers - Depuis 2014
+
+## Keywords (100 characters max, comma-separated)
+sorties,rencontres,afterwork,bars,amis,evenements,social,geolocalisation,soiree,convivial
+
+## What's New (for updates)
+- Nouvelle interface multilingue (FR/EN/NL)
+- Partage WhatsApp et export calendrier
+- Ameliorations de performance
+
+## Support URL
+https://fug.app/support
+
+## Privacy Policy URL
+https://fug.app/privacy
+
+## Age Rating
+17+ (Frequent/Intense Alcohol, Tobacco, or Drug Use or References)
+
+## Copyright
+(c) 2014-2026 The Develobeers
