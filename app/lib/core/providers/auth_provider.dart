@@ -86,6 +86,16 @@ class AuthStateNotifier extends AsyncNotifier<models.User?> {
     });
   }
 
+  /// Connexion avec Google Sign-In
+  Future<void> signInWithGoogle() async {
+    state = const AsyncValue.loading();
+
+    state = await AsyncValue.guard(() async {
+      await _repository.signInWithGoogle();
+      return _repository.getCurrentUser();
+    });
+  }
+
   /// Deconnexion
   Future<void> signOut() async {
     state = const AsyncValue.loading();

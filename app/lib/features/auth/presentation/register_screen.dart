@@ -28,6 +28,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
   bool _isAppleSignInLoading = false;
+  bool _isGoogleSignInLoading = false;
 
   @override
   void dispose() {
@@ -81,6 +82,54 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (mounted) {
         setState(() {
           _isAppleSignInLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_isGoogleSignInLoading) return;
+
+    setState(() {
+      _isGoogleSignInLoading = true;
+    });
+
+    try {
+      await ref.read(authStateProvider.notifier).signInWithGoogle();
+
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.accountCreatedWelcome),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/home');
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.unexpectedError),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleSignInLoading = false;
         });
       }
     }
@@ -416,17 +465,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                 // Boutons OAuth
                 OutlinedButton.icon(
-                  onPressed: isLoading
+                  onPressed: (isLoading || _isGoogleSignInLoading)
                       ? null
-                      : () {
-                          // TODO: Implementer Google Sign-In
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.featureComingSoon),
-                            ),
-                          );
-                        },
-                  icon: const Icon(Icons.g_mobiledata, size: 24),
+                      : _signInWithGoogle,
+                  icon: _isGoogleSignInLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.g_mobiledata, size: 24),
                   label: Text(l10n.continueWithGoogle),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),

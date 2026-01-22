@@ -190,6 +190,94 @@ class AuthRepository {
     }
   }
 
+  /// Connexion avec Google Sign-In
+  ///
+  /// Utilise le flow OAuth2 d'Appwrite qui gere la redirection
+  /// vers Google et le retour dans l'application.
+  ///
+  /// Sur mobile: ouvre un navigateur/webview pour l'authentification
+  /// Sur web: redirige vers Google puis retour
+  Future<models.User> signInWithGoogle() async {
+    try {
+      // Utiliser le flow OAuth2 d'Appwrite
+      await _account.createOAuth2Session(
+        provider: OAuthProvider.google,
+        success: 'appwrite-callback-${AppwriteConfig.projectId}://auth',
+        failure: 'appwrite-callback-${AppwriteConfig.projectId}://auth/error',
+        scopes: ['email', 'profile'],
+      );
+
+      // Recuperer l'utilisateur connecte
+      final user = await _account.get();
+
+      // Verifier/creer le profil utilisateur
+      await _getOrCreateUserProfileFromOAuth(
+        user: user,
+        provider: 'google',
+      );
+
+      return user;
+    } on AppwriteException catch (e) {
+      throw AuthException(
+        _getReadableErrorMessage(e),
+        code: e.code,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Google Sign-In error: $e');
+      }
+      throw AuthException('Une erreur est survenue lors de la connexion Google.');
+    }
+  }
+
+  /// Cree ou met a jour le profil utilisateur apres une connexion OAuth
+  Future<void> _getOrCreateUserProfileFromOAuth({
+    required models.User user,
+    required String provider,
+  }) async {
+    try {
+      // Verifier si le profil existe deja
+      final existingProfile = await getUserProfile(user.$id);
+
+      if (existingProfile == null) {
+        // Creer le profil utilisateur
+        await _databases.createDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.usersCollectionId,
+          documentId: user.$id,
+          data: {
+            'userId': user.$id,
+            'email': user.email,
+            'name': user.name.isNotEmpty ? user.name : 'Utilisateur FUG',
+            'avatar': null,
+            'bio': null,
+            'points': 0,
+            'level': 1,
+            'followersCount': 0,
+            'followingCount': 0,
+            'locationLat': null,
+            'locationLng': null,
+            'notificationRadius': 10.0,
+            'fcmToken': null,
+            'authProvider': provider,
+            'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
+          },
+          permissions: [
+            Permission.read(Role.user(user.$id)),
+            Permission.update(Role.user(user.$id)),
+            Permission.delete(Role.user(user.$id)),
+          ],
+        );
+      }
+    } on AppwriteException catch (e) {
+      if (kDebugMode) {
+        print('Error creating OAuth user profile: ${e.message}');
+      }
+      // Ne pas bloquer la connexion si le profil echoue
+    }
+  }
+
   /// Connexion anonyme (pour les invités)
   Future<models.Session> signInAnonymously() async {
     try {

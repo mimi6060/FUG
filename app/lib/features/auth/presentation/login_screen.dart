@@ -29,6 +29,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isAppleSignInLoading = false;
+  bool _isGoogleSignInLoading = false;
 
   @override
   void dispose() {
@@ -82,6 +83,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         setState(() {
           _isAppleSignInLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    if (_isGoogleSignInLoading) return;
+
+    setState(() {
+      _isGoogleSignInLoading = true;
+    });
+    ref.read(authErrorProvider.notifier).state = null;
+
+    try {
+      await ref.read(authStateProvider.notifier).signInWithGoogle();
+      // La navigation est geree automatiquement par GoRouter
+    } on AuthException catch (e) {
+      ref.read(authErrorProvider.notifier).state = e.message;
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ref.read(authErrorProvider.notifier).state = l10n.unexpectedError;
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleSignInLoading = false;
         });
       }
     }
@@ -304,17 +332,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   // Boutons OAuth
                   OutlinedButton.icon(
-                    onPressed: isLoading
+                    onPressed: (isLoading || _isGoogleSignInLoading)
                         ? null
-                        : () {
-                            // TODO: Implementer Google Sign-In
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.featureComingSoon),
-                              ),
-                            );
-                          },
-                    icon: const Icon(Icons.g_mobiledata, size: 24),
+                        : _signInWithGoogle,
+                    icon: _isGoogleSignInLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.g_mobiledata, size: 24),
                     label: Text(l10n.continueWithGoogle),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
