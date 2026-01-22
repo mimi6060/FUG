@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID, Functions } from 'node-appwrite';
+import { Client, Databases, Query, ID, Functions, Messaging } from 'node-appwrite';
 
 /**
  * Appwrite Function: join-event
@@ -168,18 +168,44 @@ export default async ({ req, res, log, error }) => {
         userId: event.organizerId,
         type: 'new_participant',
         title: 'Nouveau participant',
-        message: `${user.displayName || user.username} a rejoint votre événement "${event.title}"`,
+        message: `${user.displayName || user.name || 'Quelqu\'un'} a rejoint votre événement "${event.title}"`,
         data: JSON.stringify({
           eventId,
           eventTitle: event.title,
           participantId: userId,
-          participantName: user.displayName || user.username,
+          participantName: user.displayName || user.name,
           totalParticipants: newParticipantCount
         }),
         read: false,
         createdAt: new Date().toISOString()
       }
     );
+
+    // Send push notification to event organizer via Appwrite Messaging
+    const messaging = new Messaging(client);
+    try {
+      await messaging.createPush(
+        ID.unique(),
+        'Nouveau participant',
+        `${user.displayName || user.name || 'Quelqu\'un'} a rejoint votre événement "${event.title}"`,
+        [], // topics
+        [event.organizerId], // users (target user IDs)
+        [], // targets
+        { eventId, eventTitle: event.title }, // data payload
+        'normal', // action
+        undefined, // icon
+        undefined, // sound
+        undefined, // color
+        undefined, // tag
+        undefined, // badge
+        false, // draft
+        undefined // scheduledAt
+      );
+      log(`Push notification sent to organizer ${event.organizerId}`);
+    } catch (pushError) {
+      // Log but don't fail - push is non-critical
+      log(`Push notification failed (non-critical): ${pushError.message}`);
+    }
 
     // Notifier les autres participants (optionnel, limité aux 5 derniers)
     if (participantCount > 0 && participantCount <= 20) {
@@ -196,11 +222,11 @@ export default async ({ req, res, log, error }) => {
               userId: participant.userId,
               type: 'event_update',
               title: 'Nouveau participant',
-              message: `${user.displayName || user.username} a également rejoint "${event.title}"`,
+              message: `${user.displayName || user.name || 'Quelqu\'un'} a également rejoint "${event.title}"`,
               data: JSON.stringify({
                 eventId,
                 eventTitle: event.title,
-                newParticipantName: user.displayName || user.username,
+                newParticipantName: user.displayName || user.name,
                 totalParticipants: newParticipantCount
               }),
               read: false,

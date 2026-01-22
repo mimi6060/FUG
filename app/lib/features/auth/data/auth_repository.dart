@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../core/services/appwrite_service.dart';
+import '../../../core/services/push_notification_service.dart';
 import '../../../core/config/appwrite_config.dart';
 import '../domain/user_model.dart';
 
@@ -31,9 +32,13 @@ class AuthException implements Exception {
 /// - Profil utilisateur
 class AuthRepository {
   final AppwriteService _appwrite;
+  final PushNotificationService _pushService;
 
-  AuthRepository({AppwriteService? appwrite})
-      : _appwrite = appwrite ?? AppwriteService.instance;
+  AuthRepository({
+    AppwriteService? appwrite,
+    PushNotificationService? pushService,
+  })  : _appwrite = appwrite ?? AppwriteService.instance,
+        _pushService = pushService ?? PushNotificationService.instance;
 
   Account get _account => _appwrite.account;
   Databases get _databases => _appwrite.databases;
@@ -158,10 +163,16 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      return await _account.createEmailPasswordSession(
+      final session = await _account.createEmailPasswordSession(
         email: email,
         password: password,
       );
+
+      // Register device for push notifications
+      final user = await _account.get();
+      await _pushService.registerDevice(user.$id);
+
+      return session;
     } on AppwriteException catch (e) {
       throw AuthException(
         _getReadableErrorMessage(e),
@@ -215,6 +226,9 @@ class AuthRepository {
         user: user,
         provider: 'google',
       );
+
+      // Register device for push notifications
+      await _pushService.registerDevice(user.$id);
 
       return user;
     } on AppwriteException catch (e) {
@@ -328,6 +342,9 @@ class AuthRepository {
         user: user,
         credential: credential,
       );
+
+      // 5. Register device for push notifications
+      await _pushService.registerDevice(user.$id);
 
       return user;
     } on SignInWithAppleAuthorizationException catch (e) {
@@ -446,6 +463,12 @@ class AuthRepository {
   /// Déconnexion de la session actuelle
   Future<void> signOut() async {
     try {
+      // Unregister device from push notifications before logout
+      final user = await getCurrentUser();
+      if (user != null) {
+        await _pushService.unregisterDevice(user.$id);
+      }
+
       await _account.deleteSession(sessionId: 'current');
     } on AppwriteException catch (e) {
       throw AuthException(

@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID, Functions } from 'node-appwrite';
+import { Client, Databases, Query, ID, Functions, Messaging } from 'node-appwrite';
 
 /**
  * Appwrite Function: follow-user
@@ -141,6 +141,32 @@ export default async ({ req, res, log, error }) => {
     );
 
     log(`Notification créée: ${notification.$id}`);
+
+    // Send push notification via Appwrite Messaging
+    const messaging = new Messaging(client);
+    try {
+      await messaging.createPush(
+        ID.unique(),
+        'Nouveau follower',
+        `${follower.displayName || follower.name || 'Quelqu\'un'} vous suit maintenant`,
+        [], // topics
+        [followingId], // users (target user IDs)
+        [], // targets
+        {}, // data payload
+        'normal', // action
+        undefined, // icon
+        undefined, // sound
+        undefined, // color
+        undefined, // tag
+        undefined, // badge
+        false, // draft
+        undefined // scheduledAt
+      );
+      log(`Push notification sent to ${followingId}`);
+    } catch (pushError) {
+      // Log but don't fail - push is non-critical
+      log(`Push notification failed (non-critical): ${pushError.message}`);
+    }
 
     // Attribuer les points de gamification
     await Promise.all([
