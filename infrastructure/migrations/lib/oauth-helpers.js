@@ -384,12 +384,12 @@ export async function configureFcmProvider(endpoint, projectId, sessionSecret, c
     throw new Error('No FCM credentials available');
   }
 
-  // Create FCM provider via Appwrite Messaging API
-  const response = await fetch(`${endpoint}/messaging/providers/fcm`, {
+  // Create FCM provider via Appwrite Console API (projects endpoint)
+  const response = await fetch(`${endpoint}/projects/${projectId}/messaging/providers/fcm`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Appwrite-Project': projectId,
+      'X-Appwrite-Project': 'console',
       Cookie: `a_session_console=${sessionSecret}`,
     },
     body: JSON.stringify(requestBody),
@@ -404,11 +404,11 @@ export async function configureFcmProvider(endpoint, projectId, sessionSecret, c
       const updateBody = { ...requestBody };
       delete updateBody.providerId;
 
-      const updateResponse = await fetch(`${endpoint}/messaging/providers/fcm/fcm-provider`, {
+      const updateResponse = await fetch(`${endpoint}/projects/${projectId}/messaging/providers/fcm/fcm-provider`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Appwrite-Project': projectId,
+          'X-Appwrite-Project': 'console',
           Cookie: `a_session_console=${sessionSecret}`,
         },
         body: JSON.stringify(updateBody),
@@ -440,11 +440,11 @@ export async function configureFcmProvider(endpoint, projectId, sessionSecret, c
 export async function configureApnsProvider(endpoint, projectId, sessionSecret, credentials, log) {
   log.info('Configuring APNs messaging provider...');
 
-  const response = await fetch(`${endpoint}/messaging/providers/apns`, {
+  const response = await fetch(`${endpoint}/projects/${projectId}/messaging/providers/apns`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Appwrite-Project': projectId,
+      'X-Appwrite-Project': 'console',
       Cookie: `a_session_console=${sessionSecret}`,
     },
     body: JSON.stringify({
@@ -462,11 +462,11 @@ export async function configureApnsProvider(endpoint, projectId, sessionSecret, 
     // Check if provider already exists
     if (response.status === 409) {
       log.info('APNs provider already exists, updating...');
-      const updateResponse = await fetch(`${endpoint}/messaging/providers/apns/apns-provider`, {
+      const updateResponse = await fetch(`${endpoint}/projects/${projectId}/messaging/providers/apns/apns-provider`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Appwrite-Project': projectId,
+          'X-Appwrite-Project': 'console',
           Cookie: `a_session_console=${sessionSecret}`,
         },
         body: JSON.stringify({
@@ -505,11 +505,11 @@ export async function configureApnsProvider(endpoint, projectId, sessionSecret, 
  */
 export async function disableMessagingProvider(endpoint, projectId, sessionSecret, providerType, providerId, log) {
   try {
-    await fetch(`${endpoint}/messaging/providers/${providerType}/${providerId}`, {
+    await fetch(`${endpoint}/projects/${projectId}/messaging/providers/${providerType}/${providerId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'X-Appwrite-Project': projectId,
+        'X-Appwrite-Project': 'console',
         Cookie: `a_session_console=${sessionSecret}`,
       },
       body: JSON.stringify({
