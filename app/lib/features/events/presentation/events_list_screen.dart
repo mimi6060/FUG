@@ -376,7 +376,7 @@ class _EventCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withAlpha(26),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -396,7 +396,7 @@ class _EventCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.1),
+                            color: Colors.amber.withAlpha(26),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -438,7 +438,7 @@ class _EventCard extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: event.isFree
-            ? Colors.green.withOpacity(0.1)
+            ? Colors.green.withAlpha(26)
             : theme.colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(16),
       ),

@@ -235,7 +235,7 @@ class _ProfileHeader extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            theme.colorScheme.primaryContainer.withOpacity(0.5),
+            theme.colorScheme.primaryContainer.withAlpha(128),
             theme.colorScheme.surface,
           ],
         ),

@@ -175,10 +175,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withOpacity(0.3),
+                  color: colorScheme.primaryContainer.withAlpha(77),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: colorScheme.primary.withOpacity(0.2),
+                    color: colorScheme.primary.withAlpha(51),
                   ),
                 ),
                 child: Row(
@@ -366,7 +366,7 @@ class _ConsentTile extends StatelessWidget {
             secondary: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -390,7 +390,7 @@ class _ConsentTile extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: colorScheme.secondary.withOpacity(0.1),
+                      color: colorScheme.secondary.withAlpha(26),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(

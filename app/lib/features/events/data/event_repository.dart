@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/foundation.dart';
+
 import '../../../core/services/appwrite_service.dart';
 import '../../../core/config/appwrite_config.dart';
 import '../domain/event_model.dart';
@@ -647,7 +650,9 @@ class EventRepository {
   // ============================================
 
   /// S'abonne aux changements d'un événement spécifique
-  RealtimeSubscription subscribeToEvent({
+  /// Returns a record containing both the RealtimeSubscription (for closing)
+  /// and the StreamSubscription (for canceling the listener)
+  ({RealtimeSubscription subscription, StreamSubscription<RealtimeMessage> listener}) subscribeToEvent({
     required String eventId,
     required Function(EventModel) onUpdate,
     Function()? onDelete,
@@ -655,7 +660,8 @@ class EventRepository {
     final channel =
         'databases.${AppwriteConfig.databaseId}.collections.${AppwriteConfig.eventsCollectionId}.documents.$eventId';
 
-    return _appwrite.realtime.subscribe([channel]).stream.listen((response) {
+    final subscription = _appwrite.realtime.subscribe([channel]);
+    final listener = subscription.stream.listen((response) {
       if (kDebugMode) {
         print('Realtime event: ${response.events}');
       }
@@ -666,20 +672,27 @@ class EventRepository {
         final event = EventModel.fromJson(response.payload);
         onUpdate(event);
       }
-    }) as RealtimeSubscription;
+    });
+
+    return (subscription: subscription, listener: listener);
   }
 
   /// S'abonne aux nouveaux événements dans une zone
-  RealtimeSubscription subscribeToNearbyEvents({
+  /// Returns a record containing both the RealtimeSubscription (for closing)
+  /// and the StreamSubscription (for canceling the listener)
+  ({RealtimeSubscription subscription, StreamSubscription<RealtimeMessage> listener}) subscribeToNearbyEvents({
     required Function(EventModel) onNewEvent,
   }) {
     final channel = AppwriteConfig.eventsChannel;
 
-    return _appwrite.realtime.subscribe([channel]).stream.listen((response) {
+    final subscription = _appwrite.realtime.subscribe([channel]);
+    final listener = subscription.stream.listen((response) {
       if (response.events.any((e) => e.contains('.create'))) {
         final event = EventModel.fromJson(response.payload);
         onNewEvent(event);
       }
-    }) as RealtimeSubscription;
+    });
+
+    return (subscription: subscription, listener: listener);
   }
 }

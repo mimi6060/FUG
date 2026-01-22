@@ -117,7 +117,7 @@ class NotificationsScreen extends ConsumerWidget {
                   Icon(
                     Icons.notifications_none,
                     size: 80,
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withAlpha(128),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -296,7 +296,7 @@ class _NotificationTile extends StatelessWidget {
               ),
         tileColor: notification.isRead
             ? null
-            : theme.colorScheme.primaryContainer.withOpacity(0.1),
+            : theme.colorScheme.primaryContainer.withAlpha(26),
         onTap: onTap,
       ),
     );
@@ -334,7 +334,7 @@ class _NotificationTile extends StatelessWidget {
 
     // Icone par defaut
     return CircleAvatar(
-      backgroundColor: _getIconColor(theme).withOpacity(0.1),
+      backgroundColor: _getIconColor(theme).withAlpha(26),
       child: Icon(
         _getIcon(),
         color: _getIconColor(theme),

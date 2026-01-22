@@ -648,7 +648,7 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withAlpha(26),
                     blurRadius: 8,
                   ),
                 ],

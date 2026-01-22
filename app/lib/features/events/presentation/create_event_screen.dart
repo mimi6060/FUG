@@ -528,7 +528,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                      color: theme.colorScheme.primaryContainer.withAlpha(77),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -807,7 +807,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color: theme.colorScheme.onSurfaceVariant.withAlpha(102),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -882,7 +882,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                               border: Border.all(color: Colors.white, width: 3),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
+                                  color: Colors.black.withAlpha(77),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),

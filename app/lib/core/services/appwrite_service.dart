@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/foundation.dart';
+
 import '../config/appwrite_config.dart';
 
 /// Service singleton pour la gestion des connexions Appwrite
@@ -214,16 +217,21 @@ class AppwriteService {
   // ============================================
 
   /// S'abonne à un channel Realtime
-  RealtimeSubscription subscribe({
+  /// Returns a record containing both the RealtimeSubscription (for closing)
+  /// and the StreamSubscription (for canceling the listener)
+  ({RealtimeSubscription subscription, StreamSubscription<RealtimeMessage> listener}) subscribe({
     required List<String> channels,
     required Function(RealtimeMessage) callback,
   }) {
-    return _realtime.subscribe(channels).stream.listen(callback)
-        as RealtimeSubscription;
+    final subscription = _realtime.subscribe(channels);
+    final listener = subscription.stream.listen(callback);
+    return (subscription: subscription, listener: listener);
   }
 
   /// S'abonne aux changements d'une collection
-  RealtimeSubscription subscribeToCollection({
+  /// Returns a record containing both the RealtimeSubscription (for closing)
+  /// and the StreamSubscription (for canceling the listener)
+  ({RealtimeSubscription subscription, StreamSubscription<RealtimeMessage> listener}) subscribeToCollection({
     required String collectionId,
     required Function(RealtimeMessage) callback,
   }) {

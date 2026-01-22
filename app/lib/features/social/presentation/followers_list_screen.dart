@@ -60,7 +60,7 @@ class FollowersListScreen extends ConsumerWidget {
                   Icon(
                     isFollowers ? Icons.people_outline : Icons.person_add_disabled,
                     size: 80,
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    color: theme.colorScheme.onSurfaceVariant.withAlpha(128),
                   ),
                   const SizedBox(height: 16),
                   Text(

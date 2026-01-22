@@ -44,7 +44,7 @@ class LanguageSelector extends ConsumerWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.4),
+                  color: theme.colorScheme.outline.withAlpha(102),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -140,7 +140,7 @@ class _LanguageOption extends StatelessWidget {
 
     return Material(
       color: isSelected
-          ? theme.colorScheme.primaryContainer.withOpacity(0.5)
+          ? theme.colorScheme.primaryContainer.withAlpha(128)
           : Colors.transparent,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -218,7 +218,7 @@ class LanguageTile extends ConsumerWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+          color: theme.colorScheme.primaryContainer.withAlpha(77),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(

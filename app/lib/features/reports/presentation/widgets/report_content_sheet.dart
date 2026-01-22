@@ -175,7 +175,7 @@ class _ReportContentSheetState extends ConsumerState<ReportContentSheet> {
                     'Merci de contribuer a une communaute plus sure.',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withAlpha(204),
                     ),
                   ),
                 ],
@@ -223,7 +223,7 @@ class _ReportContentSheetState extends ConsumerState<ReportContentSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withOpacity(0.3),
+                    color: theme.colorScheme.outline.withAlpha(77),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -412,7 +412,7 @@ class _ReportContentSheetState extends ConsumerState<ReportContentSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withOpacity(0.3),
+                color: theme.colorScheme.outline.withAlpha(77),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -469,13 +469,13 @@ class _ReportContentSheetState extends ConsumerState<ReportContentSheet> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.errorContainer.withOpacity(0.3)
-                : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                ? theme.colorScheme.errorContainer.withAlpha(77)
+                : theme.colorScheme.surfaceContainerHighest.withAlpha(128),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
                   ? theme.colorScheme.error
-                  : theme.colorScheme.outline.withOpacity(0.2),
+                  : theme.colorScheme.outline.withAlpha(51),
               width: isSelected ? 2 : 1,
             ),
           ),

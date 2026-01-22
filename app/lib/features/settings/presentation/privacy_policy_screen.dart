@@ -363,9 +363,9 @@ class _VersionBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
+        color: colorScheme.primaryContainer.withAlpha(77),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.primary.withAlpha(51)),
       ),
       child: Row(
         children: [
@@ -386,7 +386,7 @@ class _VersionBanner extends StatelessWidget {
                   'Derniere mise a jour: $lastUpdated',
                   style: TextStyle(
                     fontSize: 12,
-                    color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                    color: colorScheme.onPrimaryContainer.withAlpha(204),
                   ),
                 ),
               ],
@@ -651,7 +651,7 @@ class _DataTableHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
+        color: colorScheme.primaryContainer.withAlpha(77),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
       ),
       child: const Row(
@@ -735,7 +735,7 @@ class _LegalBasisTable extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.3),
+              color: colorScheme.primaryContainer.withAlpha(77),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             ),
             child: const Row(
@@ -831,7 +831,7 @@ class _RetentionTable extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.3),
+              color: colorScheme.primaryContainer.withAlpha(77),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             ),
             child: const Row(
@@ -1040,7 +1040,7 @@ class _CookiesTable extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.3),
+              color: colorScheme.primaryContainer.withAlpha(77),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
             ),
             child: const Row(

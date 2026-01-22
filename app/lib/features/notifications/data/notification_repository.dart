@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/foundation.dart';
 
@@ -228,13 +230,16 @@ class NotificationRepository {
   // =============================================
 
   /// S'abonne aux nouvelles notifications
-  RealtimeSubscription subscribeToNotifications({
+  /// Returns a record containing both the RealtimeSubscription (for closing)
+  /// and the StreamSubscription (for canceling the listener)
+  ({RealtimeSubscription subscription, StreamSubscription<RealtimeMessage> listener}) subscribeToNotifications({
     required String userId,
     required Function(NotificationModel) onNewNotification,
   }) {
     final channel = AppwriteConfig.userNotificationsChannel(userId);
 
-    return _appwrite.realtime.subscribe([channel]).stream.listen((response) {
+    final subscription = _appwrite.realtime.subscribe([channel]);
+    final listener = subscription.stream.listen((response) {
       if (response.events.any((e) => e.contains('.create'))) {
         final notification = NotificationModel.fromJson(response.payload);
         // Verifier que c'est bien pour cet utilisateur
@@ -242,6 +247,8 @@ class NotificationRepository {
           onNewNotification(notification);
         }
       }
-    }) as RealtimeSubscription;
+    });
+
+    return (subscription: subscription, listener: listener);
   }
 }

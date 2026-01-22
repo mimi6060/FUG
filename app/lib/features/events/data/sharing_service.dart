@@ -172,7 +172,7 @@ class ShareOptionsSheet extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF25D366).withOpacity(0.1),
+                  color: const Color(0xFF25D366).withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -191,7 +191,7 @@ class ShareOptionsSheet extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -210,7 +210,7 @@ class ShareOptionsSheet extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary.withOpacity(0.1),
+                  color: theme.colorScheme.secondary.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

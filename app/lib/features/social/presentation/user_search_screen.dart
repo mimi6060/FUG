@@ -133,7 +133,7 @@ class _SearchResults extends ConsumerWidget {
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  color: theme.colorScheme.onSurfaceVariant.withAlpha(128),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -222,7 +222,7 @@ class _SuggestedUsers extends ConsumerWidget {
                       Icon(
                         Icons.person_search,
                         size: 64,
-                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                        color: theme.colorScheme.onSurfaceVariant.withAlpha(128),
                       ),
                       const SizedBox(height: 16),
                       Text(
