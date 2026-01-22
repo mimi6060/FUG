@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../data/sharing_service.dart';
 
@@ -25,6 +26,7 @@ class EventDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final eventAsync = ref.watch(eventDetailProvider(eventId));
     final currentUser = ref.watch(currentUserProvider);
 
@@ -32,8 +34,8 @@ class EventDetailScreen extends ConsumerWidget {
       body: eventAsync.when(
         data: (event) {
           if (event == null) {
-            return const Center(
-              child: Text('Evenement non trouve'),
+            return Center(
+              child: Text(l10n.profileNotFound),
             );
           }
 
@@ -53,11 +55,11 @@ class EventDetailScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Erreur: $error'),
+              Text('${l10n.loadingError}: $error'),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.invalidate(eventDetailProvider(eventId)),
-                child: const Text('Reessayer'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -87,6 +89,7 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final event = widget.event;
 
@@ -141,38 +144,38 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
               itemBuilder: (context) => [
                 // Options organisateur
                 if (widget.isOrganizer) ...[
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: ListTile(
-                      leading: Icon(Icons.edit),
-                      title: Text('Modifier'),
+                      leading: const Icon(Icons.edit),
+                      title: Text(l10n.modify),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'cancel',
                     child: ListTile(
-                      leading: Icon(Icons.cancel),
-                      title: Text('Annuler l\'evenement'),
+                      leading: const Icon(Icons.cancel),
+                      title: Text(l10n.cancel),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: ListTile(
-                      leading: Icon(Icons.delete, color: Colors.red),
-                      title: Text('Supprimer', style: TextStyle(color: Colors.red)),
+                      leading: const Icon(Icons.delete, color: Colors.red),
+                      title: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
                 ],
                 // Option signalement (DSA) - pour tous sauf l'organisateur
                 if (!widget.isOrganizer)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'report',
                     child: ListTile(
-                      leading: Icon(Icons.flag_outlined, color: Colors.orange),
-                      title: Text('Signaler', style: TextStyle(color: Colors.orange)),
+                      leading: const Icon(Icons.flag_outlined, color: Colors.orange),
+                      title: Text(l10n.featureComingSoon, style: const TextStyle(color: Colors.orange)),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -196,25 +199,25 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                     if (event.isFeatured)
                       _Badge(
                         icon: Icons.star,
-                        label: 'Mis en avant',
+                        label: l10n.featured,
                         color: Colors.amber,
                       ),
                     if (event.isFree)
                       _Badge(
                         icon: Icons.money_off,
-                        label: 'Gratuit',
+                        label: l10n.freeEvent,
                         color: Colors.green,
                       ),
                     if (event.isFull)
                       _Badge(
                         icon: Icons.block,
-                        label: 'Complet',
+                        label: l10n.full,
                         color: Colors.red,
                       ),
                     if (event.status == EventStatus.cancelled)
                       _Badge(
                         icon: Icons.cancel,
-                        label: 'Annule',
+                        label: l10n.cancel,
                         color: Colors.red,
                       ),
                   ],
@@ -246,25 +249,25 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                   children: [
                     _InfoRow(
                       icon: Icons.calendar_today,
-                      title: 'Date',
+                      title: l10n.dateAndTime,
                       value: _formatDateRange(event.startDate, event.endDate),
                     ),
                     const Divider(),
                     _InfoRow(
                       icon: Icons.access_time,
-                      title: 'Duree',
+                      title: l10n.duration,
                       value: event.formattedDuration,
                     ),
                     const Divider(),
                     _InfoRow(
                       icon: Icons.euro,
-                      title: 'Prix',
+                      title: l10n.price,
                       value: event.formattedPrice,
                     ),
                     const Divider(),
                     _InfoRow(
                       icon: Icons.people,
-                      title: 'Participants',
+                      title: l10n.participants,
                       value: event.maxParticipants != null
                           ? '${event.currentParticipants}/${event.maxParticipants}'
                           : '${event.currentParticipants}',
@@ -287,7 +290,7 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
 
                 // Description
                 Text(
-                  'Description',
+                  l10n.description,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -299,7 +302,7 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
 
                 // Lieu
                 Text(
-                  'Lieu',
+                  l10n.location,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -376,7 +379,7 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                                   // TODO: Ouvrir dans Maps
                                 },
                                 icon: const Icon(Icons.directions),
-                                label: const Text('Itineraire'),
+                                label: Text(l10n.otherOptions),
                               ),
                             ),
                           ],
@@ -390,7 +393,7 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
 
                 // Organisateur
                 Text(
-                  'Organisateur',
+                  l10n.profile,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -403,10 +406,10 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                       child: Text(event.organizerName[0].toUpperCase()),
                     ),
                     title: Text(event.organizerName),
-                    subtitle: const Text('Organisateur'),
+                    subtitle: Text(l10n.profile),
                     trailing: OutlinedButton(
                       onPressed: () => context.push('/users/${event.organizerId}'),
-                      child: const Text('Voir le profil'),
+                      child: Text(l10n.profile),
                     ),
                   ),
                 ),
@@ -416,7 +419,7 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                 // Tags
                 if (event.tags.isNotEmpty) ...[
                   Text(
-                    'Tags',
+                    l10n.tags,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
