@@ -84,13 +84,9 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.privacy_tip),
             title: const Text('Privacy policy'),
-            trailing: const Icon(Icons.open_in_new),
-            onTap: () {
-              // TODO: Open privacy policy
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature coming soon')),
-              );
-            },
+            subtitle: const Text('RGPD compliant privacy information'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/privacy-policy'),
           ),
           ListTile(
             leading: const Icon(Icons.download),

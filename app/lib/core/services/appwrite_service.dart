@@ -21,13 +21,15 @@ class AppwriteService {
   late final Databases _databases;
   late final Realtime _realtime;
   late final Storage _storage;
+  late final Functions _functions;
 
-  // Getters pour accéder aux services
+  // Getters pour acceder aux services
   Client get client => _client;
   Account get account => _account;
   Databases get databases => _databases;
   Realtime get realtime => _realtime;
   Storage get storage => _storage;
+  Functions get functions => _functions;
 
   /// Constructeur privé
   AppwriteService._internal() {
@@ -57,6 +59,7 @@ class AppwriteService {
     _databases = Databases(_client);
     _realtime = Realtime(_client);
     _storage = Storage(_client);
+    _functions = Functions(_client);
 
     if (kDebugMode) {
       print('AppwriteService initialized');

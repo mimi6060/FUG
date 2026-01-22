@@ -47,6 +47,9 @@ class AppwriteConfig {
   /// Collection des signalements
   static const String reportsCollectionId = 'reports';
 
+  /// Collection des actions de moderation (DSA compliance)
+  static const String moderationActionsCollectionId = 'moderation_actions';
+
   // ============================================
   // IDs des Buckets Storage
   // ============================================

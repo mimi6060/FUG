@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../data/consent_provider.dart';
@@ -114,18 +113,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
     }
   }
 
-  Future<void> _openPrivacyPolicy() async {
-    const url = 'https://fug-app.com/privacy-policy';
-    try {
-      final uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        _showError('Cannot open link');
-      }
-    } catch (e) {
-      _showError('Error: $e');
-    }
+  void _openPrivacyPolicy() {
+    // Navigate to in-app privacy policy screen
+    context.push('/settings/privacy-policy');
   }
 
   void _acceptAll() {

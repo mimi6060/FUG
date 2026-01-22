@@ -16,6 +16,7 @@ import '../../features/social/presentation/user_search_screen.dart';
 import '../../features/social/presentation/followers_list_screen.dart';
 import '../../features/settings/presentation/consent_screen.dart';
 import '../../features/settings/presentation/delete_account_screen.dart';
+import '../../features/settings/presentation/privacy_policy_screen.dart';
 import '../../features/settings/data/consent_provider.dart';
 
 /// Cle de navigation globale
@@ -250,6 +251,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'deleteAccount',
             builder: (context, state) => const DeleteAccountScreen(),
           ),
+          // Politique de confidentialite (RGPD)
+          GoRoute(
+            path: 'privacy-policy',
+            name: 'privacyPolicy',
+            builder: (context, state) => const PrivacyPolicyScreen(),
+          ),
         ],
       ),
     ],
@@ -288,6 +295,12 @@ class _SettingsScreen extends StatelessWidget {
             title: const Text('Confidentialite et consentement'),
             subtitle: const Text('Gerer vos preferences RGPD'),
             onTap: () => context.push('/settings/consent'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description),
+            title: const Text('Politique de confidentialite'),
+            subtitle: const Text('Informations RGPD completes'),
+            onTap: () => context.push('/settings/privacy-policy'),
           ),
           ListTile(
             leading: const Icon(Icons.help),
