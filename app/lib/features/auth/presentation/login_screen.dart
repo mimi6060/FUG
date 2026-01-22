@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -350,7 +349,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 12),
 
                   // Bouton Apple Sign-In (iOS uniquement)
-                  if (Platform.isIOS) ...[
+                  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ...[
                     AppleSignInButton(
                       onPressed: (isLoading || _isAppleSignInLoading)
                           ? null

@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -8,7 +6,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 ///
 /// Ce widget:
 /// - Utilise le composant officiel SignInWithAppleButton
-/// - S'affiche uniquement sur iOS (verification Platform.isIOS)
+/// - S'affiche uniquement sur iOS (via defaultTargetPlatform)
 /// - Respecte les guidelines Apple (style noir par defaut)
 /// - Gere l'etat de chargement
 ///
@@ -68,18 +66,14 @@ class AppleSignInButton extends StatelessWidget {
   /// - iOS (production)
   /// - Web en debug mode (pour tests)
   bool _shouldShow() {
-    // En mode debug, toujours afficher pour les tests
+    // En mode debug web, toujours afficher pour les tests
     if (kDebugMode && kIsWeb) {
       return true;
     }
 
     // En production, seulement sur iOS
-    if (!kIsWeb) {
-      try {
-        return Platform.isIOS;
-      } catch (_) {
-        return false;
-      }
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      return true;
     }
 
     return false;
@@ -137,14 +131,8 @@ class IOSOnly extends StatelessWidget {
     }
 
     // Verifier si iOS
-    if (!kIsWeb) {
-      try {
-        if (Platform.isIOS) {
-          return child;
-        }
-      } catch (_) {
-        // Platform non disponible
-      }
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      return child;
     }
 
     return fallback ?? const SizedBox.shrink();

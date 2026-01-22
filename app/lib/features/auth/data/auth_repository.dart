@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart' as models;
@@ -313,8 +311,8 @@ class AuthRepository {
   /// - Email relay Apple (xyz@privaterelay.appleid.com)
   /// - Nom masque par l'utilisateur
   Future<models.User> signInWithApple() async {
-    // Verifier que nous sommes sur iOS
-    if (!Platform.isIOS) {
+    // Verifier que nous sommes sur iOS (pas sur web ou autres plateformes)
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
       throw AuthException('Apple Sign-In est disponible uniquement sur iOS.');
     }
 
@@ -371,7 +369,7 @@ class AuthRepository {
 
   /// Verifie si Apple Sign-In est disponible sur l'appareil
   static Future<bool> isAppleSignInAvailable() async {
-    if (!Platform.isIOS) return false;
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return false;
     return await SignInWithApple.isAvailable();
   }
 
