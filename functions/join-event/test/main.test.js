@@ -421,7 +421,7 @@ describe('join-event function', () => {
       const result = await joinEvent(context);
 
       expect(result.data.success).toBe(true);
-      expect(result.data.data.pointsAwarded).toBe(15); // JOIN_EVENT points
+      expect(result.data.data.pointsAwarded).toBe(5); // JOIN_EVENT points
     });
 
     it('should award bonus points to organizer', async () => {

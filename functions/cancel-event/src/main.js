@@ -163,9 +163,9 @@ export default async ({ req, res, log, error }) => {
             userId: participant.userId,
             type: 'event_cancelled',
             title: 'Evenement annule',
-            body: notificationBody,
+            message: notificationBody,
             data: notificationData,
-            isRead: false,
+            read: false,
             createdAt: now
           }
         )

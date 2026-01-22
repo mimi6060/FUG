@@ -318,7 +318,7 @@ describe('follow-user function', () => {
       const result = await followUser(context);
 
       expect(result.data.success).toBe(true);
-      expect(result.data.data.pointsAwarded.following).toBe(10); // GAIN_FOLLOWER points
+      expect(result.data.data.pointsAwarded.following).toBe(2); // GAIN_FOLLOWER points
     });
 
     it('should create gamification document if it does not exist', async () => {

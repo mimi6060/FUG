@@ -141,7 +141,7 @@ export default async ({ req, res, log, error }) => {
         userId: event.creatorId,
         type: 'event_update',
         title: 'Participant desiste',
-        body: `${user.displayName || user.username} s'est desiste de votre evenement "${event.title}"`,
+        message: `${user.displayName || user.username} s'est desiste de votre evenement "${event.title}"`,
         data: JSON.stringify({
           eventId,
           eventTitle: event.title,
@@ -149,7 +149,7 @@ export default async ({ req, res, log, error }) => {
           participantName: user.displayName || user.username,
           remainingParticipants: newParticipantCount
         }),
-        isRead: false,
+        read: false,
         createdAt: now
       }
     );
