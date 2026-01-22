@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -38,6 +39,7 @@ class FollowersListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final listAsync = isFollowers
         ? ref.watch(followersProvider(userId))
         : ref.watch(followingProvider(userId));
@@ -46,7 +48,7 @@ class FollowersListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isFollowers ? 'Followers' : 'Suivis'),
+        title: Text(isFollowers ? l10n.followers : l10n.following),
       ),
       body: listAsync.when(
         data: (users) {
@@ -63,8 +65,8 @@ class FollowersListScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     isFollowers
-                        ? 'Aucun follower pour le moment'
-                        : 'Ne suit personne pour le moment',
+                        ? l10n.noFollowersYet
+                        : l10n.notFollowingAnyone,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -75,7 +77,7 @@ class FollowersListScreen extends ConsumerWidget {
                     FilledButton.icon(
                       onPressed: () => context.push('/search'),
                       icon: const Icon(Icons.search),
-                      label: const Text('Trouver des utilisateurs'),
+                      label: Text(l10n.findUsers),
                     ),
                 ],
               ),
@@ -110,7 +112,7 @@ class FollowersListScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Erreur: $error'),
+              Text('${l10n.loadingError}: $error'),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
@@ -120,7 +122,7 @@ class FollowersListScreen extends ConsumerWidget {
                     ref.invalidate(followingProvider(userId));
                   }
                 },
-                child: const Text('Reessayer'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -220,6 +222,7 @@ class _FollowerTileState extends ConsumerState<_FollowerTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final user = widget.user;
 
@@ -263,7 +266,7 @@ class _FollowerTileState extends ConsumerState<_FollowerTile> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Vous',
+                  l10n.you,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.primary,
                   ),
@@ -312,7 +315,7 @@ class _FollowerTileState extends ConsumerState<_FollowerTile> {
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Suivi'),
+                          : Text(l10n.followingStatus),
                     )
                   : FilledButton(
                       onPressed: _isLoading ? null : _toggleFollow,
@@ -328,7 +331,7 @@ class _FollowerTileState extends ConsumerState<_FollowerTile> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Suivre'),
+                          : Text(l10n.follow),
                     ),
             )
           : null,
@@ -350,6 +353,7 @@ class FollowersCountWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final followersAsync = ref.watch(followersProvider(userId));
     final followingAsync = ref.watch(followingProvider(userId));
     final theme = Theme.of(context);
@@ -377,7 +381,7 @@ class FollowersCountWidget extends ConsumerWidget {
                 error: (_, __) => const Text('-'),
               ),
               Text(
-                'Followers',
+                l10n.followers,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -413,7 +417,7 @@ class FollowersCountWidget extends ConsumerWidget {
                 error: (_, __) => const Text('-'),
               ),
               Text(
-                'Suivis',
+                l10n.following,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -72,6 +73,7 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -80,7 +82,7 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
           controller: _searchController,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'Rechercher des utilisateurs...',
+            hintText: l10n.searchUsers,
             border: InputBorder.none,
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurfaceVariant,
@@ -117,6 +119,7 @@ class _SearchResults extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final searchAsync = ref.watch(userSearchProvider(query));
     final theme = Theme.of(context);
 
@@ -134,14 +137,14 @@ class _SearchResults extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Aucun utilisateur trouve',
+                  l10n.noUserFound,
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Essayez avec un autre terme de recherche',
+                  l10n.tryAnotherSearchTerm,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -167,7 +170,7 @@ class _SearchResults extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Erreur: $error'),
+            Text('${l10n.loadingError}: $error'),
           ],
         ),
       ),
@@ -179,6 +182,7 @@ class _SearchResults extends ConsumerWidget {
 class _SuggestedUsers extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final suggestedAsync = ref.watch(suggestedUsersProvider);
     final theme = Theme.of(context);
 
@@ -193,14 +197,14 @@ class _SuggestedUsers extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Suggestions',
+                      l10n.suggestions,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Utilisateurs avec des interets similaires',
+                      l10n.usersWithSimilarInterests,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -222,14 +226,14 @@ class _SuggestedUsers extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Aucune suggestion pour le moment',
+                        l10n.noSuggestionsYet,
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Completez votre profil avec vos interets',
+                        l10n.completeProfileWithInterests,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -252,7 +256,7 @@ class _SuggestedUsers extends ConsumerWidget {
         child: CircularProgressIndicator(),
       ),
       error: (error, stack) => Center(
-        child: Text('Erreur: $error'),
+        child: Text('${l10n.loadingError}: $error'),
       ),
     );
   }
@@ -332,6 +336,7 @@ class _UserTileState extends ConsumerState<_UserTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final user = widget.user;
 
@@ -402,7 +407,7 @@ class _UserTileState extends ConsumerState<_UserTile> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Suivi'),
+                    : Text(l10n.followingStatus),
               )
             : FilledButton(
                 onPressed: _isLoading ? null : _toggleFollow,
@@ -415,7 +420,7 @@ class _UserTileState extends ConsumerState<_UserTile> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Suivre'),
+                    : Text(l10n.follow),
               ),
       ),
       onTap: () => context.push('/users/${user.id}'),

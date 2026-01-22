@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,6 +36,8 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+
     // Utiliser le profil specifique ou le profil connecte
     final profileAsync = userId != null
         ? ref.watch(profileProvider(userId!))
@@ -45,26 +48,26 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil'),
+        title: Text(l10n.profile),
         actions: [
           if (isOwnProfile)
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => context.push('/profile/edit'),
-              tooltip: 'Modifier le profil',
+              tooltip: l10n.editProfile,
             ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => context.push('/settings'),
-            tooltip: 'Parametres',
+            tooltip: l10n.settings,
           ),
         ],
       ),
       body: profileAsync.when(
         data: (profile) {
           if (profile == null) {
-            return const Center(
-              child: Text('Profil non trouve'),
+            return Center(
+              child: Text(l10n.profileNotFound),
             );
           }
           return _ProfileContent(
@@ -81,7 +84,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Erreur: $error'),
+              Text('${l10n.loadingError}: $error'),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
@@ -91,7 +94,7 @@ class ProfileScreen extends ConsumerWidget {
                     ref.invalidate(currentProfileProvider);
                   }
                 },
-                child: const Text('Reessayer'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -113,6 +116,7 @@ class _ProfileContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return RefreshIndicator(
@@ -149,7 +153,7 @@ class _ProfileContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'A propos',
+                          l10n.aboutMe,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -175,7 +179,7 @@ class _ProfileContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Centres d\'interet',
+                          l10n.interests,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -221,6 +225,7 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Container(
@@ -336,17 +341,17 @@ class _ProfileHeader extends StatelessWidget {
             children: [
               _StatItem(
                 value: profile.followersCount.toString(),
-                label: 'Followers',
+                label: l10n.followers,
                 onTap: () => context.push('/users/${profile.id}/followers'),
               ),
               _StatItem(
                 value: profile.followingCount.toString(),
-                label: 'Suivis',
+                label: l10n.following,
                 onTap: () => context.push('/users/${profile.id}/following'),
               ),
               _StatItem(
                 value: profile.totalEventsCreated.toString(),
-                label: 'Evenements',
+                label: l10n.events,
                 onTap: () => context.push('/users/${profile.id}/events'),
               ),
             ],
@@ -403,13 +408,15 @@ class _StatItem extends StatelessWidget {
 class _OwnProfileActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () => context.push('/profile/edit'),
             icon: const Icon(Icons.edit),
-            label: const Text('Modifier'),
+            label: Text(l10n.modify),
           ),
         ),
         const SizedBox(width: 12),
@@ -417,7 +424,7 @@ class _OwnProfileActions extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: () => context.push('/events/create'),
             icon: const Icon(Icons.add),
-            label: const Text('Creer un FUG'),
+            label: Text(l10n.createFug),
           ),
         ),
       ],
@@ -502,6 +509,8 @@ class _OtherProfileActionsState extends ConsumerState<_OtherProfileActions> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Expanded(
@@ -514,7 +523,7 @@ class _OtherProfileActionsState extends ConsumerState<_OtherProfileActions> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Suivi'),
+                      : Text(l10n.followingStatus),
                 )
               : FilledButton(
                   onPressed: _isLoading ? null : _toggleFollow,
@@ -527,7 +536,7 @@ class _OtherProfileActionsState extends ConsumerState<_OtherProfileActions> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Suivre'),
+                      : Text(l10n.follow),
                 ),
         ),
         const SizedBox(width: 12),
@@ -536,11 +545,11 @@ class _OtherProfileActionsState extends ConsumerState<_OtherProfileActions> {
             onPressed: () {
               // TODO: Envoyer un message
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Messagerie a venir')),
+                SnackBar(content: Text(l10n.messagingComingSoon)),
               );
             },
             icon: const Icon(Icons.message),
-            label: const Text('Message'),
+            label: Text(l10n.message),
           ),
         ),
       ],
@@ -556,6 +565,7 @@ class _StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Card(
@@ -565,7 +575,7 @@ class _StatsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Statistiques',
+              l10n.statistics,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -573,28 +583,28 @@ class _StatsCard extends StatelessWidget {
             const SizedBox(height: 16),
             _StatRow(
               icon: Icons.event,
-              label: 'Evenements crees',
+              label: l10n.eventsCreated,
               value: profile.totalEventsCreated.toString(),
             ),
             const SizedBox(height: 12),
             _StatRow(
               icon: Icons.check_circle,
-              label: 'Participations',
+              label: l10n.participations,
               value: profile.totalEventsAttended.toString(),
             ),
             const SizedBox(height: 12),
             _StatRow(
               icon: Icons.star,
-              label: 'Note moyenne',
+              label: l10n.averageRating,
               value: profile.rating > 0
                   ? '${profile.rating.toStringAsFixed(1)}/5'
-                  : 'Non note',
+                  : l10n.notRated,
             ),
             if (profile.points > 0) ...[
               const SizedBox(height: 12),
               _StatRow(
                 icon: Icons.emoji_events,
-                label: 'Points',
+                label: l10n.points,
                 value: profile.points.toString(),
               ),
               const SizedBox(height: 8),
@@ -604,7 +614,7 @@ class _StatsCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Niveau ${profile.level} - ${profile.levelProgress.toInt()}%',
+                '${l10n.level(profile.level)} - ${profile.levelProgress.toInt()}%',
                 style: theme.textTheme.bodySmall,
               ),
             ],

@@ -21,43 +21,42 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settings),
       ),
       body: ListView(
         children: [
           // Account Section
-          _SectionHeader(title: 'Account'),
+          _SectionHeader(title: l10n.account),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            subtitle: const Text('Edit your personal information'),
+            title: Text(l10n.profile),
+            subtitle: Text(l10n.editYourPersonalInfo),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/profile/edit'),
           ),
           ListTile(
             leading: const Icon(Icons.lock),
-            title: const Text('Password'),
-            subtitle: const Text('Change your password'),
+            title: Text(l10n.password),
+            subtitle: Text(l10n.changeYourPassword),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Password change screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature coming soon')),
+                SnackBar(content: Text(l10n.featureComingSoon)),
               );
             },
           ),
           ListTile(
             leading: const Icon(Icons.email),
-            title: const Text('Email'),
-            subtitle: Text(user.valueOrNull?.email ?? 'Not connected'),
+            title: Text(l10n.email),
+            subtitle: Text(user.valueOrNull?.email ?? l10n.notConnected),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Email modification screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature coming soon')),
+                SnackBar(content: Text(l10n.featureComingSoon)),
               );
             },
           ),
@@ -65,16 +64,15 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // Notifications Section
-          _SectionHeader(title: 'Notifications'),
+          _SectionHeader(title: l10n.notifications),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Notification preferences'),
-            subtitle: const Text('Manage your alerts'),
+            title: Text(l10n.notificationPreferences),
+            subtitle: Text(l10n.manageYourAlerts),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Notification settings screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature coming soon')),
+                SnackBar(content: Text(l10n.featureComingSoon)),
               );
             },
           ),
@@ -82,29 +80,28 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // Preferences Section (MOD-010: i18n)
-          _SectionHeader(title: 'Preferences'),
+          _SectionHeader(title: l10n.languagePreference),
           const LanguageTile(),
 
           const Divider(),
 
           // Privacy Section
-          _SectionHeader(title: 'Privacy and data'),
+          _SectionHeader(title: l10n.privacyAndData),
           ListTile(
             leading: const Icon(Icons.privacy_tip),
-            title: const Text('Privacy policy'),
-            subtitle: const Text('RGPD compliant privacy information'),
+            title: Text(l10n.privacyPolicy),
+            subtitle: Text(l10n.rgpdPrivacyInfo),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/settings/privacy-policy'),
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: const Text('Export my data'),
-            subtitle: const Text('Download a copy of your data'),
+            title: Text(l10n.exportMyData),
+            subtitle: Text(l10n.downloadYourData),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Data export (GDPR)
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature coming soon')),
+                SnackBar(content: Text(l10n.featureComingSoon)),
               );
             },
           ),
@@ -128,8 +125,8 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         title: Text(
                           hasPendingRequest
-                              ? 'Deletion in progress...'
-                              : 'Delete my account',
+                              ? l10n.deletionInProgress
+                              : l10n.deleteMyAccount,
                           style: TextStyle(
                             color:
                                 hasPendingRequest ? Colors.orange : Colors.red,
@@ -137,10 +134,10 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                         subtitle: hasPendingRequest
                             ? Text(
-                                'Deletion in ${request.daysUntilDeletion} days',
+                                l10n.deletionInDays(request.daysUntilDeletion),
                                 style: const TextStyle(color: Colors.orange),
                               )
-                            : const Text('Exercise your right to be forgotten'),
+                            : Text(l10n.exerciseRightToBeForgotten),
                         trailing: Icon(
                           Icons.chevron_right,
                           color:
@@ -149,13 +146,13 @@ class SettingsScreen extends ConsumerWidget {
                         onTap: () => context.push('/settings/delete-account'),
                       );
                     },
-                    loading: () => const ListTile(
-                      leading: Icon(Icons.delete_forever, color: Colors.red),
+                    loading: () => ListTile(
+                      leading: const Icon(Icons.delete_forever, color: Colors.red),
                       title: Text(
-                        'Delete my account',
-                        style: TextStyle(color: Colors.red),
+                        l10n.deleteMyAccount,
+                        style: const TextStyle(color: Colors.red),
                       ),
-                      trailing: SizedBox(
+                      trailing: const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
@@ -164,11 +161,11 @@ class SettingsScreen extends ConsumerWidget {
                     error: (_, __) => ListTile(
                       leading:
                           const Icon(Icons.delete_forever, color: Colors.red),
-                      title: const Text(
-                        'Delete my account',
-                        style: TextStyle(color: Colors.red),
+                      title: Text(
+                        l10n.deleteMyAccount,
+                        style: const TextStyle(color: Colors.red),
                       ),
-                      subtitle: const Text('Exercise your right to be forgotten'),
+                      subtitle: Text(l10n.exerciseRightToBeForgotten),
                       trailing:
                           const Icon(Icons.chevron_right, color: Colors.red),
                       onTap: () => context.push('/settings/delete-account'),
@@ -182,21 +179,20 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
 
           // About Section
-          _SectionHeader(title: 'About'),
+          _SectionHeader(title: l10n.about),
           ListTile(
             leading: const Icon(Icons.help),
-            title: const Text('Help and support'),
+            title: Text(l10n.helpAndSupport),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: Help screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Feature coming soon')),
+                SnackBar(content: Text(l10n.featureComingSoon)),
               );
             },
           ),
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('About FUG'),
+            title: Text(l10n.aboutFug),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               showAboutDialog(
@@ -220,26 +216,24 @@ class SettingsScreen extends ConsumerWidget {
           // Logout
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Sign out',
-              style: TextStyle(color: Colors.red),
+            title: Text(
+              l10n.signOut,
+              style: const TextStyle(color: Colors.red),
             ),
             onTap: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Sign out'),
-                  content: const Text(
-                    'Are you sure you want to sign out?',
-                  ),
+                builder: (dialogContext) => AlertDialog(
+                  title: Text(l10n.signOut),
+                  content: Text(l10n.signOutConfirmation),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Cancel'),
+                      onPressed: () => Navigator.pop(dialogContext, false),
+                      child: Text(l10n.cancel),
                     ),
                     FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Sign out'),
+                      onPressed: () => Navigator.pop(dialogContext, true),
+                      child: Text(l10n.signOut),
                     ),
                   ],
                 ),
@@ -256,7 +250,7 @@ class SettingsScreen extends ConsumerWidget {
           // Version
           Center(
             child: Text(
-              'Version 1.0.0',
+              l10n.version('1.0.0'),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

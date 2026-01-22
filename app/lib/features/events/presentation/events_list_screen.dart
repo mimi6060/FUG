@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,6 +30,8 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
   }
 
   Future<void> _loadEvents() async {
+    final l10n = AppLocalizations.of(context)!;
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -53,14 +56,14 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
         }
       } else if (mounted) {
         setState(() {
-          _error = 'Impossible d\'obtenir votre position';
+          _error = l10n.positionUnavailable;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Erreur de chargement: $e';
+          _error = '${l10n.loadingError}: $e';
           _isLoading = false;
         });
       }
@@ -70,28 +73,29 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Evenements'),
+        title: Text(l10n.events),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () => context.push('/events/search'),
-            tooltip: 'Rechercher',
+            tooltip: l10n.search,
           ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilters,
-            tooltip: 'Filtres',
+            tooltip: l10n.filters,
           ),
         ],
       ),
-      body: _buildBody(theme),
+      body: _buildBody(theme, l10n),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/events/create'),
         icon: const Icon(Icons.add),
-        label: const Text('Creer un FUG'),
+        label: Text(l10n.createFug),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 1,
@@ -111,33 +115,33 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
               break;
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.map_outlined),
-            selectedIcon: Icon(Icons.map),
-            label: 'Carte',
+            icon: const Icon(Icons.map_outlined),
+            selectedIcon: const Icon(Icons.map),
+            label: l10n.map,
           ),
           NavigationDestination(
-            icon: Icon(Icons.event_outlined),
-            selectedIcon: Icon(Icons.event),
-            label: 'Evenements',
+            icon: const Icon(Icons.event_outlined),
+            selectedIcon: const Icon(Icons.event),
+            label: l10n.events,
           ),
           NavigationDestination(
-            icon: Icon(Icons.notifications_outlined),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'Notifs',
+            icon: const Icon(Icons.notifications_outlined),
+            selectedIcon: const Icon(Icons.notifications),
+            label: l10n.notifs,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outlined),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profil',
+            icon: const Icon(Icons.person_outlined),
+            selectedIcon: const Icon(Icons.person),
+            label: l10n.profile,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBody(ThemeData theme) {
+  Widget _buildBody(ThemeData theme, AppLocalizations l10n) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -164,7 +168,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
             FilledButton.icon(
               onPressed: _loadEvents,
               icon: const Icon(Icons.refresh),
-              label: const Text('Reessayer'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -183,12 +187,12 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Aucun evenement a proximite',
+              l10n.noEventsNearby,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Soyez le premier a creer un FUG!',
+              l10n.beFirstToCreate,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -197,7 +201,7 @@ class _EventsListScreenState extends ConsumerState<EventsListScreen> {
             FilledButton.icon(
               onPressed: () => context.push('/events/create'),
               icon: const Icon(Icons.add),
-              label: const Text('Creer un FUG'),
+              label: Text(l10n.createFug),
             ),
           ],
         ),
@@ -250,6 +254,7 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -296,7 +301,7 @@ class _EventCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      _buildPriceBadge(theme),
+                      _buildPriceBadge(theme, l10n),
                     ],
                   ),
 
@@ -312,7 +317,7 @@ class _EventCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _formatDate(event.startDate),
+                        _formatDate(event.startDate, l10n),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -358,7 +363,7 @@ class _EventCard extends StatelessWidget {
                       Text(
                         event.maxParticipants != null
                             ? '${event.currentParticipants}/${event.maxParticipants}'
-                            : '${event.currentParticipants} participants',
+                            : '${event.currentParticipants} ${l10n.participants}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -374,9 +379,9 @@ class _EventCard extends StatelessWidget {
                             color: Colors.red.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'Complet',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.full,
+                            style: const TextStyle(
                               color: Colors.red,
                               fontSize: 12,
                             ),
@@ -394,18 +399,18 @@ class _EventCard extends StatelessWidget {
                             color: Colors.amber.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.star,
                                 size: 12,
                                 color: Colors.amber,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
-                                'Featured',
-                                style: TextStyle(
+                                l10n.featured,
+                                style: const TextStyle(
                                   color: Colors.amber,
                                   fontSize: 12,
                                 ),
@@ -425,7 +430,7 @@ class _EventCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceBadge(ThemeData theme) {
+  Widget _buildPriceBadge(ThemeData theme, AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 10,
@@ -438,7 +443,7 @@ class _EventCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
-        event.formattedPrice,
+        event.isFree ? l10n.freeEvent : event.formattedPrice,
         style: TextStyle(
           color: event.isFree ? Colors.green : theme.colorScheme.primary,
           fontWeight: FontWeight.bold,
@@ -448,16 +453,16 @@ class _EventCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final difference = date.difference(now);
 
     if (difference.inDays == 0) {
-      return 'Aujourd\'hui a ${date.hour}h${date.minute.toString().padLeft(2, '0')}';
+      return '${l10n.today} ${date.hour}h${date.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays == 1) {
-      return 'Demain a ${date.hour}h${date.minute.toString().padLeft(2, '0')}';
+      return '${l10n.tomorrow} ${date.hour}h${date.minute.toString().padLeft(2, '0')}';
     } else {
-      return '${date.day}/${date.month} a ${date.hour}h${date.minute.toString().padLeft(2, '0')}';
+      return '${date.day}/${date.month} ${date.hour}h${date.minute.toString().padLeft(2, '0')}';
     }
   }
 }
@@ -490,6 +495,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -498,7 +504,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filtres',
+            l10n.filters,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -508,7 +514,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
           // Rayon de recherche
           Text(
-            'Rayon de recherche: ${_radius.toInt()} km',
+            '${l10n.searchRadius}: ${_radius.toInt()} ${l10n.km}',
             style: theme.textTheme.titleMedium,
           ),
           Slider(
@@ -516,7 +522,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
             min: 1,
             max: 50,
             divisions: 49,
-            label: '${_radius.toInt()} km',
+            label: '${_radius.toInt()} ${l10n.km}',
             onChanged: (value) {
               setState(() {
                 _radius = value;
@@ -528,7 +534,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
           // Filtres supplementaires
           SwitchListTile(
-            title: const Text('Evenements gratuits uniquement'),
+            title: Text(l10n.freeEventsOnly),
             value: _showFreeOnly,
             onChanged: (value) {
               setState(() {
@@ -538,7 +544,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
           ),
 
           SwitchListTile(
-            title: const Text('Places disponibles uniquement'),
+            title: Text(l10n.availableSpotsOnly),
             value: _showAvailableOnly,
             onChanged: (value) {
               setState(() {
@@ -554,7 +560,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
             width: double.infinity,
             child: FilledButton(
               onPressed: () => widget.onRadiusChanged(_radius),
-              child: const Text('Appliquer'),
+              child: Text(l10n.apply),
             ),
           ),
 

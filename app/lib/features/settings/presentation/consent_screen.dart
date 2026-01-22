@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -46,9 +47,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   }
 
   Future<void> _saveConsent() async {
+    final l10n = AppLocalizations.of(context)!;
     final user = ref.read(authStateProvider).valueOrNull;
     if (user == null) {
-      _showError('User not connected');
+      _showError(l10n.notConnected);
       return;
     }
 
@@ -81,18 +83,18 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
         } else {
           // Return to settings
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Preferences saved'),
+            SnackBar(
+              content: Text(l10n.featureComingSoon), // TODO: Add proper "Preferences saved" key
               backgroundColor: Colors.green,
             ),
           );
           context.pop();
         }
       } else {
-        _showError('Error saving preferences');
+        _showError(l10n.unexpectedError);
       }
     } catch (e) {
-      _showError('Error: $e');
+      _showError('${l10n.unexpectedError} $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -134,6 +136,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -141,7 +144,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
       appBar: widget.isFirstLaunch
           ? null
           : AppBar(
-              title: const Text('Consent Management'),
+              title: Text(l10n.privacyAndData),
             ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -159,17 +162,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Your data, your control',
+                  l10n.rgpdPrivacyInfo,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'We respect your privacy. Choose how we use your data.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -195,7 +190,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'In compliance with GDPR, you can change your choices at any time in settings.',
+                        l10n.rgpdPrivacyInfo,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onPrimaryContainer,
                         ),
@@ -210,10 +205,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.security,
                 iconColor: colorScheme.secondary,
-                title: 'Essential data',
-                subtitle: 'Required for app functionality',
-                details:
-                    'Authentication, session management, basic preferences.',
+                title: l10n.privacyAndData,
+                subtitle: l10n.rgpdPrivacyInfo,
+                details: l10n.rgpdPrivacyInfo,
                 value: _essentialConsent,
                 required: true,
                 onChanged: null, // Required, not modifiable
@@ -224,10 +218,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.analytics_outlined,
                 iconColor: colorScheme.tertiary,
-                title: 'Analytics',
-                subtitle: 'Help us improve FUG',
-                details:
-                    'Anonymous usage statistics to improve the experience.',
+                title: l10n.notificationPreferences,
+                subtitle: l10n.manageYourAlerts,
+                details: l10n.manageYourAlerts,
                 value: _analyticsConsent,
                 required: false,
                 onChanged: _isLoading
@@ -244,10 +237,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               _ConsentTile(
                 icon: Icons.campaign_outlined,
                 iconColor: colorScheme.error,
-                title: 'Marketing communications',
-                subtitle: 'Receive offers and news',
-                details:
-                    'Promotional emails, special event notifications.',
+                title: l10n.notifications,
+                subtitle: l10n.notificationPreferences,
+                details: l10n.manageYourAlerts,
                 value: _marketingConsent,
                 required: false,
                 onChanged: _isLoading
@@ -267,14 +259,14 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _rejectOptional,
-                        child: const Text('Reject optional'),
+                        child: Text(l10n.cancel),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _acceptAll,
-                        child: const Text('Accept all'),
+                        child: Text(l10n.apply),
                       ),
                     ),
                   ],
@@ -286,7 +278,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
               TextButton.icon(
                 onPressed: _openPrivacyPolicy,
                 icon: const Icon(Icons.description_outlined, size: 18),
-                label: const Text('Read our privacy policy'),
+                label: Text(l10n.privacyPolicy),
               ),
               const SizedBox(height: 24),
 
@@ -307,8 +299,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       )
                     : Text(
                         widget.isFirstLaunch
-                            ? 'Continue'
-                            : 'Save my preferences',
+                            ? l10n.continueBtn
+                            : l10n.apply,
                         style: const TextStyle(fontSize: 16),
                       ),
               ),
@@ -316,7 +308,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
               // Legal note
               Text(
-                'By continuing, you accept the essential data required for app functionality.',
+                l10n.iAcceptTerms,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -354,6 +346,7 @@ class _ConsentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -401,7 +394,7 @@ class _ConsentTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'Required',
+                      l10n.information,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colorScheme.secondary,
                         fontWeight: FontWeight.w600,

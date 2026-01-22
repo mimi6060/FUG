@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,6 +38,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
     final dataToDelete = ref.watch(dataToBeDeletedProvider);
@@ -44,15 +46,15 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Delete my account'),
+        title: Text(l10n.deleteMyAccount),
         backgroundColor: theme.colorScheme.errorContainer,
         foregroundColor: theme.colorScheme.onErrorContainer,
       ),
       body: user.when(
         data: (currentUser) {
           if (currentUser == null) {
-            return const Center(
-              child: Text('You must be logged in to access this page.'),
+            return Center(
+              child: Text(l10n.notConnected),
             );
           }
 
@@ -89,8 +91,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(
-          child: Text('Loading error'),
+        error: (_, __) => Center(
+          child: Text(l10n.loadingError),
         ),
       ),
     );
@@ -102,6 +104,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     AccountDeletionRequest request,
     String userId,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -126,7 +129,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Scheduled deletion',
+                        l10n.deletionInProgress,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.orange.shade800,
@@ -134,7 +137,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Your account will be deleted in ${request.daysUntilDeletion} days.',
+                        l10n.deletionInDays(request.daysUntilDeletion),
                         style: TextStyle(color: Colors.orange.shade700),
                       ),
                     ],
@@ -154,25 +157,25 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request details',
+                    l10n.information,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow(
-                    'Request date',
+                    l10n.dateAndTime,
                     _formatDate(request.requestedAt),
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
-                    'Scheduled deletion',
+                    l10n.deletionInProgress,
                     _formatDate(request.scheduledDeletionAt),
                   ),
                   const SizedBox(height: 8),
                   _buildInfoRow(
-                    'Days remaining',
-                    '${request.daysUntilDeletion} days',
+                    l10n.deletionInDays(request.daysUntilDeletion),
+                    '${request.daysUntilDeletion}',
                   ),
                 ],
               ),
@@ -183,8 +186,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
           // Explanatory message
           Text(
-            'You can cancel this request at any time before the scheduled deletion date. '
-            'After this date, your account and all your data will be permanently deleted.',
+            l10n.exerciseRightToBeForgotten,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -206,7 +208,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.restore),
-              label: Text(_isLoading ? 'Cancelling...' : 'Cancel deletion'),
+              label: Text(_isLoading ? l10n.deletionInProgress : l10n.cancel),
               style: FilledButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -221,7 +223,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => context.pop(),
-              child: const Text('Back to settings'),
+              child: Text(l10n.back),
             ),
           ),
         ],
@@ -236,6 +238,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     List<String> dataToDelete,
     List<String> dataToAnonymize,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -265,7 +268,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Warning',
+                          l10n.deleteMyAccount,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onErrorContainer,
@@ -273,7 +276,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'This action is irreversible after the grace period.',
+                          l10n.exerciseRightToBeForgotten,
                           style: TextStyle(
                             color: theme.colorScheme.onErrorContainer,
                           ),
@@ -301,7 +304,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Grace period: 30 days',
+                            l10n.deletionInDays(30),
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue.shade800,
@@ -309,7 +312,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'You can cancel your request at any time during this period.',
+                            l10n.exerciseRightToBeForgotten,
                             style: TextStyle(color: Colors.blue.shade700),
                           ),
                         ],
@@ -324,7 +327,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             // Deleted data
             Text(
-              'Data that will be deleted',
+              l10n.downloadYourData,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -351,7 +354,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             // Anonymized data
             Text(
-              'Anonymized data (not deleted)',
+              l10n.privacyAndData,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -385,9 +388,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   _confirmCheckbox1 = value ?? false;
                 });
               },
-              title: const Text(
-                'I understand that my data will be permanently deleted after 30 days.',
-              ),
+              title: Text(l10n.exerciseRightToBeForgotten),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -400,9 +401,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   _confirmCheckbox2 = value ?? false;
                 });
               },
-              title: const Text(
-                'I confirm that I want to delete my account and all my data.',
-              ),
+              title: Text(l10n.deleteMyAccount),
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
@@ -411,7 +410,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
             // Password
             Text(
-              'Confirm with your password',
+              l10n.password,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -421,8 +420,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               controller: _passwordController,
               obscureText: !_showPassword,
               decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
+                labelText: l10n.password,
+                hintText: l10n.pleaseEnterPassword,
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -438,7 +437,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
+                  return l10n.pleaseEnterPassword;
                 }
                 return null;
               },
@@ -464,7 +463,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       )
                     : const Icon(Icons.delete_forever),
                 label: Text(
-                  _isLoading ? 'Processing...' : 'Delete my account',
+                  _isLoading ? l10n.deletionInProgress : l10n.deleteMyAccount,
                 ),
                 style: FilledButton.styleFrom(
                   backgroundColor: theme.colorScheme.error,
@@ -481,7 +480,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => context.pop(),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
             ),
 
@@ -512,6 +511,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
   }
 
   Future<void> _requestDeletion(String userId) async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -520,22 +520,19 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Final confirmation'),
-        content: const Text(
-          'Are you absolutely sure you want to delete your account?\n\n'
-          'You have 30 days to change your mind.',
-        ),
+        title: Text(l10n.deleteMyAccount),
+        content: Text(l10n.signOutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('No, cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Yes, delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -559,13 +556,10 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
 
       // Show confirmation message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Deletion request submitted. '
-            'You have 30 days to cancel.',
-          ),
+        SnackBar(
+          content: Text(l10n.deletionInDays(30)),
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 5),
+          duration: const Duration(seconds: 5),
         ),
       );
 
@@ -595,6 +589,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
   }
 
   Future<void> _cancelDeletion(String requestId, String userId) async {
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isLoading = true;
     });
@@ -608,8 +603,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Deletion request cancelled successfully.'),
+        SnackBar(
+          content: Text(l10n.featureComingSoon), // TODO: Add proper "Request cancelled" key
           backgroundColor: Colors.green,
         ),
       );

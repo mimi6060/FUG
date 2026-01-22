@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -190,6 +191,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) return;
 
     final success = await ref.read(editProfileStateProvider.notifier).saveProfile(
@@ -203,7 +206,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil mis a jour')),
+        SnackBar(content: Text(l10n.profileUpdated)),
       );
       context.pop();
     }
@@ -211,6 +214,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(editProfileStateProvider);
     final theme = Theme.of(context);
 
@@ -221,7 +225,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Modifier le profil'),
+        title: Text(l10n.editProfile),
         actions: [
           TextButton(
             onPressed: state.isSaving ? null : _saveProfile,
@@ -231,7 +235,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Enregistrer'),
+                : Text(l10n.save),
           ),
         ],
       ),
@@ -242,13 +246,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Erreur: ${state.error}'),
+                      Text('${l10n.loadingError}: ${state.error}'),
                       const SizedBox(height: 16),
                       FilledButton(
                         onPressed: () {
                           ref.read(editProfileStateProvider.notifier).loadProfile();
                         },
-                        child: const Text('Reessayer'),
+                        child: Text(l10n.retry),
                       ),
                     ],
                   ),
@@ -305,17 +309,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         // Nom
                         TextFormField(
                           controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom',
-                            prefixIcon: Icon(Icons.person),
+                          decoration: InputDecoration(
+                            labelText: l10n.fullName,
+                            prefixIcon: const Icon(Icons.person),
                           ),
                           textCapitalization: TextCapitalization.words,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Veuillez entrer votre nom';
+                              return l10n.pleaseEnterName;
                             }
                             if (value.trim().length < 2) {
-                              return 'Le nom doit contenir au moins 2 caracteres';
+                              return l10n.nameTooShort;
                             }
                             return null;
                           },
@@ -326,10 +330,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         // Bio
                         TextFormField(
                           controller: _bioController,
-                          decoration: const InputDecoration(
-                            labelText: 'Bio',
-                            prefixIcon: Icon(Icons.info),
-                            hintText: 'Parlez de vous...',
+                          decoration: InputDecoration(
+                            labelText: l10n.bio,
+                            prefixIcon: const Icon(Icons.info),
+                            hintText: l10n.tellUsAboutYourself,
                           ),
                           maxLines: 3,
                           maxLength: 200,
@@ -340,9 +344,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         // Localisation
                         TextFormField(
                           controller: _locationController,
-                          decoration: const InputDecoration(
-                            labelText: 'Ville',
-                            prefixIcon: Icon(Icons.location_on),
+                          decoration: InputDecoration(
+                            labelText: l10n.city,
+                            prefixIcon: const Icon(Icons.location_on),
                             hintText: 'Paris, France',
                           ),
                         ),
@@ -351,14 +355,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
                         // Interets
                         Text(
-                          'Centres d\'interet',
+                          l10n.interests,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Selectionnez vos centres d\'interet pour trouver des evenements qui vous correspondent.',
+                          l10n.selectInterestsDescription,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -420,10 +424,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         FilledButton(
                           onPressed: state.isSaving ? null : _saveProfile,
                           child: state.isSaving
-                              ? const Row(
+                              ? Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
@@ -431,11 +435,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                         color: Colors.white,
                                       ),
                                     ),
-                                    SizedBox(width: 12),
-                                    Text('Enregistrement...'),
+                                    const SizedBox(width: 12),
+                                    Text(l10n.saving),
                                   ],
                                 )
-                              : const Text('Enregistrer les modifications'),
+                              : Text(l10n.saveChanges),
                         ),
 
                         const SizedBox(height: 32),

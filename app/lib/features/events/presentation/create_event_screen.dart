@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -86,12 +87,14 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
     required String categoryId,
     required DateTime startDate,
     required DateTime endDate,
+    required String locationError,
+    required String notConnectedError,
     int? maxParticipants,
     int price = 0,
     List<String>? tags,
   }) async {
     if (state.selectedLocation == null) {
-      state = state.copyWith(error: 'Veuillez selectionner un lieu');
+      state = state.copyWith(error: locationError);
       return null;
     }
 
@@ -100,7 +103,7 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
     try {
       final user = await _ref.read(currentUserProvider.future);
       if (user == null) {
-        state = state.copyWith(isLoading: false, error: 'Non connecte');
+        state = state.copyWith(isLoading: false, error: notConnectedError);
         return null;
       }
 
@@ -156,18 +159,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   bool _isFree = true;
   bool _hasMaxParticipants = false;
 
-  final List<Map<String, String>> _categories = [
-    {'id': 'sport', 'name': 'Sport'},
-    {'id': 'music', 'name': 'Musique'},
-    {'id': 'art', 'name': 'Art'},
-    {'id': 'tech', 'name': 'Tech'},
-    {'id': 'food', 'name': 'Cuisine'},
-    {'id': 'gaming', 'name': 'Gaming'},
-    {'id': 'outdoor', 'name': 'Plein air'},
-    {'id': 'social', 'name': 'Social'},
-    {'id': 'other', 'name': 'Autre'},
-  ];
-
   @override
   void dispose() {
     _titleController.dispose();
@@ -177,6 +168,20 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     _maxParticipantsController.dispose();
     _tagsController.dispose();
     super.dispose();
+  }
+
+  List<Map<String, String>> _getCategories(AppLocalizations l10n) {
+    return [
+      {'id': 'sport', 'name': l10n.categorySport},
+      {'id': 'music', 'name': l10n.categoryMusic},
+      {'id': 'art', 'name': l10n.categoryArt},
+      {'id': 'tech', 'name': l10n.categoryTech},
+      {'id': 'food', 'name': l10n.categoryFood},
+      {'id': 'gaming', 'name': l10n.categoryGaming},
+      {'id': 'outdoor', 'name': l10n.categoryOutdoor},
+      {'id': 'social', 'name': l10n.categorySocial},
+      {'id': 'other', 'name': l10n.categoryOther},
+    ];
   }
 
   Future<void> _pickImage() async {
@@ -279,6 +284,8 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   }
 
   Future<void> _createEvent() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (!_formKey.currentState!.validate()) return;
 
     final tags = _tagsController.text
@@ -297,11 +304,13 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
               _hasMaxParticipants ? int.tryParse(_maxParticipantsController.text) : null,
           price: _isFree ? 0 : (int.tryParse(_priceController.text) ?? 0) * 100,
           tags: tags,
+          locationError: l10n.pleaseSelectLocation,
+          notConnectedError: l10n.notConnected,
         );
 
     if (eventId != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Evenement cree avec succes!')),
+        SnackBar(content: Text(l10n.eventCreatedSuccess)),
       );
       context.go('/events/$eventId');
     }
@@ -311,11 +320,13 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(createEventStateProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('EEE d MMM yyyy a HH:mm', 'fr_FR');
+    final categories = _getCategories(l10n);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Creer un FUG'),
+        title: Text(l10n.createFug),
       ),
       body: Form(
         key: _formKey,
@@ -344,7 +355,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   if (state.currentStep < 3)
                     FilledButton(
                       onPressed: details.onStepContinue,
-                      child: const Text('Continuer'),
+                      child: Text(l10n.continueBtn),
                     )
                   else
                     FilledButton(
@@ -355,13 +366,13 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Creer l\'evenement'),
+                          : Text(l10n.createEvent),
                     ),
                   const SizedBox(width: 12),
                   if (state.currentStep > 0)
                     TextButton(
                       onPressed: details.onStepCancel,
-                      child: const Text('Retour'),
+                      child: Text(l10n.back),
                     ),
                 ],
               ),
@@ -370,7 +381,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
           steps: [
             // Etape 1: Informations de base
             Step(
-              title: const Text('Informations'),
+              title: Text(l10n.information),
               isActive: state.currentStep >= 0,
               state: state.currentStep > 0 ? StepState.complete : StepState.indexed,
               content: Column(
@@ -402,7 +413,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Ajouter une image',
+                                  l10n.addImage,
                                   style: TextStyle(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
@@ -418,17 +429,17 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   // Titre
                   TextFormField(
                     controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Titre de l\'evenement',
-                      prefixIcon: Icon(Icons.title),
+                    decoration: InputDecoration(
+                      labelText: l10n.eventTitle,
+                      prefixIcon: const Icon(Icons.title),
                     ),
                     textCapitalization: TextCapitalization.sentences,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez entrer un titre';
+                        return l10n.pleaseEnterTitle;
                       }
                       if (value.trim().length < 5) {
-                        return 'Le titre doit contenir au moins 5 caracteres';
+                        return l10n.titleTooShort;
                       }
                       return null;
                     },
@@ -439,19 +450,19 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   // Description
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      prefixIcon: Icon(Icons.description),
+                    decoration: InputDecoration(
+                      labelText: l10n.description,
+                      prefixIcon: const Icon(Icons.description),
                       alignLabelWithHint: true,
                     ),
                     maxLines: 4,
                     maxLength: 1000,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Veuillez entrer une description';
+                        return l10n.pleaseEnterDescription;
                       }
                       if (value.trim().length < 20) {
-                        return 'La description doit contenir au moins 20 caracteres';
+                        return l10n.descriptionTooShort;
                       }
                       return null;
                     },
@@ -462,11 +473,11 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   // Categorie
                   DropdownButtonFormField<String>(
                     value: _selectedCategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Categorie',
-                      prefixIcon: Icon(Icons.category),
+                    decoration: InputDecoration(
+                      labelText: l10n.category,
+                      prefixIcon: const Icon(Icons.category),
                     ),
-                    items: _categories.map((cat) {
+                    items: categories.map((cat) {
                       return DropdownMenuItem(
                         value: cat['id'],
                         child: Text(cat['name']!),
@@ -486,7 +497,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
             // Etape 2: Date et heure
             Step(
-              title: const Text('Date et heure'),
+              title: Text(l10n.dateAndTime),
               isActive: state.currentStep >= 1,
               state: state.currentStep > 1 ? StepState.complete : StepState.indexed,
               content: Column(
@@ -494,7 +505,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   // Date de debut
                   ListTile(
                     leading: const Icon(Icons.play_arrow),
-                    title: const Text('Debut'),
+                    title: Text(l10n.start),
                     subtitle: Text(dateFormat.format(_startDate)),
                     trailing: const Icon(Icons.edit),
                     onTap: _selectStartDate,
@@ -505,7 +516,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   // Date de fin
                   ListTile(
                     leading: const Icon(Icons.stop),
-                    title: const Text('Fin'),
+                    title: Text(l10n.end),
                     subtitle: Text(dateFormat.format(_endDate)),
                     trailing: const Icon(Icons.edit),
                     onTap: _selectEndDate,
@@ -528,7 +539,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          'Duree: ${_formatDuration(_endDate.difference(_startDate))}',
+                          '${l10n.duration}: ${_formatDuration(_endDate.difference(_startDate))}',
                           style: theme.textTheme.titleMedium,
                         ),
                       ],
@@ -540,7 +551,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
             // Etape 3: Lieu
             Step(
-              title: const Text('Lieu'),
+              title: Text(l10n.location),
               isActive: state.currentStep >= 2,
               state: state.currentStep > 2 ? StepState.complete : StepState.indexed,
               content: Column(
@@ -549,7 +560,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   TextFormField(
                     controller: _addressController,
                     decoration: InputDecoration(
-                      labelText: 'Adresse',
+                      labelText: l10n.address,
                       prefixIcon: const Icon(Icons.location_on),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.map),
@@ -560,7 +571,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                     onTap: _selectLocation,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Veuillez selectionner un lieu';
+                        return l10n.pleaseSelectLocation;
                       }
                       return null;
                     },
@@ -618,13 +629,13 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
             // Etape 4: Options
             Step(
-              title: const Text('Options'),
+              title: Text(l10n.options),
               isActive: state.currentStep >= 3,
               content: Column(
                 children: [
                   // Prix
                   SwitchListTile(
-                    title: const Text('Evenement gratuit'),
+                    title: Text(l10n.freeEvent),
                     value: _isFree,
                     onChanged: (value) {
                       setState(() {
@@ -638,14 +649,14 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                       padding: const EdgeInsets.only(top: 8),
                       child: TextFormField(
                         controller: _priceController,
-                        decoration: const InputDecoration(
-                          labelText: 'Prix (EUR)',
-                          prefixIcon: Icon(Icons.euro),
+                        decoration: InputDecoration(
+                          labelText: l10n.priceEur,
+                          prefixIcon: const Icon(Icons.euro),
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (!_isFree && (value == null || value.isEmpty)) {
-                            return 'Veuillez entrer un prix';
+                            return l10n.pleaseEnterPrice;
                           }
                           return null;
                         },
@@ -656,7 +667,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
                   // Nombre max de participants
                   SwitchListTile(
-                    title: const Text('Limiter le nombre de participants'),
+                    title: Text(l10n.limitParticipants),
                     value: _hasMaxParticipants,
                     onChanged: (value) {
                       setState(() {
@@ -670,15 +681,15 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                       padding: const EdgeInsets.only(top: 8),
                       child: TextFormField(
                         controller: _maxParticipantsController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nombre maximum de participants',
-                          prefixIcon: Icon(Icons.people),
+                        decoration: InputDecoration(
+                          labelText: l10n.maxParticipants,
+                          prefixIcon: const Icon(Icons.people),
                         ),
                         keyboardType: TextInputType.number,
                         validator: (value) {
                           if (_hasMaxParticipants &&
                               (value == null || value.isEmpty)) {
-                            return 'Veuillez entrer un nombre';
+                            return l10n.pleaseEnterNumber;
                           }
                           return null;
                         },
@@ -690,9 +701,9 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
                   // Tags
                   TextFormField(
                     controller: _tagsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Tags (separes par des virgules)',
-                      prefixIcon: Icon(Icons.tag),
+                    decoration: InputDecoration(
+                      labelText: l10n.tagsSeparatedByCommas,
+                      prefixIcon: const Icon(Icons.tag),
                       hintText: 'sport, outdoor, football',
                     ),
                   ),
@@ -776,6 +787,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
@@ -806,7 +818,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 child: Row(
                   children: [
                     Text(
-                      'Selectionner un lieu',
+                      l10n.selectLocation,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -825,10 +837,10 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
                   controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Adresse',
-                    prefixIcon: Icon(Icons.search),
-                    hintText: 'Rechercher une adresse...',
+                  decoration: InputDecoration(
+                    labelText: l10n.address,
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: l10n.searchAddress,
                   ),
                   onSubmitted: (value) {
                     // TODO: Geocoder l'adresse
@@ -903,7 +915,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                             : 'Lat: ${_selectedPosition.latitude.toStringAsFixed(4)}, Lng: ${_selectedPosition.longitude.toStringAsFixed(4)}',
                       });
                     },
-                    child: const Text('Confirmer ce lieu'),
+                    child: Text(l10n.confirmThisLocation),
                   ),
                 ),
               ),

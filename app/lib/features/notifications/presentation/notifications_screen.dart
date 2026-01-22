@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,12 +38,13 @@ class NotificationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final notificationsAsync = ref.watch(notificationsProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l10n.notifications),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) async {
@@ -61,18 +63,16 @@ class NotificationsScreen extends ConsumerWidget {
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Supprimer toutes les notifications'),
-                      content: const Text(
-                        'Etes-vous sur de vouloir supprimer toutes vos notifications?',
-                      ),
+                      title: Text(l10n.deleteAllNotifications),
+                      content: Text(l10n.deleteAllConfirmation),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Annuler'),
+                          child: Text(l10n.cancel),
                         ),
                         FilledButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Supprimer'),
+                          child: Text(l10n.delete),
                         ),
                       ],
                     ),
@@ -87,19 +87,19 @@ class NotificationsScreen extends ConsumerWidget {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'mark_all_read',
                 child: ListTile(
-                  leading: Icon(Icons.done_all),
-                  title: Text('Tout marquer comme lu'),
+                  leading: const Icon(Icons.done_all),
+                  title: Text(l10n.markAllAsRead),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete_all',
                 child: ListTile(
-                  leading: Icon(Icons.delete_sweep),
-                  title: Text('Tout supprimer'),
+                  leading: const Icon(Icons.delete_sweep),
+                  title: Text(l10n.deleteAll),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -121,14 +121,14 @@ class NotificationsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Aucune notification',
+                    l10n.noNotification,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Vos notifications apparaitront ici',
+                    l10n.notificationsWillAppearHere,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -164,11 +164,11 @@ class NotificationsScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Erreur: $error'),
+              Text('${l10n.unexpectedError} $error'),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.invalidate(notificationsProvider),
-                child: const Text('Reessayer'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
