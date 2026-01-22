@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/providers/location_provider.dart';
@@ -30,6 +31,10 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
 
   // Rayon de recherche en km
   double _searchRadius = 10.0;
+
+  // Filtres
+  bool _showFreeOnly = false;
+  bool _showAvailableOnly = false;
 
   // Evenement selectionne pour la bottom sheet
   EventModel? _selectedEvent;
@@ -177,7 +182,14 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
   void _updateMarkers(List<EventModel> events) {
     final newMarkers = <Marker>[];
 
-    for (final event in events) {
+    // Apply local filters
+    final filteredEvents = events.where((event) {
+      if (_showFreeOnly && !event.isFree) return false;
+      if (_showAvailableOnly && event.isFull) return false;
+      return true;
+    }).toList();
+
+    for (final event in filteredEvents) {
       newMarkers.add(
         Marker(
           point: LatLng(event.latitude, event.longitude),
@@ -416,10 +428,39 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
             onPressed: () => context.push('/events/search'),
             tooltip: 'Rechercher',
           ),
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilters,
-            tooltip: 'Filtres',
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.filter_list),
+                onPressed: _showFilters,
+                tooltip: 'Filtres',
+              ),
+              if (_showFreeOnly || _showAvailableOnly)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '${(_showFreeOnly ? 1 : 0) + (_showAvailableOnly ? 1 : 0)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -460,8 +501,72 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
                     : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.fug.app',
               ),
-              MarkerLayer(
-                markers: _markers,
+              // User position marker
+              if (_locationInitialized)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentPosition,
+                      width: 30,
+                      height: 30,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.4),
+                              blurRadius: 10,
+                              spreadRadius: 3,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              // Events cluster layer
+              MarkerClusterLayerWidget(
+                options: MarkerClusterLayerOptions(
+                  maxClusterRadius: 80,
+                  size: const Size(50, 50),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(50),
+                  maxZoom: 15,
+                  markers: _markers,
+                  builder: (context, markers) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          markers.length.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -690,9 +795,13 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
       context: context,
       builder: (context) => _FiltersSheet(
         currentRadius: _searchRadius,
-        onRadiusChanged: (radius) {
+        showFreeOnly: _showFreeOnly,
+        showAvailableOnly: _showAvailableOnly,
+        onFiltersChanged: (radius, freeOnly, availableOnly) {
           setState(() {
             _searchRadius = radius;
+            _showFreeOnly = freeOnly;
+            _showAvailableOnly = availableOnly;
           });
           _loadNearbyEvents();
           Navigator.pop(context);
@@ -900,11 +1009,15 @@ class _EventPreviewSheet extends StatelessWidget {
 /// Bottom sheet des filtres
 class _FiltersSheet extends StatefulWidget {
   final double currentRadius;
-  final Function(double) onRadiusChanged;
+  final bool showFreeOnly;
+  final bool showAvailableOnly;
+  final Function(double radius, bool freeOnly, bool availableOnly) onFiltersChanged;
 
   const _FiltersSheet({
     required this.currentRadius,
-    required this.onRadiusChanged,
+    required this.showFreeOnly,
+    required this.showAvailableOnly,
+    required this.onFiltersChanged,
   });
 
   @override
@@ -913,13 +1026,22 @@ class _FiltersSheet extends StatefulWidget {
 
 class _FiltersSheetState extends State<_FiltersSheet> {
   late double _radius;
-  bool _showFreeOnly = false;
-  bool _showAvailableOnly = false;
+  late bool _showFreeOnly;
+  late bool _showAvailableOnly;
 
   @override
   void initState() {
     super.initState();
     _radius = widget.currentRadius;
+    _showFreeOnly = widget.showFreeOnly;
+    _showAvailableOnly = widget.showAvailableOnly;
+  }
+
+  int get _activeFilterCount {
+    int count = 0;
+    if (_showFreeOnly) count++;
+    if (_showAvailableOnly) count++;
+    return count;
   }
 
   @override
@@ -932,19 +1054,40 @@ class _FiltersSheetState extends State<_FiltersSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Filtres',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Filtres',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (_activeFilterCount > 0)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showFreeOnly = false;
+                      _showAvailableOnly = false;
+                    });
+                  },
+                  child: const Text('Reinitialiser'),
+                ),
+            ],
           ),
 
           const SizedBox(height: 24),
 
           // Rayon de recherche
-          Text(
-            'Rayon de recherche: ${_radius.toInt()} km',
-            style: theme.textTheme.titleMedium,
+          Row(
+            children: [
+              const Icon(Icons.radar, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Rayon de recherche: ${_radius.toInt()} km',
+                style: theme.textTheme.titleMedium,
+              ),
+            ],
           ),
           Slider(
             value: _radius,
@@ -964,6 +1107,11 @@ class _FiltersSheetState extends State<_FiltersSheet> {
           // Filtres supplementaires
           SwitchListTile(
             title: const Text('Evenements gratuits uniquement'),
+            subtitle: const Text('Afficher uniquement les FUG sans frais'),
+            secondary: Icon(
+              Icons.money_off,
+              color: _showFreeOnly ? Colors.green : null,
+            ),
             value: _showFreeOnly,
             onChanged: (value) {
               setState(() {
@@ -974,6 +1122,11 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
           SwitchListTile(
             title: const Text('Places disponibles uniquement'),
+            subtitle: const Text('Masquer les evenements complets'),
+            secondary: Icon(
+              Icons.event_available,
+              color: _showAvailableOnly ? theme.colorScheme.primary : null,
+            ),
             value: _showAvailableOnly,
             onChanged: (value) {
               setState(() {
@@ -988,8 +1141,16 @@ class _FiltersSheetState extends State<_FiltersSheet> {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () => widget.onRadiusChanged(_radius),
-              child: const Text('Appliquer'),
+              onPressed: () => widget.onFiltersChanged(
+                _radius,
+                _showFreeOnly,
+                _showAvailableOnly,
+              ),
+              child: Text(
+                _activeFilterCount > 0
+                    ? 'Appliquer ($_activeFilterCount filtre${_activeFilterCount > 1 ? 's' : ''})'
+                    : 'Appliquer',
+              ),
             ),
           ),
 
