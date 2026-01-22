@@ -28,7 +28,7 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 | ID | Feature | Priorite | Justification | Statut |
 |----|---------|----------|---------------|--------|
 | MOD-007 | Integrations Modernes | MOYENNE | Growth et viralite | **DONE** |
-| MOD-008 | IA et Recommandations | BASSE | Engagement V2 | To Do |
+| MOD-008 | IA et Recommandations | BASSE | Engagement V2+ | To Do |
 | MOD-009 | Monetisation Ethique | BASSE | Business model V2 | To Do |
 
 ---

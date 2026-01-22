@@ -162,7 +162,7 @@ def recommend_events(user_id, limit=10):
 
 | Feature | Duree | Version |
 |---------|-------|---------|
-| Moderation images | 1 semaine | V1.1 |
+| Moderation images | 1 semaine | V2 |
 | Recommandations | 3 semaines | V2 |
 | Smart notifs | 2 semaines | V3 |
 | Matching social | 2 semaines | V2 |

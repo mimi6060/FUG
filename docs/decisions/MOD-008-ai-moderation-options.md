@@ -1,7 +1,7 @@
 # MOD-008: Image Moderation - Decision Document
 
 > Status: **PENDING DECISION**
-> Priority: BASSE (V1.1+)
+> Priority: BASSE (V2+)
 
 ---
 
