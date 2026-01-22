@@ -18,16 +18,16 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 
 | ID | Feature | Priorite | Justification | Statut |
 |----|---------|----------|---------------|--------|
-| MOD-004 | Versions OS Minimales | MOYENNE | Securite et maintenance | To Do |
+| MOD-004 | Versions OS Minimales | MOYENNE | Securite et maintenance | **DONE** |
 | MOD-005 | Reformulation Marketing | MOYENNE | Image de marque | To Do |
 | MOD-006 | Politique Confidentialite | HAUTE | Transparence obligatoire | **DONE** |
-| MOD-010 | Internationalization (i18n) | **HAUTE** | UX multi-langue | To Do |
+| MOD-010 | Internationalization (i18n) | **HAUTE** | UX multi-langue | **DONE** |
 
 ### Phase 3: Nouvelles Fonctionnalites (Sprints ulterieurs)
 
 | ID | Feature | Priorite | Justification | Statut |
 |----|---------|----------|---------------|--------|
-| MOD-007 | Integrations Modernes | MOYENNE | Growth et viralite | To Do |
+| MOD-007 | Integrations Modernes | MOYENNE | Growth et viralite | **DONE** |
 | MOD-008 | IA et Recommandations | BASSE | Engagement V2 | To Do |
 | MOD-009 | Monetisation Ethique | BASSE | Business model V2 | To Do |
 
@@ -46,7 +46,7 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 | MOD-007 | SPEC-006 |
 | MOD-008 | SPEC-004 |
 | MOD-009 | SPEC-007 |
-| MOD-010 | (To create) |
+| MOD-010 | 0280e196 |
 
 ---
 
@@ -55,9 +55,9 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 | Phase | Features | Done | % |
 |-------|----------|------|---|
 | Phase 1 - Conformite | 3 | 3 | 100% |
-| Phase 2 - Technique | 4 | 1 | 25% |
-| Phase 3 - Features | 3 | 0 | 0% |
-| **TOTAL** | **10** | **4** | **40%** |
+| Phase 2 - Technique | 4 | 4 | 100% |
+| Phase 3 - Features | 3 | 1 | 33% |
+| **TOTAL** | **10** | **8** | **80%** |
 
 ---
 
@@ -73,15 +73,15 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
   - [x] MOD-003-B: Workflow de moderation (moderation_actions collection)
 
 ### Phase 2 (Sprint 11-12)
-- [ ] MOD-004: Versions OS Minimales
+- [x] MOD-004: Versions OS Minimales - **DONE** (README + pubspec flutter constraint)
 - [ ] MOD-005: Reformulation Marketing
 - [x] MOD-006: Politique de Confidentialite - **DONE** (1188 lines privacy screen)
-- [ ] MOD-010: Internationalization (i18n) - **NEW**
+- [x] MOD-010: Internationalization (i18n) - **DONE** (FR/EN/NL + flags + DB sync)
 
 ### Phase 3 (Sprint 13+)
-- [ ] MOD-007: Integrations Modernes
-  - [ ] MOD-007-A: Partage WhatsApp
-  - [ ] MOD-007-B: Export Calendrier
+- [x] MOD-007: Integrations Modernes - **DONE**
+  - [x] MOD-007-A: Partage WhatsApp (SharingService + ShareOptionsSheet)
+  - [x] MOD-007-B: Export Calendrier (add_2_calendar)
 - [ ] MOD-008: IA et Recommandations
   - [ ] MOD-008-A: Moderation images
 - [ ] MOD-009: Monetisation Ethique
@@ -114,14 +114,17 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 
 ## Next Steps
 
-1. **MOD-010 (i18n)**: Implement localization system
-   - Detect device language (iOS/Android/Web)
-   - Support French and English
-   - Migrate all hardcoded strings
+1. **MOD-005**: Marketing reformulation
+   - Update app description and tagline
+   - Modernize visual branding
 
-2. **MOD-004**: Update minimum OS versions
+2. **MOD-008**: IA et Recommandations
+   - Image moderation with AI
+   - Event recommendations
 
-3. **MOD-005**: Marketing reformulation
+3. **MOD-009**: Monetisation Ethique
+   - Premium features
+   - Revenue model
 
 ---
 
@@ -153,7 +156,26 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 - Participant notifications
 - Status updates and participant count management
 
+**MOD-007 (Modern Integrations)**
+- SharingService with shareToWhatsApp(), addToCalendar(), shareGeneric()
+- ShareOptionsSheet bottom sheet with WhatsApp/Calendar/Generic options
+- French localized share messages with FUG deep links
+- add_2_calendar package for native calendar
+
+**MOD-010 (Internationalization)**
+- flutter_localizations + l10n.yaml config
+- ARB files: English (template), French, Dutch
+- locale_provider.dart with device language detection
+- User preference sync to Appwrite users collection
+- LanguageSelector widget with country flags
+- Migration 020: preferredLanguage attribute
+
+**MOD-004 (OS Versions)**
+- README updated with OS requirements table
+- Android 10+ (API 29), iOS 14+
+- Flutter >=3.16.0 constraint in pubspec.yaml
+
 ---
 
 *Last updated: 2026-01-22*
-*Synchronized with Plane: Pending*
+*Synchronized with Plane: Done (MOD-004, MOD-007, MOD-010 marked as Done)*

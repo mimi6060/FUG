@@ -609,10 +609,10 @@
     "name": "MOD-004: Versions OS Minimales",
     "description": "<p>Mettre à jour: Android 10+ (API 29), iOS 14+. pubspec.yaml, build.gradle, Podfile. Feature: MOD-004-os-versions.md</p>",
     "priority": "medium",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:28.470754Z",
-    "updated_at": "2026-01-21T20:17:28.538808Z",
+    "updated_at": "2026-01-22T00:58:46.966510Z",
     "sequence_id": 56
   },
   {
@@ -642,10 +642,10 @@
     "name": "MOD-007: Intégrations Modernes",
     "description": "<p>Partage WhatsApp, Instagram Stories, export calendrier. Feature: MOD-007-modern-integrations.md</p>",
     "priority": "medium",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:28.872621Z",
-    "updated_at": "2026-01-21T20:17:28.922823Z",
+    "updated_at": "2026-01-22T00:58:58.151226Z",
     "sequence_id": 59
   },
   {
@@ -653,10 +653,10 @@
     "name": "MOD-007-A: Partage WhatsApp",
     "description": "<p>Deep link partage événement via WhatsApp</p>",
     "priority": "medium",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:29.017230Z",
-    "updated_at": "2026-01-21T20:17:29.074835Z",
+    "updated_at": "2026-01-22T00:58:58.248473Z",
     "sequence_id": 60
   },
   {
@@ -664,10 +664,10 @@
     "name": "MOD-007-B: Export Calendrier",
     "description": "<p>Ajouter FUG au calendrier natif iOS/Android</p>",
     "priority": "medium",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:29.153932Z",
-    "updated_at": "2026-01-21T20:17:29.225626Z",
+    "updated_at": "2026-01-22T00:58:58.340218Z",
     "sequence_id": 61
   },
   {
@@ -790,5 +790,16 @@
     "created_at": "2026-01-21T23:14:15.190661Z",
     "updated_at": "2026-01-21T23:47:47.126899Z",
     "sequence_id": 72
+  },
+  {
+    "id": "0280e196-32c2-42b8-8a37-47b62e48882a",
+    "name": "MOD-010: Internationalization (i18n)",
+    "description": "<div><p>Multi-language support for FUG app.</p><ul><li>flutter_localizations + l10n.yaml config</li><li>ARB files: English (template), French, Dutch</li><li>locale_provider.dart with device language detection</li><li>User preference sync to Appwrite users collection</li><li>LanguageSelector widget with country flags</li><li>Migration 020: preferredLanguage attribute</li><li>All UI screens localized with l10n calls</li></ul></div>",
+    "priority": "high",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
+    "parent": null,
+    "created_at": "2026-01-22T00:59:09.461139Z",
+    "updated_at": "2026-01-22T00:59:09.523584Z",
+    "sequence_id": 73
   }
 ]

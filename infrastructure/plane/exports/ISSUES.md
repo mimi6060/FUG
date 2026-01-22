@@ -1,6 +1,6 @@
 # Plane Issues Summary
 
-> Auto-generated export - 72 issues
+> Auto-generated export - 73 issues
 > Run `./sync-plane.sh export` to update
 
 ## [x] [URGENT] US-001: Inscription par email
@@ -168,8 +168,8 @@
 ## [x] [HIGH] MOD-003-B: Workflow de modération
 **State:** Done
 
-## [ ] [MEDIUM] MOD-004: Versions OS Minimales
-**State:** Backlog
+## [x] [MEDIUM] MOD-004: Versions OS Minimales
+**State:** Done
 
 ## [ ] [MEDIUM] MOD-005: Reformulation Marketing
 **State:** Backlog
@@ -177,14 +177,14 @@
 ## [x] [HIGH] MOD-006: Politique de Confidentialité
 **State:** Done
 
-## [ ] [MEDIUM] MOD-007: Intégrations Modernes
-**State:** Backlog
+## [x] [MEDIUM] MOD-007: Intégrations Modernes
+**State:** Done
 
-## [ ] [MEDIUM] MOD-007-A: Partage WhatsApp
-**State:** Backlog
+## [x] [MEDIUM] MOD-007-A: Partage WhatsApp
+**State:** Done
 
-## [ ] [MEDIUM] MOD-007-B: Export Calendrier
-**State:** Backlog
+## [x] [MEDIUM] MOD-007-B: Export Calendrier
+**State:** Done
 
 ## [ ] [LOW] MOD-008: IA et Recommandations
 **State:** Backlog
@@ -208,5 +208,8 @@
 - [x] INFRA-001-E: Update CLAUDE.md - Appwrite via migrations only (Done)
 
 ## [x] [HIGH] INFRA-002: Storage Buckets Configuration
+**State:** Done
+
+## [x] [HIGH] MOD-010: Internationalization (i18n)
 **State:** Done
 
