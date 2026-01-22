@@ -257,10 +257,10 @@
     "name": "US-024: Annuler participation",
     "description": "<div><h2>US-024: Annuler participation</h2><h3>Critères d'acceptation</h3><ul><li>❌ Bouton Annuler ma participation</li><li>❌ Confirmation avant annulation</li><li>❌ Notification organisateur</li><li>❌ Place libérée</li><li>❌ Retrait de Mes FUG</li></ul><h3>Implémentation</h3><p><strong>État:</strong> Non implémenté</p><h3>À faire</h3><ul><li>Implémenter leaveEvent() dans EventRepository</li><li>Dialog confirmation</li><li>Notification organisateur</li><li>Décrémenter currentParticipants</li></ul></div>",
     "priority": "urgent",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T19:07:25.673135Z",
-    "updated_at": "2026-01-21T19:29:58.037828Z",
+    "updated_at": "2026-01-22T00:17:36.046932Z",
     "sequence_id": 24
   },
   {
@@ -268,10 +268,10 @@
     "name": "US-025: Annuler FUG (organisateur)",
     "description": "<div><h2>US-025: Annuler FUG (organisateur)</h2><h3>Critères d'acceptation</h3><ul><li>⚠️ Bouton Annuler le FUG</li><li>❌ Motif obligatoire</li><li>⚠️ Confirmation avant annulation</li><li>❌ Notification tous participants</li><li>⚠️ FUG marqué Annulé</li></ul><h3>Implémentation</h3><p><strong>Fichiers:</strong></p><ul><li><code>lib/features/events/presentation/event_detail_screen.dart</code> - bouton TODO</li><li><code>lib/features/events/domain/event_model.dart</code> - status: cancelled</li></ul><h3>À faire</h3><ul><li>Dialog motif annulation</li><li>Implémenter cancelEvent()</li><li>Notifications push à tous participants</li></ul></div>",
     "priority": "urgent",
-    "state": "ea7339fb-b9ec-4a10-a49c-53fc3e8bc795",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T19:07:25.780860Z",
-    "updated_at": "2026-01-21T19:29:58.125078Z",
+    "updated_at": "2026-01-22T00:17:35.986326Z",
     "sequence_id": 25
   },
   {
@@ -554,10 +554,10 @@
     "name": "MOD-001-B: Export des données (portabilité)",
     "description": "<p>Bouton dans paramètres pour exporter toutes les données en JSON/ZIP</p>",
     "priority": "high",
-    "state": "ea7339fb-b9ec-4a10-a49c-53fc3e8bc795",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:27.880298Z",
-    "updated_at": "2026-01-21T20:17:27.925728Z",
+    "updated_at": "2026-01-22T00:17:35.910364Z",
     "sequence_id": 51
   },
   {
@@ -576,10 +576,10 @@
     "name": "MOD-003: Conformité DSA",
     "description": "<p>Point de contact, CGU claires, signalement contenu, modération transparente. Feature: MOD-003-dsa-compliance.md</p>",
     "priority": "high",
-    "state": "ea7339fb-b9ec-4a10-a49c-53fc3e8bc795",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:28.102414Z",
-    "updated_at": "2026-01-21T20:17:28.150911Z",
+    "updated_at": "2026-01-22T00:17:35.845876Z",
     "sequence_id": 53
   },
   {
@@ -587,10 +587,10 @@
     "name": "MOD-003-A: Système de signalement contenu",
     "description": "<p>Bouton Signaler sur événements et profils, catégories, suivi du signalement</p>",
     "priority": "high",
-    "state": "ea7339fb-b9ec-4a10-a49c-53fc3e8bc795",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:28.212759Z",
-    "updated_at": "2026-01-21T20:17:28.273517Z",
+    "updated_at": "2026-01-22T00:17:35.763064Z",
     "sequence_id": 54
   },
   {
@@ -598,10 +598,10 @@
     "name": "MOD-003-B: Workflow de modération",
     "description": "<p>Notification modération, raison explicite, mécanisme d'appel</p>",
     "priority": "high",
-    "state": "cd62817e-581b-47bd-b8eb-0486aff77ca3",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:28.338359Z",
-    "updated_at": "2026-01-21T20:17:28.391039Z",
+    "updated_at": "2026-01-22T00:17:35.674895Z",
     "sequence_id": 55
   },
   {
@@ -631,10 +631,10 @@
     "name": "MOD-006: Politique de Confidentialité",
     "description": "<p>Page in-app complète, PDF téléchargeable, revue juridique. Feature: MOD-006-privacy-policy.md</p>",
     "priority": "high",
-    "state": "ea7339fb-b9ec-4a10-a49c-53fc3e8bc795",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T20:17:28.739812Z",
-    "updated_at": "2026-01-21T20:17:28.801435Z",
+    "updated_at": "2026-01-22T00:17:35.574604Z",
     "sequence_id": 58
   },
   {
@@ -785,10 +785,10 @@
     "name": "INFRA-002: Storage Buckets Configuration",
     "description": "<p class=\"editor-paragraph-block\" data-id=\"cebff87e-d275-48e8-ba2e-049aa330a842\">Create storage buckets for user avatars and event images via migration.</p><ul class=\"list-disc pl-7 space-y-[--list-spacing-y] tight\" data-id=\"a8f7580c-b988-44b3-b4f5-9703e905609c\" data-tight=\"true\"><li class=\"not-prose space-y-2\" data-id=\"1f865b0a-886d-4763-903b-4e117b3d3d80\"><p class=\"editor-paragraph-block\" data-id=\"655ba0a2-5e75-4b29-aa88-4e74a6c850d2\">avatars bucket (5MB, images only)</p></li><li class=\"not-prose space-y-2\" data-id=\"6718f944-4d86-49bf-8661-1f433f892b77\"><p class=\"editor-paragraph-block\" data-id=\"644f67c4-bee5-48f8-a756-1f66944b156c\">event-images bucket (10MB, images only)</p></li><li class=\"not-prose space-y-2\" data-id=\"12c838b7-d69a-4f8b-b978-d99bb931aedd\"><p class=\"editor-paragraph-block\" data-id=\"198dff49-1259-43ee-8d47-ab23b3858ed5\">Proper permissions</p></li><li class=\"not-prose space-y-2\" data-id=\"01e7679f-4904-4392-82bc-35733dadf696\"><p class=\"editor-paragraph-block\" data-id=\"268a93ab-b53b-4b07-977a-3aff9d583954\">Migration 015_storage_buckets.js</p></li></ul>",
     "priority": "high",
-    "state": "c7be50de-1d35-4292-b95d-d0c82003c655",
+    "state": "f1b62e61-f55a-4b14-a80b-03c3adee9d77",
     "parent": null,
     "created_at": "2026-01-21T23:14:15.190661Z",
-    "updated_at": "2026-01-21T23:15:38.537294Z",
+    "updated_at": "2026-01-21T23:47:47.126899Z",
     "sequence_id": 72
   }
 ]

@@ -12,7 +12,7 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 |----|---------|----------|---------------|--------|
 | MOD-001 | Conformite RGPD Complete | **CRITIQUE** | Obligation legale, risque amendes | **DONE** |
 | MOD-002 | Apple Sign-In | **CRITIQUE** | Obligation App Store depuis 2020 | **DONE** |
-| MOD-003 | Conformite DSA | **HAUTE** | Obligation UE depuis 2024 | To Do |
+| MOD-003 | Conformite DSA | **HAUTE** | Obligation UE depuis 2024 | **DONE** |
 
 ### Phase 2: Mise a Jour Technique (Sprint suivant)
 
@@ -20,7 +20,7 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 |----|---------|----------|---------------|--------|
 | MOD-004 | Versions OS Minimales | MOYENNE | Securite et maintenance | To Do |
 | MOD-005 | Reformulation Marketing | MOYENNE | Image de marque | To Do |
-| MOD-006 | Politique Confidentialite | HAUTE | Transparence obligatoire | To Do |
+| MOD-006 | Politique Confidentialite | HAUTE | Transparence obligatoire | **DONE** |
 | MOD-010 | Internationalization (i18n) | **HAUTE** | UX multi-langue | To Do |
 
 ### Phase 3: Nouvelles Fonctionnalites (Sprints ulterieurs)
@@ -54,28 +54,28 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
 
 | Phase | Features | Done | % |
 |-------|----------|------|---|
-| Phase 1 - Conformite | 3 | 2 | 66% |
-| Phase 2 - Technique | 4 | 0 | 0% |
+| Phase 1 - Conformite | 3 | 3 | 100% |
+| Phase 2 - Technique | 4 | 1 | 25% |
 | Phase 3 - Features | 3 | 0 | 0% |
-| **TOTAL** | **10** | **2** | **20%** |
+| **TOTAL** | **10** | **4** | **40%** |
 
 ---
 
 ## Implementation Progress
 
 ### Phase 1 (Sprint 9-10)
-- [x] MOD-001: Conformite RGPD Complete - **IMPLEMENTED**
+- [x] MOD-001: Conformite RGPD Complete - **DONE**
   - [x] MOD-001-A: Ecran de consentement RGPD
-  - [ ] MOD-001-B: Export des donnees
-- [x] MOD-002: Apple Sign-In - **IMPLEMENTED**
-- [ ] MOD-003: Conformite DSA
-  - [ ] MOD-003-A: Systeme de signalement
-  - [ ] MOD-003-B: Workflow de moderation
+  - [x] MOD-001-B: Export des donnees (function + migration)
+- [x] MOD-002: Apple Sign-In - **DONE**
+- [x] MOD-003: Conformite DSA - **DONE**
+  - [x] MOD-003-A: Systeme de signalement (3 migrations + Flutter reports feature)
+  - [x] MOD-003-B: Workflow de moderation (moderation_actions collection)
 
 ### Phase 2 (Sprint 11-12)
 - [ ] MOD-004: Versions OS Minimales
 - [ ] MOD-005: Reformulation Marketing
-- [ ] MOD-006: Politique de Confidentialite
+- [x] MOD-006: Politique de Confidentialite - **DONE** (1188 lines privacy screen)
 - [ ] MOD-010: Internationalization (i18n) - **NEW**
 
 ### Phase 3 (Sprint 13+)
@@ -119,11 +119,41 @@ L'ordre de priorite est defini pour **d'abord se mettre aux normes 2026** avant 
    - Support French and English
    - Migrate all hardcoded strings
 
-2. **MOD-003 (DSA)**: Content reporting system
+2. **MOD-004**: Update minimum OS versions
 
-3. **MOD-001-B**: Data export functionality
+3. **MOD-005**: Marketing reformulation
 
 ---
 
-*Last updated: 2026-01-21*
-*Synchronized with Plane: Partial*
+## Recent Implementations
+
+### 2026-01-22 - Sprint 10
+
+**MOD-001-B (Data Export)**
+- export-user-data Appwrite function
+- 019_data_export_requests migration
+- Collects all user data (profile, events, participations, followers, achievements, notifications)
+- 24h download link expiration
+
+**MOD-003 (DSA Compliance)**
+- 016_content_reports migration (reports collection)
+- 017_moderation_actions migration (moderation tracking)
+- 018_notification_dsa_types migration (DSA notification types)
+- Flutter reports feature (models, repository, widgets)
+
+**MOD-006 (Privacy Policy)**
+- Complete RGPD-compliant privacy policy screen (1188 lines)
+- Table of contents, data tables, legal basis
+- User rights documentation
+- PDF download placeholder
+
+**US-024/025 (Event Cancellation)**
+- cancel-participation function (14 tests, 100% coverage)
+- cancel-event function (17 tests, 100% coverage)
+- Participant notifications
+- Status updates and participant count management
+
+---
+
+*Last updated: 2026-01-22*
+*Synchronized with Plane: Pending*

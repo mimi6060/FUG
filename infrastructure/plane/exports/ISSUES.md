@@ -72,11 +72,11 @@
 ## [ ] [MEDIUM] US-023: Inviter utilisateurs
 **State:** Backlog
 
-## [ ] [URGENT] US-024: Annuler participation
-**State:** Backlog
+## [x] [URGENT] US-024: Annuler participation
+**State:** Done
 
-## [ ] [URGENT] US-025: Annuler FUG (organisateur)
-**State:** Todo
+## [x] [URGENT] US-025: Annuler FUG (organisateur)
+**State:** Done
 
 ## [x] [MEDIUM] US-026: Historique FUG
 **State:** Done
@@ -153,20 +153,20 @@
 ## [x] [URGENT] MOD-001-A: Écran de consentement RGPD
 **State:** Done
 
-## [ ] [HIGH] MOD-001-B: Export des données (portabilité)
-**State:** Todo
+## [x] [HIGH] MOD-001-B: Export des données (portabilité)
+**State:** Done
 
 ## [ ] [URGENT] MOD-002: Apple Sign-In
 **State:** In Progress
 
-## [ ] [HIGH] MOD-003: Conformité DSA
-**State:** Todo
+## [x] [HIGH] MOD-003: Conformité DSA
+**State:** Done
 
-## [ ] [HIGH] MOD-003-A: Système de signalement contenu
-**State:** Todo
+## [x] [HIGH] MOD-003-A: Système de signalement contenu
+**State:** Done
 
-## [ ] [HIGH] MOD-003-B: Workflow de modération
-**State:** Backlog
+## [x] [HIGH] MOD-003-B: Workflow de modération
+**State:** Done
 
 ## [ ] [MEDIUM] MOD-004: Versions OS Minimales
 **State:** Backlog
@@ -174,8 +174,8 @@
 ## [ ] [MEDIUM] MOD-005: Reformulation Marketing
 **State:** Backlog
 
-## [ ] [HIGH] MOD-006: Politique de Confidentialité
-**State:** Todo
+## [x] [HIGH] MOD-006: Politique de Confidentialité
+**State:** Done
 
 ## [ ] [MEDIUM] MOD-007: Intégrations Modernes
 **State:** Backlog
@@ -207,6 +207,6 @@
 - [x] INFRA-001-D: Documentation (Done)
 - [x] INFRA-001-E: Update CLAUDE.md - Appwrite via migrations only (Done)
 
-## [ ] [HIGH] INFRA-002: Storage Buckets Configuration
-**State:** In Progress
+## [x] [HIGH] INFRA-002: Storage Buckets Configuration
+**State:** Done
 
