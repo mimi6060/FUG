@@ -100,6 +100,50 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
+      // Afficher la barre de navigation uniquement sur son propre profil
+      bottomNavigationBar: isOwnProfile
+          ? NavigationBar(
+              selectedIndex: 3,
+              onDestinationSelected: (index) {
+                switch (index) {
+                  case 0:
+                    context.go('/home');
+                    break;
+                  case 1:
+                    context.go('/events');
+                    break;
+                  case 2:
+                    context.go('/notifications');
+                    break;
+                  case 3:
+                    // Deja sur le profil
+                    break;
+                }
+              },
+              destinations: [
+                NavigationDestination(
+                  icon: const Icon(Icons.map_outlined),
+                  selectedIcon: const Icon(Icons.map),
+                  label: l10n.map,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.event_outlined),
+                  selectedIcon: const Icon(Icons.event),
+                  label: l10n.events,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.notifications_outlined),
+                  selectedIcon: const Icon(Icons.notifications),
+                  label: l10n.notifs,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.person_outlined),
+                  selectedIcon: const Icon(Icons.person),
+                  label: l10n.profile,
+                ),
+              ],
+            )
+          : null,
     );
   }
 }
