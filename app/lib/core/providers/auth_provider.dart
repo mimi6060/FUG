@@ -29,7 +29,15 @@ class AuthStateNotifier extends AsyncNotifier<models.User?> {
   @override
   Future<models.User?> build() async {
     // Verifier si l'utilisateur est deja connecte
-    return _repository.getCurrentUser();
+    final user = await _repository.getCurrentUser();
+
+    // Si l'utilisateur est connecte, s'assurer que son profil existe
+    // (utile apres OAuth sur web ou le callback ne s'execute pas)
+    if (user != null) {
+      await _repository.ensureUserProfileExists();
+    }
+
+    return user;
   }
 
   /// Connexion avec email et mot de passe

@@ -616,6 +616,57 @@ class AuthRepository {
     }
   }
 
+  /// Verifie et cree le profil utilisateur si necessaire
+  ///
+  /// Utile apres OAuth sur web ou le callback ne s'execute pas
+  Future<void> ensureUserProfileExists() async {
+    try {
+      final user = await _account.get();
+      final existingProfile = await getUserProfile(user.$id);
+
+      if (existingProfile == null) {
+        if (kDebugMode) {
+          print('Creating missing user profile for ${user.$id}');
+        }
+        await _databases.createDocument(
+          databaseId: AppwriteConfig.databaseId,
+          collectionId: AppwriteConfig.usersCollectionId,
+          documentId: user.$id,
+          data: {
+            'userId': user.$id,
+            'email': user.email,
+            'name': user.name.isNotEmpty ? user.name : 'Utilisateur FUG',
+            'avatar': null,
+            'bio': null,
+            'points': 0,
+            'level': 1,
+            'followersCount': 0,
+            'followingCount': 0,
+            'locationLat': null,
+            'locationLng': null,
+            'notificationRadius': 10.0,
+            'fcmToken': null,
+            'createdAt': DateTime.now().toIso8601String(),
+            'updatedAt': DateTime.now().toIso8601String(),
+          },
+          permissions: [
+            Permission.read(Role.user(user.$id)),
+            Permission.update(Role.user(user.$id)),
+            Permission.delete(Role.user(user.$id)),
+          ],
+        );
+        if (kDebugMode) {
+          print('User profile created successfully');
+        }
+      }
+    } on AppwriteException catch (e) {
+      if (kDebugMode) {
+        print('ensureUserProfileExists error: ${e.message}');
+      }
+      // Ne pas bloquer si le profil ne peut pas etre cree
+    }
+  }
+
   /// Met à jour le profil utilisateur
   Future<void> updateUserProfile({
     required String userId,
