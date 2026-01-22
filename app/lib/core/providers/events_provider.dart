@@ -195,9 +195,11 @@ final participationStatusProvider =
   ref,
   params,
 ) async {
-  // TODO: Implementer la verification de participation
-  // via une collection participations
-  return false;
+  final repository = ref.watch(eventRepositoryProvider);
+  return repository.isUserParticipating(
+    userId: params.userId,
+    eventId: params.eventId,
+  );
 });
 
 /// Provider pour les evenements auxquels l'utilisateur participe
@@ -206,3 +208,153 @@ final myParticipationsProvider =
   // TODO: Implementer la recuperation des participations
   return [];
 });
+
+// ============================================
+// Annulation
+// ============================================
+
+/// Etat d'annulation de participation
+class CancelParticipationState {
+  final bool isLoading;
+  final String? error;
+  final bool success;
+
+  const CancelParticipationState({
+    this.isLoading = false,
+    this.error,
+    this.success = false,
+  });
+
+  CancelParticipationState copyWith({
+    bool? isLoading,
+    String? error,
+    bool? success,
+  }) {
+    return CancelParticipationState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      success: success ?? this.success,
+    );
+  }
+}
+
+/// Provider pour l'annulation de participation
+final cancelParticipationProvider =
+    StateNotifierProvider<CancelParticipationNotifier, CancelParticipationState>(
+        (ref) {
+  return CancelParticipationNotifier(ref);
+});
+
+/// Notifier pour l'annulation de participation
+class CancelParticipationNotifier
+    extends StateNotifier<CancelParticipationState> {
+  final Ref _ref;
+
+  CancelParticipationNotifier(this._ref)
+      : super(const CancelParticipationState());
+
+  EventRepository get _repository => _ref.read(eventRepositoryProvider);
+
+  /// Annule la participation a un evenement
+  Future<bool> cancel({
+    required String userId,
+    required String eventId,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null, success: false);
+
+    try {
+      await _repository.cancelParticipation(
+        userId: userId,
+        eventId: eventId,
+      );
+
+      state = state.copyWith(isLoading: false, success: true);
+
+      // Invalider les providers lies
+      _ref.invalidate(eventDetailProvider(eventId));
+      _ref.invalidate(
+          participationStatusProvider((eventId: eventId, userId: userId)));
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  void reset() {
+    state = const CancelParticipationState();
+  }
+}
+
+/// Etat d'annulation d'evenement
+class CancelEventState {
+  final bool isLoading;
+  final String? error;
+  final bool success;
+
+  const CancelEventState({
+    this.isLoading = false,
+    this.error,
+    this.success = false,
+  });
+
+  CancelEventState copyWith({
+    bool? isLoading,
+    String? error,
+    bool? success,
+  }) {
+    return CancelEventState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      success: success ?? this.success,
+    );
+  }
+}
+
+/// Provider pour l'annulation d'evenement
+final cancelEventProvider =
+    StateNotifierProvider<CancelEventNotifier, CancelEventState>((ref) {
+  return CancelEventNotifier(ref);
+});
+
+/// Notifier pour l'annulation d'evenement
+class CancelEventNotifier extends StateNotifier<CancelEventState> {
+  final Ref _ref;
+
+  CancelEventNotifier(this._ref) : super(const CancelEventState());
+
+  EventRepository get _repository => _ref.read(eventRepositoryProvider);
+
+  /// Annule un evenement (organisateur uniquement)
+  Future<bool> cancel({
+    required String eventId,
+    required String organizerId,
+    String? reason,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null, success: false);
+
+    try {
+      await _repository.cancelEvent(
+        eventId: eventId,
+        organizerId: organizerId,
+        reason: reason,
+      );
+
+      state = state.copyWith(isLoading: false, success: true);
+
+      // Invalider les providers lies
+      _ref.invalidate(eventDetailProvider(eventId));
+      _ref.invalidate(upcomingEventsProvider);
+
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  void reset() {
+    state = const CancelEventState();
+  }
+}

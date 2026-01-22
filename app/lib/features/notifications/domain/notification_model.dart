@@ -22,6 +22,12 @@ enum NotificationType {
   directMessage,
   /// Notification systeme
   system,
+  /// Confirmation de signalement recu (DSA)
+  reportReceived,
+  /// Contenu modere (DSA - notification obligatoire)
+  contentModerated,
+  /// Decision d'appel (DSA)
+  appealDecision,
 }
 
 /// Extension pour convertir le type en string
@@ -48,6 +54,12 @@ extension NotificationTypeExtension on NotificationType {
         return 'direct_message';
       case NotificationType.system:
         return 'system';
+      case NotificationType.reportReceived:
+        return 'report_received';
+      case NotificationType.contentModerated:
+        return 'content_moderated';
+      case NotificationType.appealDecision:
+        return 'appeal_decision';
     }
   }
 
@@ -73,6 +85,12 @@ extension NotificationTypeExtension on NotificationType {
         return NotificationType.directMessage;
       case 'system':
         return NotificationType.system;
+      case 'report_received':
+        return NotificationType.reportReceived;
+      case 'content_moderated':
+        return NotificationType.contentModerated;
+      case 'appeal_decision':
+        return NotificationType.appealDecision;
       default:
         return NotificationType.system;
     }
@@ -101,6 +119,12 @@ extension NotificationTypeExtension on NotificationType {
         return 'message';
       case NotificationType.system:
         return 'info';
+      case NotificationType.reportReceived:
+        return 'flag';
+      case NotificationType.contentModerated:
+        return 'gavel';
+      case NotificationType.appealDecision:
+        return 'policy';
     }
   }
 }

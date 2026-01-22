@@ -511,12 +511,12 @@ class EventRepository {
     }
   }
 
-  /// Décrémente le nombre de participants
+  /// Decremente le nombre de participants
   Future<void> decrementParticipants(String eventId) async {
     try {
       final event = await getEvent(eventId);
       if (event == null) {
-        throw EventException('Événement non trouvé.', code: 404);
+        throw EventException('Evenement non trouve.', code: 404);
       }
 
       if (event.currentParticipants <= 0) return;
@@ -532,7 +532,111 @@ class EventRepository {
       );
     } on AppwriteException catch (e) {
       throw EventException(
-        e.message ?? 'Erreur lors de la désinscription.',
+        e.message ?? 'Erreur lors de la desinscription.',
+        code: e.code,
+      );
+    }
+  }
+
+  // ============================================
+  // Annulation
+  // ============================================
+
+  /// Annule la participation d'un utilisateur a un evenement
+  ///
+  /// Appelle la fonction Appwrite cancel-participation qui:
+  /// - Met a jour le statut de participation a 'cancelled'
+  /// - Decremente le compteur de participants
+  /// - Notifie l'organisateur
+  Future<void> cancelParticipation({
+    required String userId,
+    required String eventId,
+  }) async {
+    try {
+      await _appwrite.functions.createExecution(
+        functionId: 'cancel-participation',
+        body: '{"userId": "$userId", "eventId": "$eventId"}',
+      );
+    } on AppwriteException catch (e) {
+      throw EventException(
+        e.message ?? 'Erreur lors de l\'annulation de la participation.',
+        code: e.code,
+      );
+    }
+  }
+
+  /// Annule un evenement (organisateur uniquement)
+  ///
+  /// Appelle la fonction Appwrite cancel-event qui:
+  /// - Met a jour le statut de l'evenement a 'cancelled'
+  /// - Met a jour tous les participants a 'cancelled'
+  /// - Notifie tous les participants
+  Future<void> cancelEvent({
+    required String eventId,
+    required String organizerId,
+    String? reason,
+  }) async {
+    try {
+      final body = reason != null
+          ? '{"eventId": "$eventId", "organizerId": "$organizerId", "reason": "$reason"}'
+          : '{"eventId": "$eventId", "organizerId": "$organizerId"}';
+
+      await _appwrite.functions.createExecution(
+        functionId: 'cancel-event',
+        body: body,
+      );
+    } on AppwriteException catch (e) {
+      throw EventException(
+        e.message ?? 'Erreur lors de l\'annulation de l\'evenement.',
+        code: e.code,
+      );
+    }
+  }
+
+  /// Verifie si un utilisateur participe a un evenement
+  Future<bool> isUserParticipating({
+    required String userId,
+    required String eventId,
+  }) async {
+    try {
+      final result = await _databases.listDocuments(
+        databaseId: AppwriteConfig.databaseId,
+        collectionId: 'event_participants',
+        queries: [
+          Query.equal('userId', userId),
+          Query.equal('eventId', eventId),
+          Query.equal('status', 'confirmed'),
+        ],
+      );
+      return result.documents.isNotEmpty;
+    } on AppwriteException catch (e) {
+      throw EventException(
+        e.message ?? 'Erreur lors de la verification de participation.',
+        code: e.code,
+      );
+    }
+  }
+
+  /// Recupere le statut de participation d'un utilisateur
+  Future<String?> getParticipationStatus({
+    required String userId,
+    required String eventId,
+  }) async {
+    try {
+      final result = await _databases.listDocuments(
+        databaseId: AppwriteConfig.databaseId,
+        collectionId: 'event_participants',
+        queries: [
+          Query.equal('userId', userId),
+          Query.equal('eventId', eventId),
+          Query.limit(1),
+        ],
+      );
+      if (result.documents.isEmpty) return null;
+      return result.documents.first.data['status'] as String?;
+    } on AppwriteException catch (e) {
+      throw EventException(
+        e.message ?? 'Erreur lors de la recuperation du statut.',
         code: e.code,
       );
     }

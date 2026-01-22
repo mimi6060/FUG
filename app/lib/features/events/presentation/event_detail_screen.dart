@@ -10,6 +10,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/events_provider.dart';
 import '../domain/event_model.dart';
+import '../../reports/domain/report_model.dart';
+import '../../reports/presentation/widgets/report_content_sheet.dart';
 
 /// Ecran de detail d'un evenement
 class EventDetailScreen extends ConsumerWidget {
@@ -80,6 +82,7 @@ class _EventDetailContent extends ConsumerStatefulWidget {
 
 class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
   bool _isJoining = false;
+  bool _isCancelling = false;
 
   @override
   Widget build(BuildContext context) {
@@ -116,22 +119,27 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
               icon: const Icon(Icons.share),
               onPressed: () => _shareEvent(),
             ),
-            if (widget.isOrganizer)
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  switch (value) {
-                    case 'edit':
-                      context.push('/events/${event.id}/edit');
-                      break;
-                    case 'delete':
-                      _confirmDelete();
-                      break;
-                    case 'cancel':
-                      _confirmCancel();
-                      break;
-                  }
-                },
-                itemBuilder: (context) => [
+            // Menu contextuel avec options organisateur et signalement DSA
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                switch (value) {
+                  case 'edit':
+                    context.push('/events/${event.id}/edit');
+                    break;
+                  case 'delete':
+                    _confirmDelete();
+                    break;
+                  case 'cancel':
+                    _confirmCancel();
+                    break;
+                  case 'report':
+                    _reportEvent();
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                // Options organisateur
+                if (widget.isOrganizer) ...[
                   const PopupMenuItem(
                     value: 'edit',
                     child: ListTile(
@@ -157,7 +165,18 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                     ),
                   ),
                 ],
-              ),
+                // Option signalement (DSA) - pour tous sauf l'organisateur
+                if (!widget.isOrganizer)
+                  const PopupMenuItem(
+                    value: 'report',
+                    child: ListTile(
+                      leading: Icon(Icons.flag_outlined, color: Colors.orange),
+                      title: Text('Signaler', style: TextStyle(color: Colors.orange)),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
 
@@ -415,6 +434,9 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                   const SizedBox(height: 24),
                 ],
 
+                // Bouton d'annulation de participation (pour les participants)
+                _buildCancelParticipationButton(),
+
                 // Espace pour le bouton flottant
                 const SizedBox(height: 80),
               ],
@@ -422,6 +444,59 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Construit le bouton d'annulation de participation pour les participants
+  Widget _buildCancelParticipationButton() {
+    final currentUser = ref.watch(currentUserProvider).value;
+    if (currentUser == null) return const SizedBox.shrink();
+
+    // Ne pas afficher si l'utilisateur est l'organisateur
+    if (widget.isOrganizer) return const SizedBox.shrink();
+
+    // Ne pas afficher si l'evenement est annule ou termine
+    if (widget.event.status == EventStatus.cancelled ||
+        widget.event.status == EventStatus.completed) {
+      return const SizedBox.shrink();
+    }
+
+    final participationAsync = ref.watch(
+      participationStatusProvider(
+        (eventId: widget.event.id, userId: currentUser.$id),
+      ),
+    );
+
+    return participationAsync.when(
+      data: (isParticipating) {
+        if (!isParticipating) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _isCancelling ? null : _confirmCancelParticipation,
+              icon: _isCancelling
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cancel_outlined, color: Colors.orange),
+              label: Text(
+                _isCancelling ? 'Annulation...' : 'Annuler ma participation',
+                style: const TextStyle(color: Colors.orange),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.orange),
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
@@ -477,13 +552,31 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
   }
 
   Future<void> _confirmCancel() async {
+    final reasonController = TextEditingController();
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Annuler l\'evenement'),
-        content: const Text(
-          'Etes-vous sur de vouloir annuler cet evenement? '
-          'Les participants seront notifies.',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Etes-vous sur de vouloir annuler cet evenement? '
+              'Les participants seront notifies.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Raison (optionnel)',
+                hintText: 'Ex: Probleme de sante, mauvais temps...',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -498,9 +591,127 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
       ),
     );
 
-    if (confirmed == true) {
-      // TODO: Annuler l'evenement
+    if (confirmed == true && mounted) {
+      setState(() => _isCancelling = true);
+
+      final currentUser = ref.read(currentUserProvider).value;
+      if (currentUser == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erreur: utilisateur non connecte')),
+          );
+          setState(() => _isCancelling = false);
+        }
+        return;
+      }
+
+      final success = await ref.read(cancelEventProvider.notifier).cancel(
+            eventId: widget.event.id,
+            organizerId: currentUser.$id,
+            reason: reasonController.text.isNotEmpty ? reasonController.text : null,
+          );
+
+      if (mounted) {
+        setState(() => _isCancelling = false);
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Evenement annule avec succes'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Rafraichir les donnees
+          ref.invalidate(eventDetailProvider(widget.event.id));
+        } else {
+          final error = ref.read(cancelEventProvider).error;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error ?? 'Erreur lors de l\'annulation'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
+  }
+
+  Future<void> _confirmCancelParticipation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Annuler ma participation'),
+        content: const Text(
+          'Etes-vous sur de vouloir annuler votre participation a cet evenement? '
+          'L\'organisateur sera notifie.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Non'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Oui, annuler'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() => _isCancelling = true);
+
+      final currentUser = ref.read(currentUserProvider).value;
+      if (currentUser == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erreur: utilisateur non connecte')),
+          );
+          setState(() => _isCancelling = false);
+        }
+        return;
+      }
+
+      final success = await ref.read(cancelParticipationProvider.notifier).cancel(
+            userId: currentUser.$id,
+            eventId: widget.event.id,
+          );
+
+      if (mounted) {
+        setState(() => _isCancelling = false);
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Participation annulee'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Rafraichir les donnees
+          ref.invalidate(eventDetailProvider(widget.event.id));
+        } else {
+          final error = ref.read(cancelParticipationProvider).error;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error ?? 'Erreur lors de l\'annulation'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// Signaler l'evenement (DSA compliance)
+  void _reportEvent() {
+    final event = widget.event;
+    ReportContentSheet.show(
+      context,
+      contentType: ReportContentType.event,
+      contentId: event.id,
+      contentName: event.title,
+    );
   }
 }
 
