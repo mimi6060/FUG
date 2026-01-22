@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../data/account_repository.dart';
+import 'widgets/language_selector.dart';
 
 /// Application settings screen
 ///
@@ -76,6 +78,12 @@ class SettingsScreen extends ConsumerWidget {
               );
             },
           ),
+
+          const Divider(),
+
+          // Preferences Section (MOD-010: i18n)
+          _SectionHeader(title: 'Preferences'),
+          const LanguageTile(),
 
           const Divider(),
 

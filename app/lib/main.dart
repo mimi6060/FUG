@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'core/router/app_router.dart';
 import 'core/services/appwrite_service.dart';
+import 'core/providers/locale_provider.dart';
 
 /// Provider pour SharedPreferences
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -70,10 +73,21 @@ class FugApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(appRouterProvider);
+    final effectiveLocale = ref.watch(effectiveLocaleProvider);
 
     return MaterialApp.router(
-      title: 'FUG - Find Urban Gatherings',
+      title: 'FUG',
       debugShowCheckedModeBanner: false,
+
+      // Localization
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: supportedLocales,
+      locale: effectiveLocale,
 
       // Configuration du routeur
       routerConfig: router,
