@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
+
+import '../data/sharing_service.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/events_provider.dart';
@@ -512,13 +513,12 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
   }
 
   void _shareEvent() {
-    final event = widget.event;
-    Share.share(
-      '${event.title}\n\n'
-      '${_formatDateRange(event.startDate, event.endDate)}\n\n'
-      '${event.address}\n\n'
-      'Rejoins-moi sur FUG!',
-      subject: event.title,
+    ShareOptionsSheet.show(
+      context,
+      event: widget.event,
+      onWhatsAppNotAvailable: () {
+        SharingService.shareGeneric(widget.event);
+      },
     );
   }
 
