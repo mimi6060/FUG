@@ -5,6 +5,9 @@ import '../../data/gamification_repository.dart';
 import '../../domain/achievement_model.dart';
 import '../../domain/leaderboard_entry_model.dart';
 
+// Re-export UserAchievementsResult for screens
+export '../../data/gamification_repository.dart' show UserAchievementsResult;
+
 /// Provider pour le repository de gamification
 final gamificationRepositoryProvider = Provider<GamificationRepository>((ref) {
   return GamificationRepository();
