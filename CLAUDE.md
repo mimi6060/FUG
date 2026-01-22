@@ -265,14 +265,95 @@ PHASE 4 - COMMIT:
 - NE PAS push (l'orchestrateur s'en charge)
 ```
 
-### Après Complétion des Agents
+### Après Complétion des Agents (Merge Workflow)
 
-L'orchestrateur (session principale) doit:
-1. Vérifier les outputs de chaque agent
-2. Merger les branches des worktrees vers develop
-3. Résoudre les conflits éventuels
-4. Nettoyer les worktrees (`git worktree remove`)
-5. Mettre à jour Plane avec les statuts
+L'orchestrateur (session principale) doit suivre ce workflow pour un historique Git propre:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  WORKFLOW MERGE AVEC REBASE (Historique Propre)         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  1. REVIEW DES OUTPUTS                                  │
+│     - Vérifier les outputs de chaque agent              │
+│     - S'assurer que les tests passent                   │
+│                                                         │
+│  2. REBASE SUR DEVELOP                                  │
+│     cd /home/knabo/dev/FUG-worktrees/<feature>          │
+│     git fetch origin develop                            │
+│     git rebase origin/develop                           │
+│                                                         │
+│  3. COMMITS PAR STORY (si modifications partielles)     │
+│     git add -p  # Stage par hunks/lignes                │
+│     git commit -m "feat(scope): story description"      │
+│                                                         │
+│  4. MERGE REQUEST (Optionnel mais recommandé)           │
+│     git push -u origin feature/<feature-name>           │
+│     gh pr create --base develop --title "..."           │
+│                                                         │
+│  5. MERGE AVEC FAST-FORWARD (si pas de MR)              │
+│     cd /home/knabo/dev/FUG                              │
+│     git merge --ff-only feature/<feature-name>          │
+│                                                         │
+│  6. CLEANUP                                             │
+│     git worktree remove ../FUG-worktrees/<feature>      │
+│     git branch -d feature/<feature-name>                │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### Commandes Utiles pour Commits Propres
+
+```bash
+# Stage par lignes (hunks interactif)
+git add -p <file>
+
+# Stage lignes spécifiques avec VS Code/IDE
+# Utiliser l'interface git pour sélectionner les lignes
+
+# Rebase interactif pour réorganiser commits
+git rebase -i HEAD~3  # Réorganiser les 3 derniers commits
+
+# Squash de commits avant merge
+git rebase -i develop  # Puis 'squash' ou 'fixup'
+```
+
+#### Convention de Commits par Story
+
+```
+feat(scope): <story-id> <description>
+
+# Exemples:
+feat(rgpd): MOD-001-B add data export functionality
+feat(dsa): MOD-003 add content reporting system
+feat(events): US-024 add cancel participation feature
+fix(auth): US-012 fix password reset flow
+```
+
+### Merge Requests (Recommandé pour Review)
+
+Pour les features importantes, utiliser des Merge Requests:
+
+```bash
+# Dans le worktree de la feature
+git push -u origin feature/<feature-name>
+
+# Créer la MR
+gh pr create \
+  --base develop \
+  --title "feat(scope): <story-id> <description>" \
+  --body "## Summary
+- Implementation of <story>
+
+## Test plan
+- [ ] Tests pass
+- [ ] QA review done"
+```
+
+L'orchestrateur (agent principal) peut alors:
+1. Review la MR via `gh pr view <number>`
+2. Approuver et merger via `gh pr merge <number> --rebase`
+3. Supprimer la branche après merge
 
 ---
 
