@@ -53,6 +53,7 @@ enum AchievementTier {
   bronze,
   silver,
   gold,
+  platinum,
 }
 
 /// Extension pour le tier
@@ -65,6 +66,8 @@ extension AchievementTierExtension on AchievementTier {
         return 'silver';
       case AchievementTier.gold:
         return 'gold';
+      case AchievementTier.platinum:
+        return 'platinum';
     }
   }
 
@@ -76,6 +79,8 @@ extension AchievementTierExtension on AchievementTier {
         return AchievementTier.silver;
       case 'gold':
         return AchievementTier.gold;
+      case 'platinum':
+        return AchievementTier.platinum;
       default:
         return AchievementTier.bronze;
     }
@@ -256,6 +261,9 @@ class AchievementModel extends Equatable {
 
   /// Determine le tier a partir de l'ID
   static AchievementTier _tierFromId(String id) {
+    if (id.contains('platinum') || id.contains('ultimate') || id.contains('100')) {
+      return AchievementTier.platinum;
+    }
     if (id.contains('legend') || id.contains('star') || id.contains('25')) {
       return AchievementTier.gold;
     }
