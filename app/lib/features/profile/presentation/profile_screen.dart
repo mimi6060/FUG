@@ -352,11 +352,7 @@ class _ProfileHeader extends StatelessWidget {
               _StatItem(
                 value: profile.totalEventsCreated.toString(),
                 label: l10n.events,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.featureComingSoon)),
-                  );
-                },
+                onTap: () => context.push('/users/${profile.id}/events'),
               ),
             ],
           ),

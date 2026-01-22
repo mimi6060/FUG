@@ -11,6 +11,7 @@ import '../../features/events/presentation/event_detail_screen.dart';
 import '../../features/events/presentation/create_event_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/edit_profile_screen.dart';
+import '../../features/profile/presentation/user_events_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/social/presentation/user_search_screen.dart';
 import '../../features/social/presentation/followers_list_screen.dart';
@@ -209,8 +210,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'userEvents',
             builder: (context, state) {
               final userId = state.pathParameters['userId']!;
-              // TODO: Creer UserEventsScreen
-              return ProfileScreen(userId: userId);
+              return UserEventsScreen(userId: userId);
             },
           ),
         ],
