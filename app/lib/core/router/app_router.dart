@@ -18,6 +18,8 @@ import '../../features/settings/presentation/consent_screen.dart';
 import '../../features/settings/presentation/delete_account_screen.dart';
 import '../../features/settings/presentation/privacy_policy_screen.dart';
 import '../../features/settings/data/consent_provider.dart';
+import '../../features/gamification/presentation/screens/achievements_screen.dart';
+import '../../features/gamification/presentation/screens/leaderboard_screen.dart';
 
 /// Cle de navigation globale
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -229,6 +231,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/search',
         name: 'search',
         builder: (context, state) => const UserSearchScreen(),
+      ),
+
+      // ================================================
+      // Routes de gamification
+      // ================================================
+      GoRoute(
+        path: '/achievements',
+        name: 'achievements',
+        builder: (context, state) => const AchievementsScreen(),
+      ),
+      GoRoute(
+        path: '/leaderboard',
+        name: 'leaderboard',
+        builder: (context, state) => const LeaderboardScreen(),
       ),
 
       // ================================================

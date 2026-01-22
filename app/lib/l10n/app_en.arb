@@ -160,6 +160,14 @@
   "noNotification": "No notification",
   "notificationsWillAppearHere": "Your notifications will appear here",
 
+  "achievements": "Achievements",
+  "leaderboard": "Leaderboard",
+  "unlocked": "Unlocked",
+  "locked": "Locked",
+  "weeklyLeaderboard": "Weekly",
+  "monthlyLeaderboard": "Monthly",
+  "allTimeLeaderboard": "All time",
+
   "featureComingSoon": "Feature coming soon",
   "unexpectedError": "An unexpected error occurred.",
   "pleaseEnterEmail": "Please enter your email.",

@@ -145,6 +145,14 @@
   "noNotification": "Aucune notification",
   "notificationsWillAppearHere": "Vos notifications apparaitront ici",
 
+  "achievements": "Badges",
+  "leaderboard": "Classement",
+  "unlocked": "Debloques",
+  "locked": "Verrouilles",
+  "weeklyLeaderboard": "Hebdomadaire",
+  "monthlyLeaderboard": "Mensuel",
+  "allTimeLeaderboard": "Tout temps",
+
   "featureComingSoon": "Fonctionnalite a venir",
   "unexpectedError": "Une erreur inattendue est survenue.",
   "pleaseEnterEmail": "Veuillez entrer votre email.",

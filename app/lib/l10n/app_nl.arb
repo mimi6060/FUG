@@ -145,6 +145,14 @@
   "noNotification": "Geen meldingen",
   "notificationsWillAppearHere": "Je meldingen verschijnen hier",
 
+  "achievements": "Badges",
+  "leaderboard": "Klassement",
+  "unlocked": "Ontgrendeld",
+  "locked": "Vergrendeld",
+  "weeklyLeaderboard": "Wekelijks",
+  "monthlyLeaderboard": "Maandelijks",
+  "allTimeLeaderboard": "Altijd",
+
   "featureComingSoon": "Functie binnenkort beschikbaar",
   "unexpectedError": "Er is een onverwachte fout opgetreden.",
   "pleaseEnterEmail": "Voer je e-mailadres in.",
