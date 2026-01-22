@@ -211,6 +211,8 @@ class AchievementCard extends StatelessWidget {
         return const Color(0xFFC0C0C0); // Silver
       case AchievementTier.gold:
         return const Color(0xFFFFD700); // Gold
+      case AchievementTier.platinum:
+        return const Color(0xFFE5E4E2); // Platinum
     }
   }
 
