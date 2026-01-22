@@ -6,63 +6,67 @@
  * Used to persist language choice across devices and sessions
  */
 
-export const up = async (db, appwrite) => {
-  const { databases } = appwrite;
+export default {
+  name: '020_user_preferred_language',
 
-  console.log('Adding preferredLanguage attribute to users collection...');
+  async up(client, databases, log, config) {
+    const databaseId = config.databaseId;
 
-  try {
-    await databases.createStringAttribute(
-      db,
-      'users',
-      'preferredLanguage',
-      2, // Max length for language code (fr, en, nl)
-      false, // Not required - null means use system default
-      null, // No default
-      false // Not array
-    );
+    log.info('Adding preferredLanguage attribute to users collection...');
 
-    console.log('preferredLanguage attribute created successfully');
+    try {
+      await databases.createStringAttribute(
+        databaseId,
+        'users',
+        'preferredLanguage',
+        2, // Max length for language code (fr, en, nl)
+        false, // Not required - null means use system default
+        null, // No default
+        false // Not array
+      );
 
-    // Wait for attribute to be available
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      log.success('preferredLanguage attribute created');
 
-    // Create index for potential filtering by language
-    await databases.createIndex(
-      db,
-      'users',
-      'idx_preferredLanguage',
-      'key',
-      ['preferredLanguage'],
-      ['ASC']
-    );
+      // Wait for attribute to be available
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    console.log('Index on preferredLanguage created');
-  } catch (error) {
-    if (error.code === 409) {
-      console.log('Attribute already exists, skipping...');
-    } else {
-      throw error;
+      // Create index for potential filtering by language
+      await databases.createIndex(
+        databaseId,
+        'users',
+        'idx_preferredLanguage',
+        'key',
+        ['preferredLanguage'],
+        ['ASC']
+      );
+
+      log.success('Index on preferredLanguage created');
+    } catch (error) {
+      if (error.code === 409) {
+        log.warn('Attribute already exists, skipping...');
+      } else {
+        throw error;
+      }
     }
-  }
-};
+  },
 
-export const down = async (db, appwrite) => {
-  const { databases } = appwrite;
+  async down(client, databases, log, config) {
+    const databaseId = config.databaseId;
 
-  console.log('Removing preferredLanguage attribute from users collection...');
+    log.info('Removing preferredLanguage attribute from users collection...');
 
-  try {
-    await databases.deleteIndex(db, 'users', 'idx_preferredLanguage');
-    console.log('Index removed');
-  } catch (error) {
-    console.log('Index removal failed or not found:', error.message);
-  }
+    try {
+      await databases.deleteIndex(databaseId, 'users', 'idx_preferredLanguage');
+      log.info('Index removed');
+    } catch (error) {
+      log.warn('Index removal failed or not found: ' + error.message);
+    }
 
-  try {
-    await databases.deleteAttribute(db, 'users', 'preferredLanguage');
-    console.log('preferredLanguage attribute removed');
-  } catch (error) {
-    console.log('Attribute removal failed or not found:', error.message);
-  }
+    try {
+      await databases.deleteAttribute(databaseId, 'users', 'preferredLanguage');
+      log.success('preferredLanguage attribute removed');
+    } catch (error) {
+      log.warn('Attribute removal failed or not found: ' + error.message);
+    }
+  },
 };

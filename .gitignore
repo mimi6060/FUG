@@ -156,6 +156,7 @@ temp/
 # =================================
 infrastructure/setup/.google-credentials
 infrastructure/setup/.apple-credentials
+infrastructure/setup/.admin-credentials
 infrastructure/setup/.env
 
 # =================================

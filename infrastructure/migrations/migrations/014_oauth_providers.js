@@ -96,15 +96,43 @@ export default {
   },
 
   /**
+   * Load admin credentials from file or environment
+   */
+  loadAdminCredentials(log) {
+    let email = process.env.APPWRITE_ADMIN_EMAIL;
+    let password = process.env.APPWRITE_ADMIN_PASSWORD;
+
+    // Try credentials file if env vars not set
+    if (!email || !password) {
+      const adminFile = path.join(setupDir, '.admin-credentials');
+      if (fs.existsSync(adminFile)) {
+        const content = fs.readFileSync(adminFile, 'utf-8');
+        const lines = content.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('#')) continue;
+          const [key, ...valueParts] = line.split('=');
+          const value = valueParts.join('=').trim();
+          if (key === 'APPWRITE_ADMIN_EMAIL') email = value;
+          if (key === 'APPWRITE_ADMIN_PASSWORD') password = value;
+        }
+        if (email && password) {
+          log.info('Loaded admin credentials from file');
+        }
+      }
+    }
+
+    return { email, password };
+  },
+
+  /**
    * Create admin session and get session cookie
    */
   async createAdminSession(endpoint, log) {
-    const email = process.env.APPWRITE_ADMIN_EMAIL;
-    const password = process.env.APPWRITE_ADMIN_PASSWORD;
+    const { email, password } = this.loadAdminCredentials(log);
 
     if (!email || !password) {
       throw new Error(
-        'Admin credentials required. Set APPWRITE_ADMIN_EMAIL and APPWRITE_ADMIN_PASSWORD environment variables.'
+        'Admin credentials required. Set APPWRITE_ADMIN_EMAIL and APPWRITE_ADMIN_PASSWORD environment variables, or ensure .admin-credentials file exists.'
       );
     }
 
