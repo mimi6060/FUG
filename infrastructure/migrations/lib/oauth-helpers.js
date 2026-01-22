@@ -245,3 +245,244 @@ export async function disableOAuthProvider(endpoint, projectId, sessionSecret, p
     log.warn(`Could not disable ${provider} OAuth: ${e.message}`);
   }
 }
+
+// ============================================
+// MESSAGING HELPERS (FCM / APNs)
+// ============================================
+
+/**
+ * Load FCM credentials from environment or .fcm-credentials file
+ * @param {string} setupDir - Path to the setup directory
+ * @param {object} log - Logger object
+ * @returns {{serverKey: string|null, senderId: string|null}}
+ */
+export function loadFcmCredentials(setupDir, log) {
+  let serverKey = process.env.FCM_SERVER_KEY;
+  let senderId = process.env.FCM_SENDER_ID;
+
+  if (!serverKey) {
+    const fcmFile = path.join(setupDir, '.fcm-credentials');
+    if (fs.existsSync(fcmFile)) {
+      const content = fs.readFileSync(fcmFile, 'utf-8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('#') || !line.trim()) continue;
+        const [key, ...valueParts] = line.split('=');
+        const value = valueParts.join('=').trim();
+        if (key === 'FCM_SERVER_KEY') serverKey = value;
+        if (key === 'FCM_SENDER_ID') senderId = value;
+      }
+      if (serverKey) {
+        log.info('Loaded FCM credentials from file');
+      }
+    }
+  }
+
+  return { serverKey, senderId };
+}
+
+/**
+ * Load APNs credentials from environment or .apns-credentials file
+ * @param {string} setupDir - Path to the setup directory
+ * @param {object} log - Logger object
+ * @returns {{keyId: string|null, teamId: string|null, bundleId: string|null, authKey: string|null}}
+ */
+export function loadApnsCredentials(setupDir, log) {
+  const credentials = {
+    keyId: process.env.APNS_KEY_ID,
+    teamId: process.env.APNS_TEAM_ID,
+    bundleId: process.env.APNS_BUNDLE_ID,
+    authKey: process.env.APNS_AUTH_KEY,
+  };
+
+  if (!credentials.keyId || !credentials.teamId) {
+    const apnsFile = path.join(setupDir, '.apns-credentials');
+    if (fs.existsSync(apnsFile)) {
+      const content = fs.readFileSync(apnsFile, 'utf-8');
+      const lines = content.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('#') || !line.trim()) continue;
+        const [key, ...valueParts] = line.split('=');
+        let value = valueParts.join('=').trim();
+        // Handle multi-line auth key
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1);
+        }
+        if (key === 'APNS_KEY_ID') credentials.keyId = value;
+        if (key === 'APNS_TEAM_ID') credentials.teamId = value;
+        if (key === 'APNS_BUNDLE_ID') credentials.bundleId = value;
+        if (key === 'APNS_AUTH_KEY') credentials.authKey = value;
+      }
+
+      // Try to load auth key from .p8 file
+      if (!credentials.authKey) {
+        const p8Files = fs.readdirSync(setupDir).filter(f => f.endsWith('.p8'));
+        if (p8Files.length > 0) {
+          const p8Path = path.join(setupDir, p8Files[0]);
+          credentials.authKey = fs.readFileSync(p8Path, 'utf-8');
+          log.info(`Loaded APNs auth key from ${p8Files[0]}`);
+        }
+      }
+
+      if (credentials.keyId) {
+        log.info('Loaded APNs credentials from file');
+      }
+    }
+  }
+
+  return credentials;
+}
+
+/**
+ * Configure FCM messaging provider in Appwrite
+ * @param {string} endpoint - Appwrite endpoint (with /v1)
+ * @param {string} projectId - Project ID
+ * @param {string} sessionSecret - Admin session secret
+ * @param {string} serverKey - FCM Server Key
+ * @param {string} senderId - FCM Sender ID (optional)
+ * @param {object} log - Logger object
+ */
+export async function configureFcmProvider(endpoint, projectId, sessionSecret, serverKey, senderId, log) {
+  log.info('Configuring FCM messaging provider...');
+
+  // Create FCM provider via Appwrite Messaging API
+  const response = await fetch(`${endpoint}/messaging/providers/fcm`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': projectId,
+      Cookie: `a_session_console=${sessionSecret}`,
+    },
+    body: JSON.stringify({
+      providerId: 'fcm-provider',
+      name: 'FCM Push Notifications',
+      serverKey: serverKey,
+      enabled: true,
+    }),
+  });
+
+  if (!response.ok) {
+    // Check if provider already exists
+    if (response.status === 409) {
+      log.info('FCM provider already exists, updating...');
+      const updateResponse = await fetch(`${endpoint}/messaging/providers/fcm/fcm-provider`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': projectId,
+          Cookie: `a_session_console=${sessionSecret}`,
+        },
+        body: JSON.stringify({
+          name: 'FCM Push Notifications',
+          serverKey: serverKey,
+          enabled: true,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const error = await updateResponse.json().catch(() => ({}));
+        throw new Error(`Failed to update FCM provider: ${error.message || updateResponse.status}`);
+      }
+      log.success('FCM provider updated');
+      return;
+    }
+
+    const error = await response.json().catch(() => ({}));
+    throw new Error(`Failed to create FCM provider: ${error.message || response.status}`);
+  }
+
+  log.success('FCM provider configured');
+}
+
+/**
+ * Configure APNs messaging provider in Appwrite
+ * @param {string} endpoint - Appwrite endpoint (with /v1)
+ * @param {string} projectId - Project ID
+ * @param {string} sessionSecret - Admin session secret
+ * @param {object} credentials - APNs credentials {keyId, teamId, bundleId, authKey}
+ * @param {object} log - Logger object
+ */
+export async function configureApnsProvider(endpoint, projectId, sessionSecret, credentials, log) {
+  log.info('Configuring APNs messaging provider...');
+
+  const response = await fetch(`${endpoint}/messaging/providers/apns`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Appwrite-Project': projectId,
+      Cookie: `a_session_console=${sessionSecret}`,
+    },
+    body: JSON.stringify({
+      providerId: 'apns-provider',
+      name: 'APNs Push Notifications',
+      authKey: credentials.authKey,
+      authKeyId: credentials.keyId,
+      teamId: credentials.teamId,
+      bundleId: credentials.bundleId,
+      enabled: true,
+    }),
+  });
+
+  if (!response.ok) {
+    // Check if provider already exists
+    if (response.status === 409) {
+      log.info('APNs provider already exists, updating...');
+      const updateResponse = await fetch(`${endpoint}/messaging/providers/apns/apns-provider`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Appwrite-Project': projectId,
+          Cookie: `a_session_console=${sessionSecret}`,
+        },
+        body: JSON.stringify({
+          name: 'APNs Push Notifications',
+          authKey: credentials.authKey,
+          authKeyId: credentials.keyId,
+          teamId: credentials.teamId,
+          bundleId: credentials.bundleId,
+          enabled: true,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const error = await updateResponse.json().catch(() => ({}));
+        throw new Error(`Failed to update APNs provider: ${error.message || updateResponse.status}`);
+      }
+      log.success('APNs provider updated');
+      return;
+    }
+
+    const error = await response.json().catch(() => ({}));
+    throw new Error(`Failed to create APNs provider: ${error.message || response.status}`);
+  }
+
+  log.success('APNs provider configured');
+}
+
+/**
+ * Disable a messaging provider in Appwrite
+ * @param {string} endpoint - Appwrite endpoint (with /v1)
+ * @param {string} projectId - Project ID
+ * @param {string} sessionSecret - Admin session secret
+ * @param {string} providerType - Provider type (fcm or apns)
+ * @param {string} providerId - Provider ID
+ * @param {object} log - Logger object
+ */
+export async function disableMessagingProvider(endpoint, projectId, sessionSecret, providerType, providerId, log) {
+  try {
+    await fetch(`${endpoint}/messaging/providers/${providerType}/${providerId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Appwrite-Project': projectId,
+        Cookie: `a_session_console=${sessionSecret}`,
+      },
+      body: JSON.stringify({
+        enabled: false,
+      }),
+    });
+    log.info(`${providerType.toUpperCase()} messaging provider disabled`);
+  } catch (e) {
+    log.warn(`Could not disable ${providerType} provider: ${e.message}`);
+  }
+}

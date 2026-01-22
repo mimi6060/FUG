@@ -159,6 +159,12 @@ infrastructure/setup/.apple-credentials
 infrastructure/setup/.admin-credentials
 infrastructure/setup/.env
 
+# Push Notification Credentials
+# =================================
+infrastructure/setup/.fcm-credentials
+infrastructure/setup/.apns-credentials
+infrastructure/setup/*.p8
+
 # =================================
 # Archives
 # =================================
