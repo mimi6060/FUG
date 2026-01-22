@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID } from 'node-appwrite';
+import { Client, Databases, Query, ID, Functions } from 'node-appwrite';
 
 /**
  * Appwrite Function: follow-user
@@ -18,7 +18,7 @@ import { Client, Databases, Query, ID } from 'node-appwrite';
 // Configuration des points
 const POINTS = {
   FOLLOW_SOMEONE: 5,      // Points gagnés en suivant quelqu'un
-  GAIN_FOLLOWER: 10       // Points gagnés en recevant un follower
+  GAIN_FOLLOWER: 2        // Points gagnés en recevant un follower
 };
 
 // Configuration des collections
@@ -148,6 +148,19 @@ export default async ({ req, res, log, error }) => {
       addGamificationPoints(databases, databaseId, followerId, POINTS.FOLLOW_SOMEONE, 'follow_user', log),
       // Points pour celui qui est suivi
       addGamificationPoints(databases, databaseId, followingId, POINTS.GAIN_FOLLOWER, 'gain_follower', log)
+    ]);
+
+    // Check and award achievements for both users
+    const functions = new Functions(client);
+    await Promise.all([
+      functions.createExecution('gamification', JSON.stringify({
+        action: 'check_achievements',
+        userId: followerId
+      })),
+      functions.createExecution('gamification', JSON.stringify({
+        action: 'check_achievements',
+        userId: followingId
+      }))
     ]);
 
     return res.json({

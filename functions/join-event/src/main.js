@@ -1,4 +1,4 @@
-import { Client, Databases, Query, ID } from 'node-appwrite';
+import { Client, Databases, Query, ID, Functions } from 'node-appwrite';
 
 /**
  * Appwrite Function: join-event
@@ -18,7 +18,7 @@ import { Client, Databases, Query, ID } from 'node-appwrite';
 
 // Configuration des points
 const POINTS = {
-  JOIN_EVENT: 15,           // Points gagnés en rejoignant un événement
+  JOIN_EVENT: 5,            // Points gagnés en rejoignant un événement
   EVENT_MILESTONE_10: 25,   // Bonus quand l'événement atteint 10 participants
   EVENT_MILESTONE_50: 50,   // Bonus quand l'événement atteint 50 participants
   ORGANIZER_BONUS: 5        // Points pour l'organisateur par nouveau participant
@@ -224,6 +224,13 @@ export default async ({ req, res, log, error }) => {
       'join_event',
       log
     );
+
+    // Check and award achievements for the participant
+    const functions = new Functions(client);
+    await functions.createExecution('gamification', JSON.stringify({
+      action: 'check_achievements',
+      userId: userId
+    }));
 
     // Bonus pour l'organisateur
     await addGamificationPoints(
