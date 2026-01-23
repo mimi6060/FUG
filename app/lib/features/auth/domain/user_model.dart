@@ -153,7 +153,7 @@ class UserModel extends Equatable {
 
   /// Retourne les initiales du nom (pour l'avatar par défaut)
   String get initials {
-    final parts = name.trim().split(' ');
+    final parts = name.trim().split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts[0][0].toUpperCase();
     return '${parts[0][0]}${parts.last[0]}'.toUpperCase();

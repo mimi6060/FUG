@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/location_provider.dart';
@@ -311,15 +313,60 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
   Future<void> _createEvent() async {
     final l10n = AppLocalizations.of(context)!;
+    final state = ref.read(createEventStateProvider);
 
-    print('=== _createEvent called ===');
-    print('Form valid: ${_formKey.currentState?.validate()}');
+    print('=== _createEvent called (v2) ===');
+    print('Title: "${_titleController.text}"');
+    print('Title length: ${_titleController.text.trim().length}');
+    print('Location: ${state.selectedLocation}');
+    print('Address: ${state.selectedAddress}');
 
-    if (!_formKey.currentState!.validate()) {
-      print('Form validation failed');
+    // Check title (step 0)
+    if (_titleController.text.trim().isEmpty || _titleController.text.trim().length < 5) {
+      print('ERROR: Title validation failed');
+      ref.read(createEventStateProvider.notifier).setStep(0);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_titleController.text.trim().isEmpty
+              ? l10n.pleaseEnterTitle
+              : l10n.titleTooShort),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
       return;
     }
-    print('Form validation passed');
+
+    // Check location (step 2)
+    if (state.selectedLocation == null) {
+      print('ERROR: Location not selected');
+      ref.read(createEventStateProvider.notifier).setStep(2);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.pleaseSelectLocation),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    // Validate form for other fields
+    print('Running form validation...');
+    if (!_formKey.currentState!.validate()) {
+      print('ERROR: Form validation failed - checking fields...');
+      // Log each field status
+      print('  - maxParticipants enabled: $_hasMaxParticipants');
+      if (_hasMaxParticipants) {
+        print('  - maxParticipants value: "${_maxParticipantsController.text}"');
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Validation error - check form fields'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+    print('Form validation passed!');
 
     final tags = _tagsController.text
         .split(',')
@@ -344,7 +391,11 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.eventCreatedSuccess)),
       );
-      context.go('/events/$eventId');
+      // Small delay to avoid Hero animation conflict with SnackBar
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (mounted) {
+        context.go('/events/$eventId');
+      }
     } else if (mounted) {
       // Show error message
       final state = ref.read(createEventStateProvider);
@@ -777,6 +828,8 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
   late LatLng _selectedPosition;
   final MapController _mapController = MapController();
   final _addressController = TextEditingController();
+  bool _isSearching = false;
+  List<Map<String, dynamic>> _searchResults = [];
 
   @override
   void initState() {
@@ -789,6 +842,109 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
     _mapController.dispose();
     _addressController.dispose();
     super.dispose();
+  }
+
+  /// Geocode an address to coordinates using Nominatim API
+  Future<void> _searchAddress(String query) async {
+    print('=== _searchAddress called ===');
+    print('Query: "$query"');
+
+    if (query.trim().isEmpty) {
+      print('Query is empty, returning');
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _searchResults = [];
+    });
+
+    try {
+      final encodedQuery = Uri.encodeComponent(query);
+      final url = 'https://nominatim.openstreetmap.org/search?q=$encodedQuery&format=json&addressdetails=1&limit=5';
+      print('Fetching: $url');
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'User-Agent': 'FUG-App/1.0',
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> results = json.decode(response.body);
+        print('Found ${results.length} results');
+        if (results.isNotEmpty && mounted) {
+          setState(() {
+            _searchResults = results.map((r) => {
+              'lat': double.parse(r['lat']),
+              'lon': double.parse(r['lon']),
+              'display_name': r['display_name'] as String,
+            }).toList();
+          });
+          print('Search results updated: ${_searchResults.length} items');
+        }
+      }
+    } catch (e, stack) {
+      print('Geocoding error: $e');
+      print('Stack: $stack');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+        });
+      }
+    }
+  }
+
+  /// Select a search result
+  void _selectSearchResult(Map<String, dynamic> result) {
+    final position = LatLng(result['lat'], result['lon']);
+    setState(() {
+      _selectedPosition = position;
+      _addressController.text = result['display_name'];
+      _searchResults = [];
+    });
+    _mapController.move(position, 16);
+  }
+
+  /// Reverse geocode coordinates to address using Nominatim API
+  Future<void> _reverseGeocode(LatLng position) async {
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://nominatim.openstreetmap.org/reverse?lat=${position.latitude}&lon=${position.longitude}&format=json&addressdetails=1',
+        ),
+        headers: {
+          'User-Agent': 'FUG-App/1.0',
+        },
+      );
+
+      if (response.statusCode == 200 && mounted) {
+        final data = json.decode(response.body);
+        final displayName = data['display_name'] as String?;
+        if (displayName != null) {
+          setState(() {
+            _addressController.text = displayName;
+          });
+        }
+      }
+    } catch (e) {
+      print('Reverse geocoding error: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+        });
+      }
+    }
   }
 
   @override
@@ -839,7 +995,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 ),
               ),
 
-              // Champ d'adresse
+              // Champ d'adresse avec recherche
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
@@ -848,12 +1004,65 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                     labelText: l10n.address,
                     prefixIcon: const Icon(Icons.search),
                     hintText: l10n.searchAddress,
+                    suffixIcon: _isSearching
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: () => _searchAddress(_addressController.text),
+                          ),
                   ),
-                  onSubmitted: (value) {
-                    // TODO: Geocoder l'adresse
+                  onSubmitted: _searchAddress,
+                  onChanged: (value) {
+                    // Clear results when typing
+                    if (_searchResults.isNotEmpty) {
+                      setState(() {
+                        _searchResults = [];
+                      });
+                    }
                   },
                 ),
               ),
+
+              // Search results list
+              if (_searchResults.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(26),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final result = _searchResults[index];
+                      return ListTile(
+                        leading: const Icon(Icons.location_on),
+                        title: Text(
+                          result['display_name'],
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () => _selectSearchResult(result),
+                      );
+                    },
+                  ),
+                ),
 
               const SizedBox(height: 16),
 
@@ -867,8 +1076,9 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                     onTap: (tapPosition, point) {
                       setState(() {
                         _selectedPosition = point;
+                        _searchResults = []; // Clear search results
                       });
-                      // TODO: Reverse geocoder la position
+                      _reverseGeocode(point);
                     },
                   ),
                   children: [

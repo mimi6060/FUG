@@ -202,12 +202,6 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                         label: l10n.featured,
                         color: Colors.amber,
                       ),
-                    if (event.isFree)
-                      _Badge(
-                        icon: Icons.money_off,
-                        label: l10n.freeEvent,
-                        color: Colors.green,
-                      ),
                     if (event.isFull)
                       _Badge(
                         icon: Icons.block,
@@ -257,12 +251,6 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                       icon: Icons.access_time,
                       title: l10n.duration,
                       value: event.formattedDuration,
-                    ),
-                    const Divider(),
-                    _InfoRow(
-                      icon: Icons.euro,
-                      title: l10n.price,
-                      value: event.formattedPrice,
                     ),
                     const Divider(),
                     _InfoRow(
@@ -403,9 +391,13 @@ class _EventDetailContentState extends ConsumerState<_EventDetailContent> {
                 Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      child: Text(event.organizerName[0].toUpperCase()),
+                      child: Text(event.organizerName.isNotEmpty
+                          ? event.organizerName[0].toUpperCase()
+                          : '?'),
                     ),
-                    title: Text(event.organizerName),
+                    title: Text(event.organizerName.isNotEmpty
+                        ? event.organizerName
+                        : 'Utilisateur'),
                     subtitle: Text(l10n.profile),
                     trailing: OutlinedButton(
                       onPressed: () => context.push('/users/${event.organizerId}'),
@@ -798,27 +790,26 @@ class _InfoRow extends StatelessWidget {
         children: [
           Icon(icon, color: theme.colorScheme.primary),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              Text(
-                value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                Text(
+                  value,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          if (trailing != null) ...[
-            const Spacer(),
-            trailing!,
-          ],
+          if (trailing != null) trailing!,
         ],
       ),
     );
