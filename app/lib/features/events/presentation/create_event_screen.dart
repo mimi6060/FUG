@@ -150,8 +150,8 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   final _maxParticipantsController = TextEditingController();
   final _tagsController = TextEditingController();
 
-  DateTime _startDate = DateTime.now().add(const Duration(days: 1));
-  DateTime _endDate = DateTime.now().add(const Duration(days: 1, hours: 2));
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now().add(const Duration(hours: 2));
   String? _selectedLocationType;
   bool _hasMaxParticipants = false;
 
