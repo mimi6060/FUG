@@ -121,7 +121,7 @@ class EventRepository {
     required String eventId,
     String? title,
     String? description,
-    String? categoryId,
+    String? locationType,
     String? categoryName,
     String? imageUrl,
     List<String>? additionalImages,
@@ -144,7 +144,7 @@ class EventRepository {
 
       if (title != null) data['title'] = title;
       if (description != null) data['description'] = description;
-      if (categoryId != null) data['category'] = categoryId;
+      if (locationType != null) data['category'] = locationType;
       if (imageUrl != null) data['imageUrl'] = imageUrl;
       if (address != null) data['locationAddress'] = address;
       if (latitude != null) data['locationLat'] = latitude;
@@ -195,7 +195,7 @@ class EventRepository {
   Future<List<EventModel>> listEvents({
     int limit = 25,
     int offset = 0,
-    String? categoryId,
+    String? locationType,
     EventStatus? status,
     bool? isFeatured,
     String? orderBy,
@@ -207,8 +207,8 @@ class EventRepository {
         Query.offset(offset),
       ];
 
-      if (categoryId != null) {
-        queries.add(Query.equal('category', categoryId));
+      if (locationType != null) {
+        queries.add(Query.equal('category', locationType));
       }
 
       if (status != null) {
@@ -251,7 +251,7 @@ class EventRepository {
   /// Liste les événements à venir
   Future<List<EventModel>> getUpcomingEvents({
     int limit = 25,
-    String? categoryId,
+    String? locationType,
   }) async {
     try {
       final queries = <String>[
@@ -261,8 +261,8 @@ class EventRepository {
         Query.orderAsc('startDate'),
       ];
 
-      if (categoryId != null) {
-        queries.add(Query.equal('category', categoryId));
+      if (locationType != null) {
+        queries.add(Query.equal('category', locationType));
       }
 
       final result = await _databases.listDocuments(
@@ -369,7 +369,7 @@ class EventRepository {
     required double longitude,
     double radiusKm = 10.0,
     int limit = 50,
-    String? categoryId,
+    String? locationType,
     DateTime? afterDate,
   }) async {
     try {
@@ -390,8 +390,8 @@ class EventRepository {
         Query.limit(limit * 2), // Marge pour le filtrage par distance
       ];
 
-      if (categoryId != null) {
-        queries.add(Query.equal('category', categoryId));
+      if (locationType != null) {
+        queries.add(Query.equal('category', locationType));
       }
 
       if (afterDate != null) {
@@ -450,7 +450,7 @@ class EventRepository {
   Future<List<EventModel>> searchEvents({
     required String query,
     int limit = 25,
-    String? categoryId,
+    String? locationType,
   }) async {
     try {
       final queries = <String>[
@@ -459,8 +459,8 @@ class EventRepository {
         Query.limit(limit),
       ];
 
-      if (categoryId != null) {
-        queries.add(Query.equal('category', categoryId));
+      if (locationType != null) {
+        queries.add(Query.equal('category', locationType));
       }
 
       final result = await _databases.listDocuments(

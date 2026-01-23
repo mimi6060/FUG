@@ -13,13 +13,13 @@ class NearbyEventsParams {
   final double latitude;
   final double longitude;
   final double radiusKm;
-  final String? categoryId;
+  final String? locationType;
 
   const NearbyEventsParams({
     required this.latitude,
     required this.longitude,
     this.radiusKm = 10.0,
-    this.categoryId,
+    this.locationType,
   });
 
   @override
@@ -29,14 +29,14 @@ class NearbyEventsParams {
           latitude == other.latitude &&
           longitude == other.longitude &&
           radiusKm == other.radiusKm &&
-          categoryId == other.categoryId;
+          locationType == other.locationType;
 
   @override
   int get hashCode =>
       latitude.hashCode ^
       longitude.hashCode ^
       radiusKm.hashCode ^
-      categoryId.hashCode;
+      locationType.hashCode;
 }
 
 /// Provider pour les evenements a proximite
@@ -50,7 +50,7 @@ final nearbyEventsProvider =
     latitude: params.latitude,
     longitude: params.longitude,
     radiusKm: params.radiusKm,
-    categoryId: params.categoryId,
+    locationType: params.locationType,
   );
 });
 
@@ -77,9 +77,9 @@ final organizerEventsProvider =
 
 /// Provider pour les evenements filtres par categorie
 final categoryEventsProvider =
-    FutureProvider.family<List<EventModel>, String?>((ref, categoryId) async {
+    FutureProvider.family<List<EventModel>, String?>((ref, locationType) async {
   final repository = ref.watch(eventRepositoryProvider);
-  return repository.listEvents(categoryId: categoryId);
+  return repository.listEvents(locationType: locationType);
 });
 
 /// Provider pour la recherche d'evenements
@@ -141,8 +141,7 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
     required String description,
     required String organizerId,
     required String organizerName,
-    required String categoryId,
-    String? categoryName,
+    String? locationType,
     String? imageUrl,
     required String address,
     required double latitude,
@@ -162,8 +161,7 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
         description: description,
         organizerId: organizerId,
         organizerName: organizerName,
-        categoryId: categoryId,
-        categoryName: categoryName,
+        locationType: locationType,
         imageUrl: imageUrl,
         address: address,
         latitude: latitude,
