@@ -3,6 +3,7 @@
   "appTitle": "FUG - Vind Stedelijke Bijeenkomsten",
   "appName": "FUG",
   "appTagline": "Deel gezellige momenten",
+  "optional": "optioneel",
 
   "loginTitle": "Inloggen",
   "email": "E-mail",

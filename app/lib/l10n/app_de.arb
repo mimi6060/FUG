@@ -3,6 +3,7 @@
   "appTitle": "FUG - Fous-toi Une Guinze",
   "appName": "FUG",
   "appTagline": "Teilen Sie gesellige Momente",
+  "optional": "optional",
 
   "loginTitle": "Anmeldung",
   "email": "E-Mail",

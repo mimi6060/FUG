@@ -92,7 +92,12 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
     int? maxParticipants,
     List<String>? tags,
   }) async {
+    print('=== createEvent notifier called ===');
+    print('selectedLocation: ${state.selectedLocation}');
+    print('selectedAddress: ${state.selectedAddress}');
+
     if (state.selectedLocation == null) {
+      print('ERROR: Location not selected');
       state = state.copyWith(error: locationError);
       return null;
     }
@@ -101,6 +106,7 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
 
     try {
       final user = await _ref.read(currentUserProvider.future);
+      print('User: ${user?.$id}');
       if (user == null) {
         state = state.copyWith(isLoading: false, error: notConnectedError);
         return null;
@@ -125,9 +131,11 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
         tags: tags,
       );
 
+      print('Event created: ${event.id}');
       state = state.copyWith(isLoading: false);
       return event.id;
     } catch (e) {
+      print('ERROR creating event: $e');
       state = state.copyWith(isLoading: false, error: e.toString());
       return null;
     }
@@ -154,6 +162,32 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   DateTime _endDate = DateTime.now().add(const Duration(hours: 2));
   String? _selectedLocationType;
   bool _hasMaxParticipants = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pré-remplir avec la position GPS actuelle
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initCurrentLocation();
+    });
+  }
+
+  Future<void> _initCurrentLocation() async {
+    try {
+      final position = await ref.read(currentPositionProvider.future);
+      if (position != null && mounted) {
+        final location = LatLng(position.latitude, position.longitude);
+        final address = 'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}';
+
+        ref.read(createEventStateProvider.notifier).setLocation(location, address);
+        setState(() {
+          _addressController.text = address;
+        });
+      }
+    } catch (e) {
+      print('Error getting current position: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -278,7 +312,14 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   Future<void> _createEvent() async {
     final l10n = AppLocalizations.of(context)!;
 
-    if (!_formKey.currentState!.validate()) return;
+    print('=== _createEvent called ===');
+    print('Form valid: ${_formKey.currentState?.validate()}');
+
+    if (!_formKey.currentState!.validate()) {
+      print('Form validation failed');
+      return;
+    }
+    print('Form validation passed');
 
     final tags = _tagsController.text
         .split(',')
@@ -453,25 +494,17 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Description
+                  // Description (optionnelle)
                   TextFormField(
                     controller: _descriptionController,
                     decoration: InputDecoration(
-                      labelText: l10n.description,
+                      labelText: '${l10n.description} (${l10n.optional})',
                       prefixIcon: const Icon(Icons.description),
                       alignLabelWithHint: true,
                     ),
                     maxLines: 4,
                     maxLength: 1000,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return l10n.pleaseEnterDescription;
-                      }
-                      if (value.trim().length < 20) {
-                        return l10n.descriptionTooShort;
-                      }
-                      return null;
-                    },
+                    // Pas de validator - champ optionnel
                   ),
 
                   const SizedBox(height: 16),

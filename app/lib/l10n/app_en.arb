@@ -3,6 +3,7 @@
   "appTitle": "FUG - Find Urban Gatherings",
   "appName": "FUG",
   "appTagline": "Share convivial moments",
+  "optional": "optional",
 
   "loginTitle": "Sign in",
   "email": "Email",
