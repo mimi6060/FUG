@@ -304,6 +304,17 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
         SnackBar(content: Text(l10n.eventCreatedSuccess)),
       );
       context.go('/events/$eventId');
+    } else if (mounted) {
+      // Show error message
+      final state = ref.read(createEventStateProvider);
+      if (state.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.error!),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 
