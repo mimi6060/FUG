@@ -55,26 +55,18 @@ cd FUG
 
 ### 3. Setup manuel (si necessaire)
 
-#### Infrastructure (Backend)
+#### Backend (fug-backend)
 
 ```bash
-# Aller dans le dossier infrastructure
-cd infrastructure
+# Cloner fug-backend si pas deja fait
+git clone git@github.com:knabo6/fug-backend.git /home/knabo/dev/fug-backend
 
-# Copier le fichier d'environnement
-cp .env.example .env
-# Editer .env avec vos valeurs
+# Demarrer le backend
+cd /home/knabo/dev/fug-backend
+make dev
 
-# Lancer les services Docker
-docker compose up -d
-
-# Attendre qu'Appwrite soit pret
-./scripts/wait-for-appwrite.sh
-
-# Executer les migrations
-cd migrations
-npm install
-npm run migrate:dev
+# Premier demarrage : lancer le bootstrap
+./setup/bootstrap.sh --env development
 ```
 
 #### Application Flutter
@@ -117,10 +109,13 @@ FUG/
 │   ├── join-event/
 │   ├── create-event/
 │   └── gamification/
-├── infrastructure/         # Configuration Docker et scripts
-│   ├── migrations/        # Systeme de migrations
-│   └── scripts/           # Scripts de setup et maintenance
 └── docs/                   # Documentation additionnelle
+
+# Backend (repository separe: fug-backend)
+fug-backend/
+├── docker-compose.yml      # Stack Appwrite
+├── migrations/             # Migrations Appwrite
+└── setup/                  # Scripts de bootstrap
 ```
 
 ## Processus de Pull Request

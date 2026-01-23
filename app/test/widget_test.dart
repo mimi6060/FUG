@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:fug_app/features/auth/presentation/login_screen.dart';
 import 'package:fug_app/features/auth/data/auth_repository.dart';
+import 'package:fug_app/core/providers/auth_provider.dart';
 
 import 'helpers/test_helpers.dart';
 
@@ -25,14 +28,28 @@ void main() {
 
     /// Helper pour construire le widget avec les providers necessaires
     Widget buildLoginScreen({AuthRepository? authRepository}) {
+      // Default mock setup for getCurrentUser
+      when(() => mockAuthRepository.getCurrentUser())
+          .thenAnswer((_) async => null);
+      when(() => mockAuthRepository.ensureUserProfileExists())
+          .thenAnswer((_) async {});
+
       return ProviderScope(
         overrides: [
           authRepositoryProvider.overrideWithValue(
             authRepository ?? mockAuthRepository,
           ),
         ],
-        child: const MaterialApp(
-          home: LoginScreen(),
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('fr'),
+          home: const LoginScreen(),
         ),
       );
     }
@@ -44,7 +61,7 @@ void main() {
 
         // Assert
         expect(find.text('FUG'), findsOneWidget);
-        expect(find.text('Find Urban Gatherings'), findsOneWidget);
+        expect(find.text('Partagez des moments conviviaux'), findsOneWidget);
         expect(find.byIcon(Icons.event), findsOneWidget);
       });
 
@@ -106,7 +123,7 @@ void main() {
 
         // Assert
         expect(find.widgetWithText(TextFormField, 'Nom complet'), findsOneWidget);
-        expect(find.widgetWithText(FilledButton, 'Créer un compte'), findsOneWidget);
+        expect(find.widgetWithText(FilledButton, 'Créer mon compte'), findsOneWidget);
       });
 
       testWidgets('devrait revenir en mode connexion', (tester) async {
@@ -196,7 +213,7 @@ void main() {
           find.widgetWithText(TextFormField, 'Mot de passe'),
           'short',
         );
-        await tester.tap(find.widgetWithText(FilledButton, 'Créer un compte'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Créer mon compte'));
         await tester.pumpAndSettle();
 
         // Assert
@@ -223,7 +240,7 @@ void main() {
           find.widgetWithText(TextFormField, 'Mot de passe'),
           'password123',
         );
-        await tester.tap(find.widgetWithText(FilledButton, 'Créer un compte'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Créer mon compte'));
         await tester.pumpAndSettle();
 
         // Assert
@@ -264,11 +281,14 @@ void main() {
         // Arrange
         await tester.pumpWidget(buildLoginScreen());
 
-        // Assert
-        final passwordField = tester.widget<TextFormField>(
-          find.widgetWithText(TextFormField, 'Mot de passe'),
+        // Assert - Check the EditableText widget inside TextFormField
+        final editableText = tester.widget<EditableText>(
+          find.descendant(
+            of: find.widgetWithText(TextFormField, 'Mot de passe'),
+            matching: find.byType(EditableText),
+          ),
         );
-        expect(passwordField.obscureText, isTrue);
+        expect(editableText.obscureText, isTrue);
       });
 
       testWidgets('devrait afficher/masquer le mot de passe au clic', (tester) async {

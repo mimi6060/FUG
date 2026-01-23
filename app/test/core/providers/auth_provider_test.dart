@@ -23,6 +23,10 @@ void main() {
   setUp(() {
     mockAuthRepository = MockAuthRepository();
 
+    // Default stub for ensureUserProfileExists (called in build() when user exists)
+    when(() => mockAuthRepository.ensureUserProfileExists())
+        .thenAnswer((_) async {});
+
     // Creer un container avec le mock injecte
     container = ProviderContainer(
       overrides: [
@@ -327,6 +331,9 @@ void main() {
         when(() => mockAuthRepository.getCurrentUser())
             .thenAnswer((_) async => fakeUser);
 
+        // Wait for authStateProvider to complete first
+        await container.read(authStateProvider.future);
+
         // Act
         final result = await container.read(currentUserProvider.future);
 
@@ -339,6 +346,9 @@ void main() {
         // Arrange
         when(() => mockAuthRepository.getCurrentUser())
             .thenAnswer((_) async => null);
+
+        // Wait for authStateProvider to complete first
+        await container.read(authStateProvider.future);
 
         // Act
         final result = await container.read(currentUserProvider.future);

@@ -1,0 +1,68 @@
+# =============================================================================
+# FUG - Docker Compose (App Only)
+# =============================================================================
+# L'infrastructure Appwrite est gérée dans fug-backend
+# Ce fichier gère uniquement l'application Flutter
+#
+# Prérequis: fug-backend doit être démarré
+#   cd /home/knabo/dev/fug-backend && make dev
+# =============================================================================
+
+x-flutter-env: &flutter-env
+  APPWRITE_ENDPOINT: ${APPWRITE_ENDPOINT:-http://fug-traefik/v1}
+  APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID:-fug}
+
+services:
+  # ===========================================================================
+  # FUG APP DEV - Flutter Web Development (Hot Reload)
+  # ===========================================================================
+  fug-app-dev:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.dev
+    image: fug-app:dev
+    container_name: fug-app-dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *flutter-env
+    volumes:
+      - ./app:/app
+      - flutter-pub-cache:/root/.pub-cache
+    networks:
+      - fug-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ===========================================================================
+  # FUG APP TEST - Flutter Test Runner
+  # ===========================================================================
+  fug-app-test:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.dev
+    image: fug-app:dev
+    container_name: fug-app-test
+    environment:
+      <<: *flutter-env
+    volumes:
+      - ./app:/app
+      - flutter-pub-cache:/root/.pub-cache
+    networks:
+      - fug-network
+    command: ["flutter", "test"]
+    profiles:
+      - test
+
+volumes:
+  flutter-pub-cache:
+
+networks:
+  fug-network:
+    external: true
+    name: fug-network

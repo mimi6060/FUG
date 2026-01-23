@@ -29,10 +29,10 @@ class MockRealtime extends Mock implements Realtime {}
 class MockStorage extends Mock implements Storage {}
 
 /// Mock d'un Document Appwrite
-class MockDocument extends Mock implements Document {}
+class MockDocument extends Mock implements models.Document {}
 
 /// Mock d'une DocumentList Appwrite
-class MockDocumentList extends Mock implements DocumentList {}
+class MockDocumentList extends Mock implements models.DocumentList {}
 
 // ============================================
 // Fake Classes pour Mocktail registerFallbackValue
@@ -50,10 +50,10 @@ class FakeUser extends Fake implements models.User {
   String get name => 'Fake User';
 
   @override
-  DateTime get $createdAt => DateTime(2024, 1, 1);
+  String get $createdAt => '2024-01-01T00:00:00.000Z';
 
   @override
-  DateTime get $updatedAt => DateTime(2024, 1, 1);
+  String get $updatedAt => '2024-01-01T00:00:00.000Z';
 
   @override
   bool get emailVerification => false;
@@ -65,7 +65,7 @@ class FakeUser extends Fake implements models.User {
   String get phone => '';
 
   @override
-  Map<String, dynamic> get prefs => {};
+  models.Preferences get prefs => models.Preferences(data: {});
 
   @override
   bool get status => true;
@@ -77,10 +77,10 @@ class FakeUser extends Fake implements models.User {
   String get hash => '';
 
   @override
-  String get hashOptions => '';
+  Map<dynamic, dynamic>? get hashOptions => null;
 
   @override
-  DateTime get registration => DateTime(2024, 1, 1);
+  String get registration => '2024-01-01T00:00:00.000Z';
 
   @override
   bool get mfa => false;
@@ -89,7 +89,7 @@ class FakeUser extends Fake implements models.User {
   List<models.Target> get targets => [];
 
   @override
-  DateTime get accessedAt => DateTime(2024, 1, 1);
+  String get accessedAt => '2024-01-01T00:00:00.000Z';
 
   @override
   Map<String, dynamic> toMap() => {
@@ -108,10 +108,10 @@ class FakeSession extends Fake implements models.Session {
   String get userId => 'fake-user-id';
 
   @override
-  DateTime get $createdAt => DateTime(2024, 1, 1);
+  String get $createdAt => '2024-01-01T00:00:00.000Z';
 
   @override
-  DateTime get expire => DateTime(2024, 12, 31);
+  String get expire => '2024-12-31T00:00:00.000Z';
 
   @override
   String get provider => 'email';
@@ -123,7 +123,7 @@ class FakeSession extends Fake implements models.Session {
   String get providerAccessToken => '';
 
   @override
-  DateTime get providerAccessTokenExpiry => DateTime(2024, 12, 31);
+  String get providerAccessTokenExpiry => '2024-12-31T00:00:00.000Z';
 
   @override
   String get providerRefreshToken => '';
@@ -183,7 +183,7 @@ class FakeSession extends Fake implements models.Session {
   String get secret => '';
 
   @override
-  bool get mfaUpdatedAt => false;
+  String get mfaUpdatedAt => '';
 
   @override
   Map<String, dynamic> toMap() => {
@@ -483,8 +483,8 @@ void setUpTestHelpers() {
 }
 
 /// Cree un mock Document avec les donnees specifiees
-Document createMockDocument(Map<String, dynamic> data) {
-  return Document(
+models.Document createMockDocument(Map<String, dynamic> data) {
+  return models.Document(
     $id: data['\$id'] ?? 'mock-doc-id',
     $collectionId: 'mock-collection',
     $databaseId: 'mock-database',
@@ -496,8 +496,8 @@ Document createMockDocument(Map<String, dynamic> data) {
 }
 
 /// Cree un mock DocumentList avec les documents specifies
-DocumentList createMockDocumentList(List<Map<String, dynamic>> documents) {
-  return DocumentList(
+models.DocumentList createMockDocumentList(List<Map<String, dynamic>> documents) {
+  return models.DocumentList(
     total: documents.length,
     documents: documents.map((data) => createMockDocument(data)).toList(),
   );

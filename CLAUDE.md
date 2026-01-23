@@ -9,11 +9,76 @@ Application mobile de réseau social géolocalisé pour trouver des compagnons d
 ## Stack Technique
 
 - **Frontend**: Flutter 3.24+ (Dart)
-- **Backend**: Appwrite Self-Hosted
+- **Backend**: Appwrite Self-Hosted (via fug-backend)
 - **State Management**: Riverpod
 - **Navigation**: GoRouter
-- **Infrastructure**: Docker Compose
 - **CI/CD**: GitHub Actions
+
+---
+
+## Backend Dependency (fug-backend)
+
+FUG utilise le repository partagé **fug-backend** pour l'infrastructure Appwrite.
+
+### Prérequis
+
+Avant de développer sur FUG, le backend doit être démarré:
+
+```bash
+# 1. Cloner fug-backend (si pas déjà fait)
+git clone git@github.com:knabo6/fug-backend.git /home/knabo/dev/fug-backend
+
+# 2. Démarrer le backend
+cd /home/knabo/dev/fug-backend
+make dev
+
+# 3. Vérifier que c'est prêt
+curl http://localhost/v1/health/version
+# Doit retourner {"version":"1.5.7"}
+```
+
+### Premier démarrage (bootstrap)
+
+Si c'est une installation fraîche d'Appwrite:
+
+```bash
+cd /home/knabo/dev/fug-backend
+./setup/bootstrap.sh --env development
+```
+
+Le bootstrap crée automatiquement le projet, la base de données, et applique toutes les migrations.
+
+### Version minimale requise
+
+- **fug-backend**: >= v1.0.0
+
+### Workflow de développement
+
+```bash
+# Terminal 1: Démarrer le backend (faire en premier)
+cd /home/knabo/dev/fug-backend
+make dev
+
+# Terminal 2: Démarrer FUG Flutter
+cd /home/knabo/dev/FUG/app
+flutter run -d chrome
+```
+
+### Migrations
+
+Les migrations sont gérées dans fug-backend. Pour modifier le schéma:
+
+```bash
+cd /home/knabo/dev/fug-backend/migrations
+node migrate.js create "ma-migration"
+node migrate.js up --env=development
+```
+
+### Accès console Appwrite
+
+- **URL**: http://localhost
+- **Email**: fous.toi.une.guinze@gmail.com
+- **Password**: (généré par bootstrap, voir setup/.admin-credentials)
 
 ---
 
@@ -24,9 +89,15 @@ FUG/
 ├── _bmad/                  # Configuration BMAD-METHOD
 ├── app/                    # Application Flutter
 ├── functions/              # Appwrite Functions (Node.js)
-├── infrastructure/         # Docker + Migrations
 ├── docs/                   # Documentation pour agents BMAD
 └── .github/workflows/      # CI/CD
+
+# Backend (repository séparé)
+fug-backend/
+├── docker-compose.yml      # Stack Appwrite
+├── migrations/             # Migrations Appwrite
+├── setup/                  # Bootstrap scripts
+└── traefik/                # Reverse proxy
 ```
 
 ---
@@ -49,7 +120,7 @@ Ce projet utilise le framework **BMAD-METHOD v6** pour le développement assist�
 1. **Analyser** - Lire `docs/` et `_bmad/project-brief.md`
 2. **Planifier** - Créer une spec dans `_bmad-output/`
 3. **Synchroniser Plane** - Créer/mettre à jour les stories (voir section ci-dessous)
-4. **Migration** - Si besoin, créer dans `infrastructure/migrations/migrations/`
+4. **Migration** - Si besoin, créer dans `fug-backend/migrations/` (voir section Backend Dependency)
 5. **Implémenter** - Code Flutter dans `app/lib/features/`
 6. **Tester** - Tests dans `app/test/`
 7. **Documenter** - Mettre à jour `docs/`
@@ -359,95 +430,31 @@ L'orchestrateur (agent principal) peut alors:
 
 ## Regles Infrastructure Appwrite (OBLIGATOIRE)
 
-**REGLE CRITIQUE:** Aucune modification manuelle dans la console Appwrite. TOUT doit passer par migration.
+**REGLE CRITIQUE:** Aucune modification manuelle dans la console Appwrite. TOUT doit passer par migration dans **fug-backend**.
 
 ### Principe
 
-L'infrastructure Appwrite est geree exclusivement via le systeme de migrations. Cela garantit:
+L'infrastructure Appwrite est geree exclusivement via le systeme de migrations dans le repository `fug-backend`. Cela garantit:
 - **Reproductibilite** sur nouveaux serveurs
 - **Historique** des changements via git
 - **Pas de clonage** de DB entre environnements
-- **Facilite les upgrades** staging -> production
-
-### Ce qui DOIT passer par migration
-
-| Element | Exemples |
-|---------|----------|
-| Collections | Creation, modification, suppression |
-| Attributs | Ajout de champs, modification de types |
-| Index | Index simples, composites, fulltext |
-| OAuth Providers | Google, Apple, configuration |
-| Storage Buckets | Creation, permissions |
-| Functions | Configuration (le code reste dans `functions/`) |
+- **Partage** avec d'autres apps (Ketal)
 
 ### Comment creer une migration
 
 ```bash
-cd infrastructure/migrations
+cd /home/knabo/dev/fug-backend/migrations
 node migrate.js create mon-nom-de-migration
-```
-
-Cela cree un fichier `migrations/XXX-mon-nom-de-migration.js` avec la structure:
-
-```javascript
-export const up = async (db, appwrite) => {
-  // Code pour appliquer la migration
-};
-
-export const down = async (db, appwrite) => {
-  // Code pour annuler la migration (rollback)
-};
-```
-
-### Workflow Migration
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  1. DEVELOPPEMENT LOCAL                                 │
-│     cd infrastructure/migrations                        │
-│     node migrate.js create ma-migration                 │
-│     node migrate.js up --env=development                │
-│     # Tester que tout fonctionne                        │
-├─────────────────────────────────────────────────────────┤
-│  2. COMMIT                                              │
-│     git add migrations/                                 │
-│     git commit -m "feat(migration): add ma-migration"   │
-├─────────────────────────────────────────────────────────┤
-│  3. STAGING                                             │
-│     node migrate.js up --env=staging                    │
-│     # Valider en conditions reelles                     │
-├─────────────────────────────────────────────────────────┤
-│  4. PRODUCTION                                          │
-│     node migrate.js up --env=production                 │
-│     # Migration appliquee de facon identique            │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Commandes utiles
-
-```bash
-# Voir le statut des migrations
-node migrate.js status --env=development
-
-# Appliquer toutes les migrations en attente
 node migrate.js up --env=development
-
-# Annuler la derniere migration
-node migrate.js down --env=development
-
-# Creer une nouvelle migration
-node migrate.js create nom-de-la-migration
 ```
 
 ### Ce qui est INTERDIT
 
 - Creer une collection via la console Appwrite
 - Ajouter un attribut manuellement
-- Configurer OAuth via l'interface web
-- Creer un bucket storage via la console
 - Modifier les permissions directement dans Appwrite
 
-**Toute modification manuelle sera ecrasee lors de la prochaine migration ou perdue lors d'un nouveau deploiement.**
+**Les migrations sont dans fug-backend, pas dans FUG.**
 
 ---
 
@@ -488,25 +495,22 @@ export default async ({ req, res, log, error }) => {
 
 ## Commandes Utiles
 
-### Infrastructure Docker
+### Backend (fug-backend)
 
 ```bash
-cd infrastructure
+cd /home/knabo/dev/fug-backend
 
-# Démarrer tout
-make all
-
-# Appwrite seul
-make up
-
-# Flutter dev (hot reload)
-make app-dev
+# Démarrer Appwrite
+make dev
 
 # Voir les logs
 make logs
 
 # Migrations
-cd migrations && node migrate.js up --env=development
+make migrate ENV=development
+
+# Status des migrations
+make migrate-status
 ```
 
 ### Flutter

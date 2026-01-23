@@ -12,10 +12,15 @@ Ce document presente la structure complete du projet FUG et le role de chaque fi
 FUG/
 ├── app/                      # Application Flutter mobile
 ├── functions/                # Fonctions Appwrite (serverless)
-├── infrastructure/           # Configuration Docker et scripts
 ├── .github/                  # Configuration GitHub (CI/CD)
 ├── .bmad/                    # Configuration BMAD method
 └── docs/                     # Documentation supplementaire
+
+# Backend (repository separe)
+fug-backend/                  # Infrastructure Appwrite partagee
+├── docker-compose.yml        # Stack Appwrite
+├── migrations/               # Migrations base de donnees
+└── setup/                    # Scripts de bootstrap
 ```
 
 ---
@@ -137,70 +142,20 @@ functions/
 
 ---
 
-## Infrastructure (`infrastructure/`)
+## Backend (fug-backend)
 
-Configuration Docker, scripts de deploiement et migrations.
+L'infrastructure Appwrite est geree dans le repository separe **fug-backend**.
 
-### Structure
+```bash
+# Demarrer le backend
+cd /home/knabo/dev/fug-backend
+make dev
 
-```
-infrastructure/
-├── docker-compose.yml           # Services: Appwrite, MariaDB, Redis, etc.
-├── docker-compose.override.yml  # Surcharges pour le developpement
-├── .env.example                 # Template des variables d'environnement
-├── Makefile                     # Commandes Make pour operations courantes
-├── telegraf.conf                # Configuration monitoring Telegraf
-├── README.md                    # Documentation infrastructure
-├── .gitignore                   # Ignorer les donnees persistantes
-├── docs/                        # Documentation supplementaire
-├── migrations/                  # Systeme de migrations DB
-│   ├── migrate.js               # CLI de migration
-│   ├── lib/
-│   │   ├── appwrite-client.js   # Client Appwrite pour migrations
-│   │   ├── logger.js            # Logger colore
-│   │   └── migrator.js          # Moteur de migration
-│   ├── migrations/
-│   │   ├── 001_initial_schema.js        # Schema initial (database, collections)
-│   │   ├── 002_users_base_attributes.js # Attributs utilisateurs de base
-│   │   ├── 003_users_gamification.js    # Attributs gamification
-│   │   ├── 004_users_location.js        # Attributs geolocalisation
-│   │   ├── 005_events_base.js           # Attributs evenements de base
-│   │   ├── 006_events_location.js       # Attributs localisation evenements
-│   │   ├── 007_followers_schema.js      # Collection followers
-│   │   ├── 008_participants_schema.js   # Collection participants
-│   │   ├── 009_achievements_schema.js   # Collection achievements/badges
-│   │   ├── 010_notifications_schema.js  # Collection notifications
-│   │   ├── 011_indexes.js               # Index de performance
-│   │   └── 012_seed_achievements.js     # Donnees initiales achievements
-│   ├── environments/
-│   │   ├── .env.development     # Config environnement dev
-│   │   ├── .env.test            # Config environnement test
-│   │   └── .env.production      # Config environnement prod
-│   ├── package.json             # Dependances migrations
-│   └── README.md                # Documentation migrations
-└── scripts/
-    ├── setup.js                 # Setup initial Appwrite
-    ├── setup-collections.js     # Creation des collections
-    ├── setup-indexes.js         # Creation des index
-    ├── setup-buckets.js         # Creation des buckets storage
-    ├── seed-data.js             # Donnees de test
-    ├── backup.sh                # Script de backup
-    ├── wait-for-appwrite.sh     # Attente demarrage Appwrite
-    ├── package.json             # Dependances scripts
-    └── .env.example             # Template variables scripts
+# Premier demarrage
+./setup/bootstrap.sh --env development
 ```
 
-### Services Docker
-
-| Service | Port | Role |
-|---------|------|------|
-| Appwrite | 8080 | Backend-as-a-Service |
-| MariaDB | 3306 | Base de donnees Appwrite |
-| Redis | 6379 | Cache et queues |
-| InfluxDB | 8086 | Metriques et monitoring |
-| Grafana | 3001 | Dashboards monitoring |
-| Telegraf | - | Collecteur de metriques |
-| Traefik | 80/443 | Reverse proxy et SSL |
+Voir: https://github.com/knabo6/fug-backend
 
 ---
 

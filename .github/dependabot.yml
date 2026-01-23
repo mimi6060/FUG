@@ -172,20 +172,4 @@ updates:
         patterns:
           - "*"
 
-  # Docker dependencies (if Dockerfiles exist)
-  - package-ecosystem: "docker"
-    directory: "/infrastructure"
-    schedule:
-      interval: "weekly"
-      day: "thursday"
-      time: "09:00"
-      timezone: "Europe/Paris"
-    open-pull-requests-limit: 3
-    reviewers:
-      - "devops-team"
-    labels:
-      - "dependencies"
-      - "docker"
-      - "automated"
-    commit-message:
-      prefix: "deps(docker)"
+  # Note: Docker infrastructure is now managed in fug-backend repository

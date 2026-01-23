@@ -114,8 +114,6 @@ FUG/
 │   ├── create-event/           # Creation d'evenements
 │   └── gamification/           # Systeme de points/badges
 │
-├── infrastructure/             # Configuration infrastructure
-│
 ├── _bmad/                      # Configuration BMAD-METHOD (v6)
 │   ├── bmm/config.yaml         # Configuration module BMM
 │   ├── project-brief.md        # Brief projet pour les agents
