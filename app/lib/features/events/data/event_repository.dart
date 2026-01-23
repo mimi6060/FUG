@@ -41,8 +41,7 @@ class EventRepository {
     required String description,
     required String organizerId,
     required String organizerName,
-    required String categoryId,
-    String? categoryName,
+    String? locationType,
     String? imageUrl,
     List<String>? additionalImages,
     required String address,
@@ -63,7 +62,7 @@ class EventRepository {
         'title': title,
         'description': description,
         'status': EventStatus.published.value,
-        'category': categoryId, // Using categoryId as category enum value
+        if (locationType != null) 'category': locationType, // Location type (optional)
         'maxParticipants': maxParticipants ?? 0,
         'participantCount': 0,
         'startDate': startDate.toIso8601String(),

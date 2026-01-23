@@ -84,7 +84,7 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
   Future<String?> createEvent({
     required String title,
     required String description,
-    required String categoryId,
+    String? locationType,
     required DateTime startDate,
     required DateTime endDate,
     required String locationError,
@@ -116,7 +116,7 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
         description: description,
         organizerId: user.$id,
         organizerName: user.name,
-        categoryId: categoryId,
+        locationType: locationType,
         address: state.selectedAddress!,
         latitude: state.selectedLocation!.latitude,
         longitude: state.selectedLocation!.longitude,
@@ -155,7 +155,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
   DateTime _startDate = DateTime.now().add(const Duration(days: 1));
   DateTime _endDate = DateTime.now().add(const Duration(days: 1, hours: 2));
-  String _selectedCategory = 'sport';
+  String? _selectedLocationType;
   bool _isFree = true;
   bool _hasMaxParticipants = false;
 
@@ -170,17 +170,14 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     super.dispose();
   }
 
-  List<Map<String, String>> _getCategories(AppLocalizations l10n) {
+  List<Map<String, String>> _getLocationTypes(AppLocalizations l10n) {
     return [
-      {'id': 'sport', 'name': l10n.categorySport},
-      {'id': 'music', 'name': l10n.categoryMusic},
-      {'id': 'art', 'name': l10n.categoryArt},
-      {'id': 'tech', 'name': l10n.categoryTech},
-      {'id': 'food', 'name': l10n.categoryFood},
-      {'id': 'gaming', 'name': l10n.categoryGaming},
-      {'id': 'outdoor', 'name': l10n.categoryOutdoor},
-      {'id': 'social', 'name': l10n.categorySocial},
-      {'id': 'other', 'name': l10n.categoryOther},
+      {'id': 'bar', 'name': l10n.locationTypeBar},
+      {'id': 'cafe', 'name': l10n.locationTypeCafe},
+      {'id': 'restaurant', 'name': l10n.locationTypeRestaurant},
+      {'id': 'park', 'name': l10n.locationTypePark},
+      {'id': 'home', 'name': l10n.locationTypeHome},
+      {'id': 'other', 'name': l10n.locationTypeOther},
     ];
   }
 
@@ -297,7 +294,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     final eventId = await ref.read(createEventStateProvider.notifier).createEvent(
           title: _titleController.text.trim(),
           description: _descriptionController.text.trim(),
-          categoryId: _selectedCategory,
+          locationType: _selectedLocationType,
           startDate: _startDate,
           endDate: _endDate,
           maxParticipants:
@@ -322,7 +319,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('EEE d MMM yyyy a HH:mm', 'fr_FR');
-    final categories = _getCategories(l10n);
+    final locationTypes = _getLocationTypes(l10n);
 
     return Scaffold(
       appBar: AppBar(
@@ -334,6 +331,7 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
           child: Form(
             key: _formKey,
             child: Stepper(
+          type: StepperType.vertical,
           currentStep: state.currentStep,
           onStepContinue: () {
             if (state.currentStep < 3) {
@@ -351,38 +349,34 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
             ref.read(createEventStateProvider.notifier).setStep(step);
           },
           controlsBuilder: (context, details) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Wrap(
-                    spacing: 12,
-                    children: [
-                      if (state.currentStep < 3)
-                        FilledButton(
-                          onPressed: details.onStepContinue,
-                          child: Text(l10n.continueBtn),
-                        )
-                      else
-                        FilledButton(
-                          onPressed: state.isLoading ? null : details.onStepContinue,
-                          child: state.isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : Text(l10n.createEvent),
-                        ),
-                      if (state.currentStep > 0)
-                        TextButton(
-                          onPressed: details.onStepCancel,
-                          child: Text(l10n.back),
-                        ),
-                    ],
-                  ),
-                );
-              },
+            return Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Wrap(
+                spacing: 12,
+                children: [
+                  if (state.currentStep < 3)
+                    FilledButton(
+                      onPressed: details.onStepContinue,
+                      child: Text(l10n.continueBtn),
+                    )
+                  else
+                    FilledButton(
+                      onPressed: state.isLoading ? null : details.onStepContinue,
+                      child: state.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.createEvent),
+                    ),
+                  if (state.currentStep > 0)
+                    TextButton(
+                      onPressed: details.onStepCancel,
+                      child: Text(l10n.back),
+                    ),
+                ],
+              ),
             );
           },
           steps: [
@@ -477,25 +471,23 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Categorie
+                  // Type de lieu (optionnel)
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    value: _selectedLocationType,
                     decoration: InputDecoration(
-                      labelText: l10n.category,
-                      prefixIcon: const Icon(Icons.category),
+                      labelText: l10n.locationTypeOptional,
+                      prefixIcon: const Icon(Icons.place),
                     ),
-                    items: categories.map((cat) {
+                    items: locationTypes.map((type) {
                       return DropdownMenuItem(
-                        value: cat['id'],
-                        child: Text(cat['name']!),
+                        value: type['id'],
+                        child: Text(type['name']!),
                       );
                     }).toList(),
                     onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      }
+                      setState(() {
+                        _selectedLocationType = value;
+                      });
                     },
                   ),
                 ],
