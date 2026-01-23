@@ -84,18 +84,31 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
       }
       if (position != null && mounted) {
         final newPosition = LatLng(position.latitude, position.longitude);
+        // Calculate appropriate zoom based on accuracy
+        // Higher accuracy (smaller value) = more zoom
+        final accuracy = position.accuracy;
+        double zoom;
+        if (accuracy > 500) {
+          zoom = 14;
+        } else if (accuracy > 200) {
+          zoom = 15;
+        } else if (accuracy > 50) {
+          zoom = 16;
+        } else {
+          zoom = 17;
+        }
         if (kDebugMode) {
           print('Moving map to: $newPosition');
-          print('Position accuracy: ${position.accuracy} meters');
+          print('Position accuracy: ${position.accuracy} meters, zoom: $zoom');
         }
         setState(() {
           _userGpsPosition = newPosition;
           _mapCenter = newPosition;
-          _positionAccuracy = position.accuracy;
+          _positionAccuracy = accuracy;
           _locationInitialized = true;
         });
-        // Move the map to the user's position
-        _mapController.move(newPosition, 13);
+        // Move the map to the user's position with calculated zoom
+        _mapController.move(newPosition, zoom);
       } else if (mounted) {
         if (kDebugMode) {
           print('Position is null - using default position');
@@ -283,15 +296,27 @@ class _EventsMapScreenState extends ConsumerState<EventsMapScreen> {
 
       if (position != null && mounted) {
         final newPosition = LatLng(position.latitude, position.longitude);
+        final accuracy = position.accuracy;
+        // Calculate appropriate zoom based on accuracy
+        double zoom;
+        if (accuracy > 500) {
+          zoom = 14;
+        } else if (accuracy > 200) {
+          zoom = 15;
+        } else if (accuracy > 50) {
+          zoom = 16;
+        } else {
+          zoom = 17;
+        }
         if (kDebugMode) {
           print('GPS Position: ${position.latitude}, ${position.longitude}');
-          print('Accuracy: ${position.accuracy} meters');
+          print('Accuracy: ${accuracy} meters, zoom: $zoom');
         }
-        _mapController.move(newPosition, 14);
+        _mapController.move(newPosition, zoom);
         setState(() {
           _userGpsPosition = newPosition;
           _mapCenter = newPosition;
-          _positionAccuracy = position.accuracy;
+          _positionAccuracy = accuracy;
           _isCentering = false;
         });
         await _loadNearbyEvents();

@@ -328,9 +328,12 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
       appBar: AppBar(
         title: Text(l10n.createFug),
       ),
-      body: Form(
-        key: _formKey,
-        child: Stepper(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Form(
+            key: _formKey,
+            child: Stepper(
           currentStep: state.currentStep,
           onStepContinue: () {
             if (state.currentStep < 3) {
@@ -741,6 +744,8 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
               ),
             ),
           ],
+        ),
+      ),
         ),
       ),
     );
