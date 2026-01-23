@@ -90,7 +90,6 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
     required String locationError,
     required String notConnectedError,
     int? maxParticipants,
-    int price = 0,
     List<String>? tags,
   }) async {
     if (state.selectedLocation == null) {
@@ -123,7 +122,6 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
         startDate: startDate,
         endDate: endDate,
         maxParticipants: maxParticipants,
-        price: price,
         tags: tags,
       );
 
@@ -149,14 +147,12 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _addressController = TextEditingController();
-  final _priceController = TextEditingController(text: '0');
   final _maxParticipantsController = TextEditingController();
   final _tagsController = TextEditingController();
 
   DateTime _startDate = DateTime.now().add(const Duration(days: 1));
   DateTime _endDate = DateTime.now().add(const Duration(days: 1, hours: 2));
   String? _selectedLocationType;
-  bool _isFree = true;
   bool _hasMaxParticipants = false;
 
   @override
@@ -164,7 +160,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _addressController.dispose();
-    _priceController.dispose();
     _maxParticipantsController.dispose();
     _tagsController.dispose();
     super.dispose();
@@ -299,7 +294,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
           endDate: _endDate,
           maxParticipants:
               _hasMaxParticipants ? int.tryParse(_maxParticipantsController.text) : null,
-          price: _isFree ? 0 : (int.tryParse(_priceController.text) ?? 0) * 100,
           tags: tags,
           locationError: l10n.pleaseSelectLocation,
           notConnectedError: l10n.notConnected,
@@ -632,38 +626,6 @@ class _CreateEventScreenState extends ConsumerState<CreateEventScreen> {
               isActive: state.currentStep >= 3,
               content: Column(
                 children: [
-                  // Prix
-                  SwitchListTile(
-                    title: Text(l10n.freeEvent),
-                    value: _isFree,
-                    onChanged: (value) {
-                      setState(() {
-                        _isFree = value;
-                      });
-                    },
-                  ),
-
-                  if (!_isFree)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: TextFormField(
-                        controller: _priceController,
-                        decoration: InputDecoration(
-                          labelText: l10n.priceEur,
-                          prefixIcon: const Icon(Icons.euro),
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (!_isFree && (value == null || value.isEmpty)) {
-                            return l10n.pleaseEnterPrice;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-
-                  const Divider(height: 32),
-
                   // Nombre max de participants
                   SwitchListTile(
                     title: Text(l10n.limitParticipants),

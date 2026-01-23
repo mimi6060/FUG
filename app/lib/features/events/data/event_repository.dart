@@ -51,8 +51,6 @@ class EventRepository {
     required DateTime startDate,
     required DateTime endDate,
     int? maxParticipants,
-    int price = 0,
-    String currency = 'EUR',
     List<String>? tags,
   }) async {
     try {
@@ -122,7 +120,6 @@ class EventRepository {
     String? title,
     String? description,
     String? locationType,
-    String? categoryName,
     String? imageUrl,
     List<String>? additionalImages,
     String? address,
@@ -132,8 +129,6 @@ class EventRepository {
     DateTime? startDate,
     DateTime? endDate,
     int? maxParticipants,
-    int? price,
-    String? currency,
     List<String>? tags,
     EventStatus? status,
   }) async {

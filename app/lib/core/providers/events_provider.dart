@@ -150,7 +150,6 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
     required DateTime startDate,
     required DateTime endDate,
     int? maxParticipants,
-    int price = 0,
     List<String>? tags,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
@@ -170,7 +169,6 @@ class CreateEventNotifier extends StateNotifier<CreateEventState> {
         startDate: startDate,
         endDate: endDate,
         maxParticipants: maxParticipants,
-        price: price,
         tags: tags,
       );
 
