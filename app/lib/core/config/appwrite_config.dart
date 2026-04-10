@@ -7,7 +7,8 @@ class AppwriteConfig {
   AppwriteConfig._();
 
   /// Endpoint Appwrite - À modifier selon l'environnement
-  static const String endpoint = 'http://localhost:9000/v1';
+  /// Via Traefik pour que les cookies/sessions fonctionnent correctement
+  static const String endpoint = 'http://localhost/v1';
 
   /// ID du projet Appwrite
   static const String projectId = 'fug';
@@ -20,7 +21,7 @@ class AppwriteConfig {
   // ============================================
 
   /// Database principale
-  static const String databaseId = 'fug-db';
+  static const String databaseId = 'fug';
 
   // ============================================
   // IDs des Collections
